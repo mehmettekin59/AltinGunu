@@ -22,13 +22,6 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
-import com.example.altingunu.domain.model.DrawResult
-import com.example.altingunu.domain.model.ItemType
-import com.example.altingunu.domain.model.ParticipantsScreenWholeInformation
-import com.example.altingunu.presentation.navigation.Screen
-import com.example.altingunu.presentation.ui.theme.Gold
-import com.example.altingunu.presentation.ui.theme.NavyBlue
-import com.example.altingunu.presentation.ui.theme.White
 import com.mehmettekin.altingunu.ui.theme.NavyBlue
 
 @OptIn(ExperimentalMaterial3Api::class)

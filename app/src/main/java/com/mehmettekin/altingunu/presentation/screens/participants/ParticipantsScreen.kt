@@ -1,5 +1,6 @@
 package com.mehmettekin.altingunu.presentation.screens.participants
 
+import android.provider.SyncStateContract.Constants
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -14,7 +15,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
@@ -64,18 +64,15 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
-import com.example.altingunu.domain.model.ItemType
-import com.example.altingunu.domain.model.Participant
-import com.example.altingunu.domain.model.ParticipantsEvent
-import com.example.altingunu.presentation.navigation.Screen
-import com.example.altingunu.presentation.ui.theme.Gold
-import com.example.altingunu.presentation.ui.theme.NavyBlue
-import com.example.altingunu.presentation.ui.theme.White
-import com.example.altingunu.util.Constants
+import com.mehmettekin.altingunu.domain.model.ItemType
+import com.mehmettekin.altingunu.domain.model.Participant
+import com.mehmettekin.altingunu.presentation.navigation.Screen
+import com.mehmettekin.altingunu.ui.theme.Gold
+import com.mehmettekin.altingunu.ui.theme.NavyBlue
+import com.mehmettekin.altingunu.ui.theme.White
 import kotlinx.coroutines.flow.collectLatest
 import java.text.SimpleDateFormat
 import java.util.Calendar
@@ -303,7 +300,7 @@ fun ItemTypeSelector(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            ItemType.values().forEach { itemType ->
+            ItemType.entries.forEach { itemType ->
                 ItemSelectableChip(
                     text = itemType.displayName,
                     selected = itemType == selectedItemType,

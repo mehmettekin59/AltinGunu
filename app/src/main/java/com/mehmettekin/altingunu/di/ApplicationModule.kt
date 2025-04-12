@@ -3,8 +3,10 @@ package com.mehmettekin.altingunu.di
 import com.mehmettekin.altingunu.data.remote.KapaliCarsiApi
 import com.mehmettekin.altingunu.data.repository.DrawRepositoryImpl
 import com.mehmettekin.altingunu.data.repository.KapaliCarsiRepositoryImpl
+import com.mehmettekin.altingunu.data.repository.UserPreferencesRepositoryImpl
 import com.mehmettekin.altingunu.domain.repository.DrawRepository
 import com.mehmettekin.altingunu.domain.repository.KapaliCarsiRepository
+import com.mehmettekin.altingunu.domain.repository.UserPreferencesRepository
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import dagger.Module

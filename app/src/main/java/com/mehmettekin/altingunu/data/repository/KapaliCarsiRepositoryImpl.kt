@@ -2,6 +2,8 @@ package com.mehmettekin.altingunu.data.repository
 
 import com.mehmettekin.altingunu.data.remote.KapaliCarsiApi
 import com.mehmettekin.altingunu.domain.repository.KapaliCarsiRepository
+import com.mehmettekin.altingunu.utils.ResultState
+import com.mehmettekin.altingunu.utils.UiText
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
