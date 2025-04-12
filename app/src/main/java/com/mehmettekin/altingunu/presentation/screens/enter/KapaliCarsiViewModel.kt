@@ -2,6 +2,9 @@ package com.mehmettekin.altingunu.presentation.screens.enter
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.mehmettekin.altingunu.domain.model.ExchangeRate
+import com.mehmettekin.altingunu.domain.repository.KapaliCarsiRepository
+import com.mehmettekin.altingunu.utils.ResultState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow

@@ -2,9 +2,8 @@ package com.mehmettekin.altingunu.presentation.screens.settings
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.altingunu.domain.model.SettingsEvent
-import com.example.altingunu.domain.repository.UserPreferencesRepository
-import com.example.altingunu.util.UiText
+import com.mehmettekin.altingunu.domain.repository.UserPreferencesRepository
+import com.mehmettekin.altingunu.utils.UiText
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow

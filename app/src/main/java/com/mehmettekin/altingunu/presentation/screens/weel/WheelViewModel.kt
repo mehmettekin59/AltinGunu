@@ -6,6 +6,12 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.mehmettekin.altingunu.domain.model.DrawResult
+import com.mehmettekin.altingunu.domain.model.ItemType
+import com.mehmettekin.altingunu.domain.model.Participant
+import com.mehmettekin.altingunu.domain.model.ParticipantsScreenWholeInformation
+import com.mehmettekin.altingunu.domain.repository.DrawRepository
+import com.mehmettekin.altingunu.utils.ResultState
 
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow

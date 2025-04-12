@@ -1,7 +1,10 @@
 package com.mehmettekin.altingunu.presentation.screens.enter
 
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.List
@@ -12,14 +15,25 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
+import com.mehmettekin.altingunu.domain.model.ExchangeRate
 import com.mehmettekin.altingunu.domain.model.ItemType
 import com.mehmettekin.altingunu.presentation.navigation.Screen
+import com.mehmettekin.altingunu.ui.theme.Gold
+import com.mehmettekin.altingunu.ui.theme.NavyBlue
+import com.mehmettekin.altingunu.ui.theme.White
 import com.mehmettekin.altingunu.utils.Constraints
 import com.mehmettekin.altingunu.utils.ResultState
+import com.mehmettekin.altingunu.utils.formatDecimalValue
+import java.text.DecimalFormat
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -294,6 +308,183 @@ private fun TheErrorState(
             )
             Spacer(Modifier.size(ButtonDefaults.IconSpacing))
             Text("Tekrar Dene")
+        }
+    }
+}
+
+@Composable
+fun RateRowSection(
+    title: String,
+    icon: ImageVector,
+    rates: List<ExchangeRate>,
+    codeToNameMap: Map<String, String>,
+    backgroundColor: Color,
+    textColor: Color,
+    modifier: Modifier = Modifier
+) {
+    Card(
+        modifier = modifier.fillMaxWidth(),
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+        colors = CardDefaults.cardColors(containerColor = backgroundColor)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp)
+        ) {
+            // Section header with title and icon
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Icon(
+                    imageVector = icon,
+                    contentDescription = null,
+                    tint = textColor
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(
+                    text = title,
+                    style = MaterialTheme.typography.titleLarge,
+                    color = textColor
+                )
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            if (rates.isEmpty()) {
+                Text(
+                    text = "Veri bulunamadı",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = textColor.copy(alpha = 0.7f),
+                    modifier = Modifier.fillMaxWidth(),
+                    textAlign = TextAlign.Center
+                )
+            } else {
+                Column(
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    rates.forEach { rate ->
+                        RateCard(
+                            rate = rate,
+                            name = codeToNameMap[rate.code] ?: rate.code,
+                            textColor = textColor
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun RateCard(
+    rate: ExchangeRate,
+    name: String,
+    textColor: Color,
+    modifier: Modifier = Modifier
+) {
+    val decimalFormat = remember { DecimalFormat("#,##0.00") }
+
+    Card(
+        modifier = modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(
+            containerColor = textColor.copy(alpha = 0.1f)
+        )
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(12.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            // Currency/Gold name
+            Text(
+                text = name,
+                style = MaterialTheme.typography.bodyLarge,
+                fontWeight = FontWeight.Bold,
+                color = textColor
+            )
+
+            // Price columns
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                // Buy price
+                Column(horizontalAlignment = Alignment.End) {
+                    Text(
+                        text = "Alış",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = textColor.copy(alpha = 0.7f)
+                    )
+                    Text(
+                        text = formatDecimalValue(rate.alis, decimalFormat),
+                        style = MaterialTheme.typography.bodyMedium,
+                        fontWeight = FontWeight.SemiBold,
+                        color = textColor
+                    )
+                }
+
+                // Sell price
+                Column(horizontalAlignment = Alignment.End) {
+                    Text(
+                        text = "Satış",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = textColor.copy(alpha = 0.7f)
+                    )
+                    Text(
+                        text = formatDecimalValue(rate.satis, decimalFormat),
+                        style = MaterialTheme.typography.bodyMedium,
+                        fontWeight = FontWeight.SemiBold,
+                        color = textColor
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun SelectableChip(
+    text: String,
+    selected: Boolean,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    itemType: ItemType
+) {
+    val backgroundColor = when {
+        selected && itemType == ItemType.GOLD -> Gold
+        selected && itemType == ItemType.CURRENCY -> NavyBlue
+        else -> Color.Transparent
+    }
+
+    val textColor = if (selected) White else Color.Gray
+    val borderColor = when {
+        selected && itemType == ItemType.GOLD -> Gold
+        selected && itemType == ItemType.CURRENCY -> NavyBlue
+        else -> Color.Gray.copy(alpha = 0.5f)
+    }
+
+    Surface(
+        modifier = modifier
+            .clip(RoundedCornerShape(8.dp))
+            .clickable(onClick = onClick),
+        color = backgroundColor,
+        border = BorderStroke(1.dp, borderColor)
+    ) {
+        Box(
+            modifier = Modifier
+                .padding(vertical = 12.dp, horizontal = 8.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = text,
+                color = textColor,
+                fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal,
+                textAlign = TextAlign.Center,
+                style = MaterialTheme.typography.bodyMedium
+            )
         }
     }
 }

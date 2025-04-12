@@ -25,6 +25,10 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import com.mehmettekin.altingunu.R
+import com.mehmettekin.altingunu.presentation.navigation.Screen
+import com.mehmettekin.altingunu.ui.theme.Gold
+import com.mehmettekin.altingunu.ui.theme.NavyBlue
 import kotlinx.coroutines.delay
 
 @Composable
@@ -60,7 +64,7 @@ fun Splash(alpha: Float) {
             modifier = Modifier
                 .size(120.dp)
                 .alpha(alpha),
-            painter = painterResource(id = R.drawable.ic_gold_coin),
+            painter = painterResource(id = R.drawable.ic_launcher_foreground),
             contentDescription = "Logo"
         )
 

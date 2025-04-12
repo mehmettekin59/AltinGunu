@@ -1,6 +1,5 @@
 package com.mehmettekin.altingunu.presentation.screens.participants
 
-import android.provider.SyncStateContract.Constants
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -12,6 +11,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
@@ -73,6 +73,7 @@ import com.mehmettekin.altingunu.presentation.navigation.Screen
 import com.mehmettekin.altingunu.ui.theme.Gold
 import com.mehmettekin.altingunu.ui.theme.NavyBlue
 import com.mehmettekin.altingunu.ui.theme.White
+import com.mehmettekin.altingunu.utils.Constraints
 import kotlinx.coroutines.flow.collectLatest
 import java.text.SimpleDateFormat
 import java.util.Calendar
@@ -354,16 +355,16 @@ fun SpecificItemSelector(
     val title = if (selectedItemType == ItemType.CURRENCY) "Döviz Türü" else "Altın Türü"
 
     val options = if (selectedItemType == ItemType.CURRENCY) {
-        currencyOptions.map { Constants.currencyCodeToName[it] ?: it }
+        currencyOptions.map { Constraints.currencyCodeToName[it] ?: it }
     } else {
-        goldOptions.map { Constants.goldCodeToName[it] ?: it }
+        goldOptions.map { Constraints.goldCodeToName[it] ?: it }
     }
 
     val selectedValue = if (selectedSpecificItem.isNotEmpty()) {
         if (selectedItemType == ItemType.CURRENCY) {
-            Constants.currencyCodeToName[selectedSpecificItem] ?: selectedSpecificItem
+           Constraints.currencyCodeToName[selectedSpecificItem] ?: selectedSpecificItem
         } else {
-            Constants.goldCodeToName[selectedSpecificItem] ?: selectedSpecificItem
+            Constraints.goldCodeToName[selectedSpecificItem] ?: selectedSpecificItem
         }
     } else ""
 
@@ -747,8 +748,8 @@ fun ConfirmationDialog(
 
                 val valueTypeAndItem = when(state.selectedItemType) {
                     ItemType.TL -> state.selectedItemType.displayName
-                    ItemType.CURRENCY -> "Döviz (${Constants.currencyCodeToName[state.selectedSpecificItem] ?: state.selectedSpecificItem})"
-                    ItemType.GOLD -> "Altın (${Constants.goldCodeToName[state.selectedSpecificItem] ?: state.selectedSpecificItem})"
+                    ItemType.CURRENCY -> "Döviz (${Constraints.currencyCodeToName[state.selectedSpecificItem] ?: state.selectedSpecificItem})"
+                    ItemType.GOLD -> "Altın (${Constraints.goldCodeToName[state.selectedSpecificItem] ?: state.selectedSpecificItem})"
                 }
 
                 ConfirmationItem(
