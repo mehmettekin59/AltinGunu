@@ -209,12 +209,12 @@ private fun WheelSection(
         Text(
             "Çark",
             style = MaterialTheme.typography.titleLarge,
-            modifier = Modifier.padding(bottom = 8.dp)
+            modifier = Modifier.padding(bottom = 2.dp)
         )
 
         Box(
             modifier = Modifier
-                .padding(16.dp)
+                .padding(8.dp)
                 .fillMaxWidth(),
             contentAlignment = Alignment.Center
         ) {
