@@ -28,13 +28,6 @@ val Context.drawResultsDataStore: DataStore<Preferences> by preferencesDataStore
 @InstallIn(SingletonComponent::class)
 object DataStoreModule {
 
-    @Provides
-    @Singleton
-    fun provideMoshi(): Moshi {
-        return Moshi.Builder()
-            .add(KotlinJsonAdapterFactory())
-            .build()
-    }
 
     @Provides
     @Singleton

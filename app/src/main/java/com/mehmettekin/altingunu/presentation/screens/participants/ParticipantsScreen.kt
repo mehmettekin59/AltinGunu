@@ -149,7 +149,7 @@ fun ParticipantsContent(
 ) {
     Column(
         modifier = modifier
-            .padding(16.dp)
+            .padding(8.dp)
             .verticalScroll(rememberScrollState())
     ) {
         // Item type selection (TL, Currency, Gold)
@@ -158,7 +158,7 @@ fun ParticipantsContent(
             onItemTypeSelect = { onEvent(ParticipantsEvent.OnItemTypeSelect(it)) }
         )
 
-        Spacer(modifier = Modifier.height(16.dp))
+       Spacer(modifier = Modifier.height(8.dp))
 
         // Specific currency or gold type selection when applicable
         if (state.selectedItemType == ItemType.CURRENCY || state.selectedItemType == ItemType.GOLD) {
@@ -170,7 +170,7 @@ fun ParticipantsContent(
                 onSpecificItemSelect = { onEvent(ParticipantsEvent.OnSpecificItemSelect(it)) }
             )
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(8.dp))
         }
 
         // Monthly amount
@@ -188,7 +188,7 @@ fun ParticipantsContent(
             }
         )
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(8.dp))
 
         // Duration in months
         ModernTextField(
@@ -671,7 +671,7 @@ fun ParticipantsSection(
         Surface(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(150.dp),
+                .height(140.dp),
             shape = RoundedCornerShape(8.dp),
             border = BorderStroke(1.dp, Color.Gray.copy(alpha = 0.2f))
         ) {
@@ -691,7 +691,7 @@ fun ParticipantsSection(
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(horizontal = 16.dp, vertical = 12.dp),
+                                .padding(horizontal = 16.dp, vertical = 2.dp),
                             horizontalArrangement = Arrangement.SpaceBetween,
                             verticalAlignment = Alignment.CenterVertically
                         ) {

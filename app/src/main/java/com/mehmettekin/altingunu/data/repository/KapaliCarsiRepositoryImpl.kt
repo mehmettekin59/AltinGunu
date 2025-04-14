@@ -24,7 +24,8 @@ import com.mehmettekin.altingunu.domain.model.ExchangeRate
 
 @Singleton
 class KapaliCarsiRepositoryImpl @Inject constructor(
-    private val api: KapaliCarsiApi
+    private val api: KapaliCarsiApi,
+    private val externalScope: CoroutineScope
 ) : KapaliCarsiRepository {
 
     private val refreshInterval = 30000L
@@ -61,7 +62,7 @@ class KapaliCarsiRepositoryImpl @Inject constructor(
                 }
             }
             .shareIn(
-                CoroutineScope(Dispatchers.IO + SupervisorJob()),
+                externalScope,
                 SharingStarted.WhileSubscribed(5000),
                 replay = 1
             )

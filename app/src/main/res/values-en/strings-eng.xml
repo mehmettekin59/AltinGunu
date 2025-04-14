@@ -14,12 +14,12 @@
     <string name="title_settings">Settings</string>
 
     <!-- Participants Screen -->
-    <string name="error_no_participants">Please add at least one participant</string>
+    <string name="error_no_participants">Please add at least 2 participant</string>
     <string name="error_min_participants">At least 2 participants are required for the draw</string>
     <string name="error_duplicate_names">There can’t be more than one participant with the same name</string>
     <string name="error_empty_names">Participant names cannot be empty</string>
     <string name="error_invalid_participant_count">Invalid number of participants</string>
-    <string name="error_participant_count_mismatch">The number of participants doesnt match the entered names</string>
+    <string name="error_participant_count_mismatch">The number of participants doesn\'t match the entered names</string>
     <string name="error_invalid_monthly_amount">Invalid monthly amount</string>
     <string name="error_invalid_duration">Invalid duration</string>
     <string name="error_specific_item_not_selected">Please select a type</string>

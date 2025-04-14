@@ -9,14 +9,58 @@ import com.mehmettekin.altingunu.domain.repository.KapaliCarsiRepository
 import com.mehmettekin.altingunu.domain.repository.UserPreferencesRepository
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
+import dagger.Binds
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
 import javax.inject.Singleton
 
+@Module
+@InstallIn(SingletonComponent::class)
+abstract class ApplicationModule {
+
+    @Binds
+    abstract fun bindKapaliCarsiRepository(impl: KapaliCarsiRepositoryImpl): KapaliCarsiRepository
+
+    @Binds
+    abstract fun bindDrawRepository(impl: DrawRepositoryImpl): DrawRepository
+
+    @Binds
+    abstract fun bindUserPreferencesRepository(impl: UserPreferencesRepositoryImpl): UserPreferencesRepository
+
+    companion object {
+        @Provides
+        @Singleton
+        fun provideMoshi(): Moshi {
+            return Moshi.Builder()
+                .add(KotlinJsonAdapterFactory())
+                .build()
+        }
+
+        @Provides
+        @Singleton
+        fun provideKapaliCarsiApi(moshi: Moshi): KapaliCarsiApi {
+            return Retrofit.Builder()
+                .baseUrl("https://kapalicarsi.apiluna.org")
+                .addConverterFactory(MoshiConverterFactory.create(moshi))
+                .build()
+                .create(KapaliCarsiApi::class.java)
+        }
+
+        @Provides
+        @Singleton
+        fun provideApplicationCoroutineScope(): CoroutineScope {
+            return CoroutineScope(SupervisorJob() + Dispatchers.IO)
+        }
+    }
+}
+/*
 @Module
 @InstallIn(SingletonComponent::class)
 object ApplicationModule {
@@ -56,3 +100,5 @@ object ApplicationModule {
         return impl
     }
 }
+
+ */
