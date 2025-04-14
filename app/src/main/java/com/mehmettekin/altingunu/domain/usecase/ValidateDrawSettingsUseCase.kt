@@ -1,5 +1,10 @@
 package com.mehmettekin.altingunu.domain.usecase
 
+import com.mehmettekin.altingunu.R
+import com.mehmettekin.altingunu.domain.model.ItemType
+import com.mehmettekin.altingunu.domain.model.ParticipantsScreenWholeInformation
+import com.mehmettekin.altingunu.utils.ResultState
+import com.mehmettekin.altingunu.utils.UiText
 import javax.inject.Inject
 
 class ValidateDrawSettingsUseCase @Inject constructor() {

@@ -1,7 +1,6 @@
 package com.mehmettekin.altingunu.presentation.screens.result
 
 import android.content.Context
-import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
 import android.graphics.Typeface
@@ -109,7 +108,7 @@ class ResultsViewModel @Inject constructor(
         // Page info
         val pageInfo = PdfDocument.PageInfo.Builder(595, 842, 1).create() // A4 size in points
         val page = document.startPage(pageInfo)
-        val canvas = page.canvas
+        var canvas = page.canvas
 
         // Set up paint for drawing
         val paint = Paint().apply {
@@ -184,7 +183,7 @@ class ResultsViewModel @Inject constructor(
                 val newPageInfo = PdfDocument.PageInfo.Builder(595, 842, document.pages.size + 1).create()
                 val newPage = document.startPage(newPageInfo)
                 canvas = newPage.canvas
-                y = 50
+                y = 50.toFloat()
             }
         }
 

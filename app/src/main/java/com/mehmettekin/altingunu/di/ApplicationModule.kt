@@ -38,14 +38,6 @@ object ApplicationModule {
             .create(KapaliCarsiApi::class.java)
     }
 
-
-
-    @Provides
-    @Singleton
-    fun provideKapaliCarsiApi(retrofit: Retrofit): KapaliCarsiApi {
-        return retrofit.create(KapaliCarsiApi::class.java)
-    }
-
     @Provides
     @Singleton
     fun provideKapaliCarsiRepository(api: KapaliCarsiApi): KapaliCarsiRepository {

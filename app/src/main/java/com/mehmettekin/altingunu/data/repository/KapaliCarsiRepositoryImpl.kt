@@ -20,6 +20,7 @@ import retrofit2.HttpException
 import java.io.IOException
 import javax.inject.Inject
 import javax.inject.Singleton
+import com.mehmettekin.altingunu.domain.model.ExchangeRate
 
 @Singleton
 class KapaliCarsiRepositoryImpl @Inject constructor(

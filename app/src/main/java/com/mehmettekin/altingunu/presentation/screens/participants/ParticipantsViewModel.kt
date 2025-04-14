@@ -9,6 +9,7 @@ import com.mehmettekin.altingunu.domain.model.Participant
 import com.mehmettekin.altingunu.domain.model.ParticipantsScreenWholeInformation
 import com.mehmettekin.altingunu.domain.repository.DrawRepository
 import com.mehmettekin.altingunu.domain.usecase.ValidateDrawSettingsUseCase
+import com.mehmettekin.altingunu.domain.usecase.ValidateParticipantsUseCase
 import com.mehmettekin.altingunu.utils.Constraints
 import com.mehmettekin.altingunu.utils.ResultState
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -26,7 +27,8 @@ import javax.inject.Inject
 @HiltViewModel
 class ParticipantsViewModel @Inject constructor(
     private val drawRepository: DrawRepository,
-    private val validateDrawSettingsUseCase: ValidateDrawSettingsUseCase
+    private val validateDrawSettingsUseCase: ValidateDrawSettingsUseCase,
+    private val validateParticipantsUseCase: ValidateParticipantsUseCase
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(ParticipantsState())

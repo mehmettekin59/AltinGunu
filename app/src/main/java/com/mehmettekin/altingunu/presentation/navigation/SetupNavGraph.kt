@@ -4,6 +4,12 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import com.mehmettekin.altingunu.presentation.screens.enter.EnterScreen
+import com.mehmettekin.altingunu.presentation.screens.participants.ParticipantsScreen
+import com.mehmettekin.altingunu.presentation.screens.result.ResultScreen
+import com.mehmettekin.altingunu.presentation.screens.settings.SettingsScreen
+import com.mehmettekin.altingunu.presentation.screens.splash.SplashScreen
+import com.mehmettekin.altingunu.presentation.screens.weel.WheelScreen
 
 
 @Composable

@@ -59,10 +59,6 @@ class DrawRepositoryImpl @Inject constructor(
     }
 
     override suspend fun saveDrawResults(results: List<DrawResult>): ResultState<Unit> {
-        TODO("Not yet implemented")
-    }
-
-    override suspend fun saveDrawResults(results: List<DrawResult>): ResultState<Unit> {
         return try {
             drawResultsDataStore.saveDrawResults(results)
             ResultState.Success(Unit)

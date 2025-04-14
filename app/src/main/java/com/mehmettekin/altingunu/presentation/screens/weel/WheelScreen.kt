@@ -35,6 +35,9 @@ import androidx.navigation.NavController
 import com.mehmettekin.altingunu.presentation.navigation.Screen
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import androidx.compose.ui.graphics.Shadow
+import kotlin.math.cos
+import kotlin.math.sin
 
 // Colors for the wheel
 val colors = listOf(
@@ -421,14 +424,18 @@ private fun DrawScope.drawWheel(
     rotation: Float,
     textMeasurer: TextMeasurer
 ) {
+    if (participants.isEmpty()) return
+
     val sliceAngle = 360f / participants.size
     val center = Offset(size.width / 2, size.height / 2)
     val radius = size.minDimension / 2 - 10.dp.toPx()
 
+    // Draw wheel slices
     participants.forEachIndexed { index, participant ->
         val startAngle = index * sliceAngle - 90f + rotation
         val sweepAngle = sliceAngle
 
+        // Draw the sector
         drawArc(
             color = colors[index % colors.size],
             startAngle = startAngle,
@@ -438,40 +445,46 @@ private fun DrawScope.drawWheel(
             size = Size(radius * 2, radius * 2)
         )
 
-        rotate(startAngle + sliceAngle / 2, pivot = center) {
-            val maxTextWidthPx = (radius * 0.7f).toInt()
+        // Draw the text for this slice
+        val middleAngle = startAngle + (sweepAngle / 2)
+        val angleInRadians = Math.toRadians(middleAngle.toDouble())
+        val textRadius = radius * 0.65f
 
-            val textLayoutResult = textMeasurer.measure(
-                text = AnnotatedString(participant),
-                style = TextStyle(
-                    color = Color.White,
-                    fontSize = 14.sp,
-                    fontWeight = FontWeight.Bold,
-                    shadow = Shadow(
-                        color = Color.Black,
-                        blurRadius = 3f
-                    ),
-                    textAlign = TextAlign.Center
+        // Calculate position using trigonometry (polar to cartesian conversion)
+        val textX = center.x + (textRadius * cos(angleInRadians)).toFloat()
+        val textY = center.y + (textRadius * sin(angleInRadians)).toFloat()
+
+        // Configure and measure text
+        val maxTextWidthPx = (radius * 0.7f).toInt()
+        val textLayoutResult = textMeasurer.measure(
+            text = AnnotatedString(participant),
+            style = TextStyle(
+                color = Color.White,
+                fontSize = 14.sp,
+                fontWeight = FontWeight.Bold,
+                shadow = Shadow(
+                    color = Color.Black,
+                    blurRadius = 3f
                 ),
-                overflow = TextOverflow.Ellipsis,
-                maxLines = 1,
-                softWrap = false,
-                constraints = Constraints(maxWidth = maxTextWidthPx)
-            )
+                textAlign = TextAlign.Center
+            ),
+            overflow = TextOverflow.Ellipsis,
+            maxLines = 1,
+            softWrap = false,
+            constraints = Constraints(maxWidth = maxTextWidthPx)
+        )
 
-            val textRadius = radius * 0.65f
-            val textPosition = Offset(
-                x = center.x + textRadius - textLayoutResult.size.width / 2,
-                y = center.y - textLayoutResult.size.height / 2
+        // Draw text centered at the calculated position
+        drawText(
+            textLayoutResult = textLayoutResult,
+            topLeft = Offset(
+                x = textX - textLayoutResult.size.width / 2,
+                y = textY - textLayoutResult.size.height / 2
             )
-
-            drawText(
-                textLayoutResult = textLayoutResult,
-                topLeft = textPosition
-            )
-        }
+        )
     }
 
+    // Draw wheel border
     drawCircle(
         color = Color.DarkGray,
         radius = radius,
