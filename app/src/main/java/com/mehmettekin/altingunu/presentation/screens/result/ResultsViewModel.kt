@@ -1,16 +1,23 @@
 package com.mehmettekin.altingunu.presentation.screens.result
 
+import android.content.ContentValues
 import android.content.Context
 import android.graphics.Color
 import android.graphics.Paint
 import android.graphics.Typeface
 import android.graphics.pdf.PdfDocument
+import android.media.MediaScannerConnection
 import android.net.Uri
+import android.os.Build
+import android.os.Environment
+import android.provider.MediaStore
 import androidx.core.content.FileProvider
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.mehmettekin.altingunu.domain.model.ItemType
+import com.mehmettekin.altingunu.domain.model.ParticipantsScreenWholeInformation
 import com.mehmettekin.altingunu.domain.repository.DrawRepository
+import com.mehmettekin.altingunu.utils.Constraints
 import com.mehmettekin.altingunu.utils.ResultState
 import com.mehmettekin.altingunu.utils.UiText
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -25,7 +32,6 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 import javax.inject.Inject
-import kotlin.collections.forEachIndexed
 
 @HiltViewModel
 class ResultsViewModel @Inject constructor(
@@ -91,6 +97,19 @@ class ResultsViewModel @Inject constructor(
         }
     }
 
+    private fun getItemTypeText(settings: ParticipantsScreenWholeInformation): String {
+        return when (settings.itemType) {
+            ItemType.TL -> "TL"
+            ItemType.CURRENCY -> {
+                val currencyName = Constraints.currencyCodeToName[settings.specificItem] ?: settings.specificItem
+                "Döviz ($currencyName)"
+            }
+            ItemType.GOLD -> {
+                val goldName = Constraints.goldCodeToName[settings.specificItem] ?: settings.specificItem
+                "Altın ($goldName)"
+            }
+        }
+    }
     fun createPdf(context: Context): Uri? {
         val results = _state.value.results
         val settings = _state.value.drawSettings
@@ -132,10 +151,10 @@ class ResultsViewModel @Inject constructor(
         paint.typeface = Typeface.create(Typeface.DEFAULT, Typeface.NORMAL)
 
         // Format the item type
-        val itemTypeText = when (settings.itemType) {
-            ItemType.TL -> "TL"
-            ItemType.CURRENCY -> "Döviz (${settings.specificItem})"
-            ItemType.GOLD -> "Altın (${settings.specificItem})"
+        val itemTypeText = if (settings != null) {
+            getItemTypeText(settings)
+        } else {
+            "Bilinmiyor"
         }
 
         canvas.drawText("Değer Türü: $itemTypeText", 50f, settingsInfoY, paint)
@@ -216,6 +235,101 @@ class ResultsViewModel @Inject constructor(
             document.close()
             return null
         }
+    }
+
+    // PDF'yi indirilenler klasörüne kaydetme
+    fun savePdfToDownloads(context: Context) {
+        viewModelScope.launch {
+            try {
+                _state.value = _state.value.copy(isLoading = true)
+
+                // Önce normal PDF URI oluştur
+                val uri = createPdf(context)
+
+                if (uri != null) {
+                    // Dosya adını oluştur
+                    val currentDate = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(Date())
+                    val fileName = "altin_gunu_cekilisi_$currentDate.pdf"
+
+                    // Downloads klasörüne kaydet
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                        // Android 10+ için MediaStore API kullan
+                        val contentValues = ContentValues().apply {
+                            put(MediaStore.Downloads.DISPLAY_NAME, fileName)
+                            put(MediaStore.Downloads.MIME_TYPE, "application/pdf")
+                            put(MediaStore.Downloads.IS_PENDING, 1)
+                        }
+
+                        val contentResolver = context.contentResolver
+                        val downloadUri = MediaStore.Downloads.EXTERNAL_CONTENT_URI
+                        val pdfUri = contentResolver.insert(downloadUri, contentValues)
+
+                        if (pdfUri != null) {
+                            contentResolver.openOutputStream(pdfUri)?.use { outputStream ->
+                                // Orijinal PDF içeriğini oku
+                                val inputStream = context.contentResolver.openInputStream(uri)
+                                inputStream?.use { input ->
+                                    input.copyTo(outputStream)
+                                }
+                            }
+
+                            contentValues.clear()
+                            contentValues.put(MediaStore.Downloads.IS_PENDING, 0)
+                            contentResolver.update(pdfUri, contentValues, null, null)
+
+                            // Kullanıcıya bildir
+                            _state.value = _state.value.copy(
+                                isLoading = false,
+                                message = UiText.dynamicString("PDF indirilenler klasörüne kaydedildi: $fileName")
+                            )
+                        }
+                    } else {
+                        // Android 9 ve altı için doğrudan Downloads klasörüne kaydet
+                        val downloadsDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
+                        val file = File(downloadsDir, fileName)
+
+                        // Orijinal PDF içeriğini oku ve kaydet
+                        val inputStream = context.contentResolver.openInputStream(uri)
+                        val outputStream = FileOutputStream(file)
+
+                        inputStream?.use { input ->
+                            outputStream.use { output ->
+                                input.copyTo(output)
+                            }
+                        }
+
+                        // MediaStore'u güncelle
+                        MediaScannerConnection.scanFile(
+                            context,
+                            arrayOf(file.absolutePath),
+                            arrayOf("application/pdf"),
+                            null
+                        )
+
+                        // Kullanıcıya bildir
+                        _state.value = _state.value.copy(
+                            isLoading = false,
+                            message = UiText.dynamicString("PDF indirilenler klasörüne kaydedildi: $fileName")
+                        )
+                    }
+                } else {
+                    _state.value = _state.value.copy(
+                        isLoading = false,
+                        error = UiText.dynamicString("PDF oluşturulamadı")
+                    )
+                }
+            } catch (e: Exception) {
+                _state.value = _state.value.copy(
+                    isLoading = false,
+                    error = UiText.dynamicString("PDF kaydedilirken hata: ${e.message}")
+                )
+            }
+        }
+    }
+
+    // Mesaj bildirimini temizle
+    fun dismissMessage() {
+        _state.value = _state.value.copy(message = null)
     }
 
     fun dismissError() {

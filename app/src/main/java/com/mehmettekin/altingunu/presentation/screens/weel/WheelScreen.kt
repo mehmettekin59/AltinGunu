@@ -7,11 +7,15 @@ import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Save
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
@@ -36,6 +40,10 @@ import com.mehmettekin.altingunu.presentation.navigation.Screen
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import androidx.compose.ui.graphics.Shadow
+import com.mehmettekin.altingunu.presentation.screens.participants.ParticipantsEvent
+import com.mehmettekin.altingunu.ui.theme.Gold
+import com.mehmettekin.altingunu.ui.theme.NavyBlue
+import com.mehmettekin.altingunu.ui.theme.White
 import kotlin.math.cos
 import kotlin.math.sin
 
@@ -57,7 +65,6 @@ fun WheelScreen(
     val state by viewModel.state.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
     val context = LocalContext.current
-    val coroutineScope = rememberCoroutineScope()
 
     val textMeasurer = rememberTextMeasurer()
     val rotationAnimatable = remember { Animatable(viewModel.rotation) }
@@ -144,7 +151,7 @@ fun WheelScreen(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(paddingValues)
-                    .padding(16.dp),
+                    .padding(vertical = 8.dp, horizontal = 16.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 // Layout based on screen width
@@ -167,7 +174,7 @@ fun WheelScreen(
                         ParticipantsSection(
                             modifier = Modifier.weight(1f),
                             remainingParticipants = state.participants,
-                            winners = viewModel.winners,
+                            winners = state.winners,// burdaki viewmodel.winners yerine state yaptık
                             onSaveResults = { viewModel.saveResults() }
                         )
                     }
@@ -188,6 +195,29 @@ fun WheelScreen(
                         winners = viewModel.winners,
                         onSaveResults = { viewModel.saveResults() }
                     )
+                    // Only show save button when all participants have been selected
+                    if (state.participants.isEmpty() && viewModel.winners.isNotEmpty()) {
+                        Button(
+                            onClick = { viewModel.saveResults() },
+                            modifier = Modifier.fillMaxWidth(),
+                            shape = RoundedCornerShape(8.dp),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = NavyBlue
+                            )
+                        ) {
+                            Icon(
+                                imageVector = Icons.Filled.Save,
+                                contentDescription = null,
+                                tint = White
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(
+                                "Devam Et",
+                                fontWeight = FontWeight.Bold,
+                                color = White
+                            )
+                        }
+                    }
                 }
             }
         }
@@ -285,7 +315,7 @@ private fun WinnerAnnouncement(winner: String?) {
         ) {
             Text(
                 text = " Kazanan:🎉✨ $it ✨🎉",
-                modifier = Modifier.padding(16.dp),
+                modifier = Modifier.padding(8.dp),
                 color = Color(0xFF4CAF50),
                 fontWeight = FontWeight.ExtraBold,
                 fontSize = 16.sp,
@@ -305,7 +335,8 @@ private fun ParticipantsSection(
     onSaveResults: () -> Unit
 ) {
     Column(
-        modifier = modifier,
+        modifier = modifier
+            .verticalScroll(rememberScrollState()),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Row(
@@ -327,24 +358,6 @@ private fun ParticipantsSection(
             )
         }
 
-        Spacer(modifier = Modifier.height(16.dp))
-
-        // Only show save button when all participants have been selected
-        if (remainingParticipants.isEmpty() && winners.isNotEmpty()) {
-            Button(
-                onClick = onSaveResults,
-                modifier = Modifier.fillMaxWidth(0.8f),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = Color(0xFF4CAF50)
-                )
-            ) {
-                Text(
-                    "Sonuçları Kaydet ve İlerle",
-                    style = MaterialTheme.typography.labelLarge,
-                    fontWeight = FontWeight.Bold
-                )
-            }
-        }
     }
 }
 
@@ -363,8 +376,8 @@ private fun ParticipantList(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(12.dp)
-                .height(200.dp)
-        ) {
+                .height(160.dp)
+        ) { 
             Text(
                 text = title,
                 style = MaterialTheme.typography.titleSmall,

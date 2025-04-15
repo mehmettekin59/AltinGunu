@@ -12,12 +12,15 @@ import com.mehmettekin.altingunu.domain.model.Participant
 import com.mehmettekin.altingunu.domain.model.ParticipantsScreenWholeInformation
 import com.mehmettekin.altingunu.domain.repository.DrawRepository
 import com.mehmettekin.altingunu.utils.ResultState
+import com.mehmettekin.altingunu.utils.formatDecimalValue
 
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import java.text.DecimalFormat
+import java.text.DecimalFormatSymbols
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
@@ -155,6 +158,13 @@ class WheelViewModel @Inject constructor(
         }
 
         winner = winnerName
+
+        // State'i de güncelleyin
+        _state.value = _state.value.copy(
+            winners = winners,  // State'deki winners listesini güncelle
+            participants = _state.value.participants.filter { it != winnerName },// Bu da eklendi silebilirsin
+            currentWinner = winnerName
+        )
     }
 
     fun handleLastParticipant() {
@@ -219,25 +229,27 @@ class WheelViewModel @Inject constructor(
         }
 
         // Format for currency and gold
-        val currencyFormat = when (settings.itemType) {
-            ItemType.TL -> "%.2f ₺"
-            ItemType.CURRENCY -> "%.2f %s"
-            ItemType.GOLD -> "%.4f %s"
-        }
 
-        // Get specific item code if needed
-        val specificItem = when (settings.itemType) {
-            ItemType.TL -> ""
-            else -> settings.specificItem
-        }
+        val decimalFormat = DecimalFormat("#,##0.00", DecimalFormatSymbols.getInstance(Locale.getDefault()))
 
-        // Format amount based on type
+// Format amount based on type - formatDecimalValue kullanarak
         val formattedAmount = when (settings.itemType) {
-            ItemType.TL ->
-                String.format(Locale.getDefault(), currencyFormat, amountPerPerson)
-            else ->
-                String.format(Locale.getDefault(), currencyFormat, amountPerPerson, specificItem)
+            ItemType.TL -> {
+                val formattedValue = formatDecimalValue(amountPerPerson.toString(), decimalFormat)
+                "$formattedValue ₺"
+            }
+            ItemType.CURRENCY, ItemType.GOLD -> {
+                val format = if (settings.itemType == ItemType.GOLD) {
+                    DecimalFormat("#,##0.00", DecimalFormatSymbols.getInstance(Locale.getDefault()))
+                } else {
+                    decimalFormat
+                }
+
+                val formattedValue = formatDecimalValue(amountPerPerson.toString(), format)
+                "$formattedValue ${settings.specificItem}"
+            }
         }
+
 
         // Starting month and year
         val calendar = Calendar.getInstance()

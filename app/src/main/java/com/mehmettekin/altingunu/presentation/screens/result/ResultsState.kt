@@ -10,5 +10,6 @@ data class ResultsState(
     val drawSettings: ParticipantsScreenWholeInformation? = null,
     val isLoading: Boolean = false,
     val error: UiText? = null,
-    val pdfUri: Uri? = null
+    val pdfUri: Uri? = null,
+    val message: UiText? = null
 )

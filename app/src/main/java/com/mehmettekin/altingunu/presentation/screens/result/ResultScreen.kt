@@ -1,14 +1,18 @@
 package com.mehmettekin.altingunu.presentation.screens.result
 
+import android.Manifest
+import android.content.ActivityNotFoundException
 import android.content.Intent
+import android.net.Uri
+import android.os.Build
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Download
-import androidx.compose.material.icons.filled.Refresh
-import androidx.compose.material.icons.filled.Share
+import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -28,6 +32,11 @@ import com.mehmettekin.altingunu.presentation.navigation.Screen
 import com.mehmettekin.altingunu.ui.theme.Gold
 import com.mehmettekin.altingunu.ui.theme.NavyBlue
 import com.mehmettekin.altingunu.ui.theme.White
+import com.mehmettekin.altingunu.utils.Constraints
+import kotlinx.coroutines.launch
+import java.text.DecimalFormat
+import java.text.DecimalFormatSymbols
+import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -38,12 +47,42 @@ fun ResultScreen(
     val context = LocalContext.current
     val state by viewModel.state.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
+    val coroutineScope = rememberCoroutineScope()
+
+    // PDF görüntüleme için launcher
+    val pdfViewerLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.StartActivityForResult()
+    ) { /* İşlem gerekmez */ }
+
+    // Yazma izni isteme launcher'ı
+    val requestPermissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission()
+    ) { isGranted ->
+        if (isGranted) {
+            // İzin verildiğinde PDF kaydetme işlemini başlat
+            viewModel.savePdfToDownloads(context)
+        } else {
+            // İzin verilmediğinde kullanıcıya bilgi ver
+            snackbarHostState.currentSnackbarData?.dismiss()
+            coroutineScope.launch {
+                snackbarHostState.showSnackbar("PDF kaydetmek için depolama izni gerekli")
+            }
+        }
+    }
 
     // Handle error messages
     LaunchedEffect(state.error) {
         state.error?.let { error ->
             snackbarHostState.showSnackbar(error.asString(context))
             viewModel.dismissError()
+        }
+    }
+
+    // Handle success messages
+    LaunchedEffect(state.message) {
+        state.message?.let { message ->
+            snackbarHostState.showSnackbar(message.asString(context))
+            viewModel.dismissMessage()
         }
     }
 
@@ -74,9 +113,41 @@ fun ResultScreen(
                     titleContentColor = White
                 ),
                 actions = {
-                    // PDF export button
+                    // PDF görüntüleme butonu
                     IconButton(onClick = {
-                        viewModel.createPdf(context)
+                        val pdfUri = viewModel.createPdf(context)
+                        pdfUri?.let {
+                            // PDF'yi görüntüleme
+                            val intent = Intent(Intent.ACTION_VIEW).apply {
+                                setDataAndType(it, "application/pdf")
+                                addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                            }
+                            try {
+                                pdfViewerLauncher.launch(intent)
+                            } catch (e: ActivityNotFoundException) {
+                                // PDF viewer bulunamadıysa kullanıcıya bilgi ver
+                                coroutineScope.launch {
+                                    snackbarHostState.showSnackbar("PDF görüntüleyici bulunamadı.")
+                                }
+                            }
+                        }
+                    }) {
+                        Icon(
+                            imageVector = Icons.Default.Visibility,
+                            contentDescription = "PDF Görüntüle",
+                            tint = White
+                        )
+                    }
+
+                    // PDF indirme butonu
+                    IconButton(onClick = {
+                        // Android 10+ için izin gerekmez
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                            viewModel.savePdfToDownloads(context)
+                        } else {
+                            // Android 9 ve altı için depolama izni gerekir
+                            requestPermissionLauncher.launch(Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                        }
                     }) {
                         Icon(
                             imageVector = Icons.Default.Download,
@@ -257,7 +328,7 @@ private fun ResultsSettingsSummary(
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            // Item Type
+            // Item Type - Constraints kullanarak daha anlamlı isimler göster
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween
@@ -270,8 +341,14 @@ private fun ResultsSettingsSummary(
 
                 val itemTypeText = when (settings.itemType) {
                     ItemType.TL -> "TL"
-                    ItemType.CURRENCY -> "Döviz (${settings.specificItem})"
-                    ItemType.GOLD -> "Altın (${settings.specificItem})"
+                    ItemType.CURRENCY -> {
+                        val currencyName = Constraints.currencyCodeToName[settings.specificItem] ?: settings.specificItem
+                        "Döviz ($currencyName)"
+                    }
+                    ItemType.GOLD -> {
+                        val goldName = Constraints.goldCodeToName[settings.specificItem] ?: settings.specificItem
+                        "Altın ($goldName)"
+                    }
                 }
 
                 Text(
@@ -353,6 +430,7 @@ private fun ResultsTable(
     results: List<DrawResult>,
     modifier: Modifier = Modifier
 ) {
+
     Card(
         modifier = modifier.fillMaxWidth(),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
@@ -405,11 +483,11 @@ private fun ResultsTable(
                 )
             }
 
-            // Table Content
+            // Table Content - Sabit yükseklik ve scrollable yapın
             LazyColumn(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .heightIn(max = 300.dp)
+                    .height(250.dp) // Sabit yükseklik
             ) {
                 itemsIndexed(results) { index, result ->
                     Row(
@@ -443,6 +521,7 @@ private fun ResultsTable(
                             modifier = Modifier.weight(0.3f)
                         )
 
+                        // Miktar değeri zaten formatlanmış olarak geliyor
                         Text(
                             text = result.amount,
                             style = MaterialTheme.typography.bodyMedium,
