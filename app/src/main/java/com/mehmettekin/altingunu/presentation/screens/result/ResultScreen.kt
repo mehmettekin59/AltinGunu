@@ -372,18 +372,15 @@ private fun ResultsSettingsSummary(
                 // Türe göre metin formatı oluştur (ResultsTable'daki gibi)
                 val formattedAmount = when (settings.itemType) {
                     ItemType.GOLD -> {
-                        // Altın için özel metin formatı
                         val goldName = Constraints.goldCodeToName[settings.specificItem] ?: settings.specificItem
-                        "${settings.monthlyAmount.toInt()} $goldName"
+                        "${formatDecimalValue(settings.calculateAmountPerPerson().toString(), null)} $goldName"
                     }
                     ItemType.CURRENCY -> {
-                        // Döviz için özel metin formatı
                         val currencyName = Constraints.currencyCodeToName[settings.specificItem] ?: settings.specificItem
-                        "${settings.monthlyAmount.toInt()} $currencyName"
+                        "${formatDecimalValue(settings.calculateAmountPerPerson().toString(), null)} $currencyName"
                     }
                     else -> {
-                        // TL için sayısal format
-                        formatDecimalValue(settings.monthlyAmount.toString(), null)
+                        formatDecimalValue(settings.calculateAmountPerPerson().toString(), null)
                     }
                 }
 
@@ -536,9 +533,9 @@ private fun ResultsTable(
                             modifier = Modifier.weight(0.3f)
                         )
 
-                        val formattedAmount = formatDecimalValue(result.amount, null)
+                        //val formattedAmount = formatDecimalValue(result.amount, null)
                         Text(
-                            text = formattedAmount,
+                            text = result.amount,
                             style = MaterialTheme.typography.bodyMedium,
                             color = Color(0xFF4CAF50),
                             fontWeight = FontWeight.SemiBold,

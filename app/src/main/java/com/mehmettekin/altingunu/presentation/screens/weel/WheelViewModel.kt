@@ -221,14 +221,7 @@ class WheelViewModel @Inject constructor(
     ): List<DrawResult> {
         val results = mutableListOf<DrawResult>()
 
-        // Calculate the payment amount based on settings
-        val amountPerPerson = if (settings.participantCount <= settings.durationMonths) {
-            // Each person gets the full monthly amount
-            settings.monthlyAmount
-        } else {
-            // Each person gets a share of the monthly amount
-            settings.monthlyAmount * settings.durationMonths / settings.participantCount
-        }
+        val amountPerPerson = settings.calculateAmountPerPerson()
 
         // Format for currency and gold
         val decimalFormat = DecimalFormat("#,##0.00", DecimalFormatSymbols.getInstance(Locale.getDefault()))

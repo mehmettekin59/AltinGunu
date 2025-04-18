@@ -9,4 +9,12 @@ data class ParticipantsScreenWholeInformation(
     val durationMonths: Int,
     val startMonth: Int, // 1-12 for January-December
     val startYear: Int
-)
+){
+    fun calculateAmountPerPerson(): Double {
+        return if (participantCount <= durationMonths) {
+            monthlyAmount
+        } else {
+            monthlyAmount * durationMonths / participantCount
+        }
+    }
+}
