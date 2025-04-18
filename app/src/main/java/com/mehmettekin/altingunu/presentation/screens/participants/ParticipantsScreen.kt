@@ -307,7 +307,8 @@ fun ItemTypeSelector(
                     text = itemType.displayName,
                     selected = itemType == selectedItemType,
                     onClick = { onItemTypeSelect(itemType) },
-                    modifier = Modifier.weight(1f)
+                    modifier = Modifier.weight(1f),
+                    itemType = itemType  // ItemType parametresini geçtik
                 )
             }
         }
@@ -319,14 +320,34 @@ fun ItemSelectableChip(
     text: String,
     selected: Boolean,
     onClick: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    itemType: ItemType  // Yeni parametre ekledik
 ) {
+    val shape = RoundedCornerShape(8.dp)
+
+    // İtemType'a göre arka plan rengini belirleme
+    val backgroundColor = when {
+        selected && itemType == ItemType.GOLD -> Gold
+        selected && itemType == ItemType.CURRENCY -> NavyBlue
+        selected && itemType == ItemType.TL -> NavyBlue
+        else -> Color.Transparent
+    }
+
+    // İtemType'a göre kenarlık rengini belirleme
+    val borderColor = when {
+        selected && itemType == ItemType.GOLD -> Gold
+        selected && itemType == ItemType.CURRENCY -> NavyBlue
+        selected && itemType == ItemType.TL -> NavyBlue
+        else -> Color.Gray.copy(alpha = 0.5f)
+    }
+
     Surface(
         modifier = modifier
-            .clip(RoundedCornerShape(8.dp))
+            .clip(shape)
             .clickable(onClick = onClick),
-        color = if (selected) Gold else Color.Transparent,
-        border = BorderStroke(1.dp, if (selected) Gold else Color.Gray.copy(alpha = 0.5f))
+        color = backgroundColor,  // Yeni değişken kullanıldı
+        border = BorderStroke(1.dp, borderColor),  // Yeni değişken kullanıldı
+        shape = shape
     ) {
         Box(
             modifier = Modifier
@@ -691,7 +712,7 @@ fun ParticipantsSection(
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(horizontal = 16.dp, vertical = 2.dp),
+                                .padding(horizontal = 8.dp, vertical = 2.dp),
                             horizontalArrangement = Arrangement.SpaceBetween,
                             verticalAlignment = Alignment.CenterVertically
                         ) {

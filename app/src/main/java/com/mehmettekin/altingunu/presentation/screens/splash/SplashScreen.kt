@@ -64,7 +64,7 @@ fun Splash(alpha: Float) {
             modifier = Modifier
                 .size(120.dp)
                 .alpha(alpha),
-            painter = painterResource(id = R.drawable.ic_launcher_foreground),
+            painter = painterResource(id = R.drawable.gold_bar),
             contentDescription = "Logo"
         )
 

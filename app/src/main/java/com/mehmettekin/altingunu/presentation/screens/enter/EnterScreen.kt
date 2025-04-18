@@ -21,9 +21,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
@@ -45,6 +46,7 @@ import java.text.DecimalFormat
 import java.text.DecimalFormatSymbols
 import java.util.Locale
 import kotlin.math.absoluteValue
+import com.mehmettekin.altingunu.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -170,19 +172,21 @@ fun EnterScreen(
                     when (selectedItemType) {
                         ItemType.GOLD -> RatesSection(
                             title = "Altın Fiyatları",
-                            icon = Icons.Filled.Diamond,
+                            icon = painterResource(id = R.drawable.gold_bar),
                             rates = goldRates,
                             codeToNameMap = codeToNameMap,
                             backgroundColor = Gold,
-                            textColor = White
+                            textColor = White,
+                            iconTint = Gold
                         )
                         ItemType.CURRENCY -> RatesSection(
                             title = "Döviz Kurları",
-                            icon = Icons.Filled.MonetizationOn,
+                            icon = painterResource(id = R.drawable.dollar),
                             rates = currencyRates,
                             codeToNameMap = codeToNameMap,
                             backgroundColor = NavyBlue,
-                            textColor = White
+                            textColor = White,
+                            iconTint = NavyBlue
                         )
                         ItemType.TL -> { /* TL case not implemented in original */ }
                     }
@@ -333,11 +337,12 @@ private fun ErrorState(
 @Composable
 fun RatesSection(
     title: String,
-    icon: ImageVector,
+    icon: Painter,
     rates: List<ExchangeRate>,
     codeToNameMap: Map<String, String>,
     backgroundColor: Color,
     textColor: Color,
+    iconTint: Color = MaterialTheme.colorScheme.primary,
     modifier: Modifier = Modifier
 ) {
     Column(modifier = modifier.fillMaxWidth()) {
@@ -350,16 +355,16 @@ fun RatesSection(
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             Icon(
-                imageVector = icon,
+                painter = icon,
                 contentDescription = title,
-                tint = MaterialTheme.colorScheme.primary
+                tint = iconTint
             )
             Text(
                 text = title,
                 style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.Bold,
                 fontSize = 24.sp,
-                color = MaterialTheme.colorScheme.onSurface
+                color = NavyBlue
             )
         }
         Spacer(modifier = Modifier.height(16.dp))
@@ -613,7 +618,7 @@ fun GoldDayLotteryCard(
 ) {
     Card(
         modifier = modifier.fillMaxWidth(),
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
         colors = CardDefaults.cardColors(
             containerColor = Gold
         )
@@ -627,7 +632,8 @@ fun GoldDayLotteryCard(
             Text(
                 text = "Altın Günü",
                 style = MaterialTheme.typography.titleLarge,
-                color = White
+                color = White,
+                fontWeight = FontWeight.Bold
             )
 
             Spacer(modifier = Modifier.height(8.dp))

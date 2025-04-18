@@ -6,7 +6,7 @@ enum class ItemType {
     val displayName: String
         get() = when (this) {
             TL -> "TL"
-            CURRENCY -> "Döviz"
-            GOLD -> "Altın"
+            CURRENCY -> "Döviz ($, €, £)"
+            GOLD -> "Altın (🥇, 🪙, 💰)"
         }
 }

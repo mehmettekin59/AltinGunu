@@ -42,7 +42,6 @@ import kotlinx.coroutines.launch
 import androidx.compose.ui.graphics.Shadow
 import com.mehmettekin.altingunu.ui.theme.NavyBlue
 import com.mehmettekin.altingunu.ui.theme.White
-import androidx.compose.material3.Divider
 import androidx.compose.material3.HorizontalDivider
 import kotlin.math.cos
 import kotlin.math.sin
