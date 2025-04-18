@@ -177,7 +177,10 @@ fun ParticipantsContent(
         ModernTextField(
             value = state.monthlyAmount,
             onValueChange = { onEvent(ParticipantsEvent.OnMonthlyAmountChange(it)) },
-            label = "Aylık Miktar",
+            label = when (state.selectedItemType) {
+                ItemType.GOLD -> "Altın Sayısı (Adet)"
+                else -> "Aylık Miktar"
+            },
             keyboardType = KeyboardType.Decimal,
             leadingIcon = {
                 Icon(
@@ -194,7 +197,7 @@ fun ParticipantsContent(
         ModernTextField(
             value = state.durationMonths,
             onValueChange = { onEvent(ParticipantsEvent.OnDurationChange(it)) },
-            label = "Süre (Ay)",
+            label = "Gün kaç ay sürecek?",
             keyboardType = KeyboardType.Number,
             leadingIcon = {
                 Icon(

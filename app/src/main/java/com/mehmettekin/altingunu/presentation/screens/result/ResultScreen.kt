@@ -276,7 +276,7 @@ private fun ResultsContent(
         Spacer(modifier = Modifier.height(16.dp))
 
         // Results table
-        ResultsTable(results = results)
+        ResultsTable(results = results, drawSettings = drawSettings)
 
         Spacer(modifier = Modifier.height(24.dp))
 
@@ -440,6 +440,7 @@ private fun ResultsSettingsSummary(
 @Composable
 private fun ResultsTable(
     results: List<DrawResult>,
+    drawSettings: ParticipantsScreenWholeInformation?,
     modifier: Modifier = Modifier
 ) {
 
@@ -532,10 +533,15 @@ private fun ResultsTable(
                             color = Color.DarkGray,
                             modifier = Modifier.weight(0.3f)
                         )
-
-                        //val formattedAmount = formatDecimalValue(result.amount, null)
+                        Spacer(Modifier.width(2.dp))
+                        val amountText = if (drawSettings != null) {
+                            formatDecimalValue(drawSettings.calculateAmountPerPerson().toString(), null)
+                        } else {
+                            // Fallback olarak result.amount kullanın
+                            result.amount
+                        }
                         Text(
-                            text = result.amount,
+                            text = amountText,
                             style = MaterialTheme.typography.bodyMedium,
                             color = Color(0xFF4CAF50),
                             fontWeight = FontWeight.SemiBold,

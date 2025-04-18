@@ -159,7 +159,7 @@ class ResultsViewModel @Inject constructor(
         }
 
         canvas.drawText("Değer Türü: $itemTypeText", 50f, settingsInfoY, paint)
-        val formattedAmount = formatDecimalValue(settings.monthlyAmount.toString(), null)
+        val formattedAmount = formatDecimalValue(settings.calculateAmountPerPerson().toString(), null)
         canvas.drawText("Aylık Miktar: $formattedAmount", 50f, settingsInfoY + 20, paint)
         canvas.drawText("Toplam Süre: ${settings.durationMonths} ay", 50f, settingsInfoY + 40, paint)
         canvas.drawText("Katılımcı Sayısı: ${settings.participantCount}", 50f, settingsInfoY + 60, paint)
@@ -194,8 +194,9 @@ class ResultsViewModel @Inject constructor(
             canvas.drawText("${index + 1}", 50f, y, paint)
             canvas.drawText(result.participantName, 100f, y, paint)
             canvas.drawText(result.month, 250f, y, paint)
-            val formattedResultAmount = formatDecimalValue(result.amount, null)
-            canvas.drawText(formattedResultAmount, 400f, y, paint)
+            val formattedAmount = formatDecimalValue(settings.calculateAmountPerPerson().toString(), null)
+           // val formattedResultAmount = formatDecimalValue(result.amount, null)
+            canvas.drawText(formattedAmount, 400f, y, paint)
 
             y += 30
 
