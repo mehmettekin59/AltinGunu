@@ -40,10 +40,10 @@ import com.mehmettekin.altingunu.presentation.navigation.Screen
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import androidx.compose.ui.graphics.Shadow
-import com.mehmettekin.altingunu.presentation.screens.participants.ParticipantsEvent
-import com.mehmettekin.altingunu.ui.theme.Gold
 import com.mehmettekin.altingunu.ui.theme.NavyBlue
 import com.mehmettekin.altingunu.ui.theme.White
+import androidx.compose.material3.Divider
+import androidx.compose.material3.HorizontalDivider
 import kotlin.math.cos
 import kotlin.math.sin
 
@@ -385,7 +385,11 @@ private fun ParticipantList(
                 modifier = Modifier.padding(bottom = 8.dp)
             )
 
-            Divider(modifier = Modifier.padding(bottom = 8.dp))
+            HorizontalDivider(
+                modifier = Modifier.padding(bottom = 8.dp),
+                thickness = 0.5.dp,
+                color = NavyBlue
+            )
 
             LazyColumn(
                 modifier = Modifier
@@ -402,7 +406,7 @@ private fun ParticipantList(
                         fontSize = 14.sp
                     )
 
-                    Divider(
+                    HorizontalDivider(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(vertical = 2.dp),

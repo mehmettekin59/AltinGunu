@@ -24,7 +24,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowDropDown
-import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.material.icons.filled.AttachMoney
 import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.Check
@@ -33,10 +32,10 @@ import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Divider
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -595,7 +594,7 @@ fun DateSelectorDialog(
                         }
 
                         if (index < options.size - 1) {
-                            Divider(
+                            HorizontalDivider(
                                 color = Color.Gray.copy(alpha = 0.2f),
                                 thickness = 1.dp
                             )
@@ -633,7 +632,7 @@ fun ParticipantsSection(
             fontWeight = FontWeight.Medium
         )
 
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(2.dp))
 
         // Participant entry field and add button
         OutlinedTextField(
@@ -712,7 +711,7 @@ fun ParticipantsSection(
                             }
                         }
 
-                        Divider(
+                        HorizontalDivider(
                             color = Color.Gray.copy(alpha = 0.2f),
                             thickness = 1.dp
                         )

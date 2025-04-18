@@ -240,7 +240,7 @@ class WheelViewModel @Inject constructor(
             }
             ItemType.CURRENCY, ItemType.GOLD -> {
                 val format = if (settings.itemType == ItemType.GOLD) {
-                    DecimalFormat("#,##0.00", DecimalFormatSymbols.getInstance(Locale.getDefault()))
+                    DecimalFormat("#,##", DecimalFormatSymbols.getInstance(Locale.getDefault()))
                 } else {
                     decimalFormat
                 }

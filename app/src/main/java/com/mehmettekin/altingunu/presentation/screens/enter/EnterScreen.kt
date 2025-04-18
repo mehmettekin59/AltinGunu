@@ -189,7 +189,7 @@ fun EnterScreen(
                 }
             }
 
-            Spacer(modifier = Modifier.height(72.dp))
+            Spacer(modifier = Modifier.height(32.dp))
 
             // Gold Day Lottery Card
             GoldDayLotteryCard(
@@ -362,6 +362,7 @@ fun RatesSection(
                 color = MaterialTheme.colorScheme.onSurface
             )
         }
+        Spacer(modifier = Modifier.height(16.dp))
 
         // CoverFlowCarousel of Rate Cards
         if (rates.isNotEmpty()) {
@@ -450,7 +451,7 @@ private fun AnimatedRateCard(
             )
 
             // Last updated timestamp (if available)
-            rate.tarih?.let {
+            rate.tarih.let {
                 Text(
                     text = "Son Güncelleme",
                     style = MaterialTheme.typography.bodySmall,
@@ -463,8 +464,9 @@ private fun AnimatedRateCard(
                 )
             }
 
-            Divider(
+            HorizontalDivider(
                 modifier = Modifier.padding(vertical = 4.dp),
+                thickness = 1.dp,
                 color = textColor.copy(alpha = 0.2f)
             )
 
@@ -623,7 +625,7 @@ fun GoldDayLotteryCard(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
-                text = "Altın Günü Düzenleyin",
+                text = "Altın Günü",
                 style = MaterialTheme.typography.titleLarge,
                 color = White
             )
