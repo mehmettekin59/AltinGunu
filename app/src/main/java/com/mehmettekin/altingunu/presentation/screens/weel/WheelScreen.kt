@@ -1,7 +1,7 @@
 package com.mehmettekin.altingunu.presentation.screens.weel
 
 import androidx.compose.animation.core.Animatable
-import androidx.compose.animation.core.EaseOut
+import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.*
@@ -44,8 +44,6 @@ import com.mehmettekin.altingunu.ui.theme.NavyBlue
 import com.mehmettekin.altingunu.ui.theme.White
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.ui.graphics.drawscope.rotate
-import androidx.compose.ui.graphics.drawscope.translate
-import androidx.compose.ui.graphics.drawscope.withTransform
 import kotlin.math.cos
 import kotlin.math.sin
 
@@ -87,7 +85,7 @@ fun WheelScreen(
                     targetValue = targetRotation,
                     animationSpec = tween(
                         durationMillis = 4000,
-                        easing = EaseOut
+                        easing = FastOutSlowInEasing
                     )
                 ) {
                     viewModel.updateRotation(value)

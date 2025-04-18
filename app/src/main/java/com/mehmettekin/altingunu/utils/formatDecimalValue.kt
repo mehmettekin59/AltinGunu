@@ -4,7 +4,7 @@ import java.text.DecimalFormat
 import java.text.NumberFormat
 import java.util.Locale
 
-fun formatDecimalValue(value: String?, formatter: DecimalFormat): String {
+fun formatDecimalValue(value: String?, formatter: DecimalFormat?): String {
     // 1. Girdi null veya boş mu kontrol et
     if (value.isNullOrBlank()) {
         return "0,00" // Null/blank için sabit fallback
@@ -17,7 +17,18 @@ fun formatDecimalValue(value: String?, formatter: DecimalFormat): String {
     return if (number != null) {
         // 4. Başarılıysa, Locale'e uygun formatter ile formatla
         try {
-            formatter.format(number)
+            if (formatter != null) {
+                formatter.format(number)
+            } else {
+                // Formatter null ise, basit formatlama kullan
+                val simpleFormatter = NumberFormat.getNumberInstance(Locale.ROOT) as DecimalFormat
+                simpleFormatter.apply {
+                    maximumFractionDigits = 2 // En fazla 2 ondalık göster
+                    minimumFractionDigits = 2 // En az 2 ondalık göster
+                    isGroupingUsed = false    // Binlik ayırıcı kullanma
+                }
+                simpleFormatter.format(number)
+            }
         } catch (e: Exception) {
             // 5. Formatlama sırasında hata olursa (örn. çok büyük/küçük sayı, NaN/Infinity),
             //    daha basit, bölgeden bağımsız bir format veya yuvarlama dene
@@ -28,14 +39,13 @@ fun formatDecimalValue(value: String?, formatter: DecimalFormat): String {
                 val simpleFormatter = NumberFormat.getNumberInstance(Locale.ROOT) as DecimalFormat
                 simpleFormatter.apply {
                     maximumFractionDigits = 2 // En fazla 2 ondalık göster
-                    minimumFractionDigits = 2 // Gereksiz sondaki sıfırları gösterme (0.50 -> 0.5)
+                    minimumFractionDigits = 2 // En az 2 ondalık göster
                     isGroupingUsed = false    // Binlik ayırıcı kullanma
                 }
                 simpleFormatter.format(number)
 
                 // Alternatif: Tam sayıya yuvarlama
                 // kotlin.math.roundToLong(number).toString()
-
             } catch (fallbackException: Exception) {
                 // Eğer basit formatlama/yuvarlama da hata verirse
                 println("Fallback Formatting Error: ${fallbackException.message}")
@@ -43,7 +53,6 @@ fun formatDecimalValue(value: String?, formatter: DecimalFormat): String {
             }
         }
     } else {
-
         println("Parsing Error: Could not parse '$value' to Double. Returning fixed fallback.")
         value
     }

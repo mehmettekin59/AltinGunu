@@ -3,7 +3,6 @@ package com.mehmettekin.altingunu.presentation.screens.result
 import android.Manifest
 import android.content.ActivityNotFoundException
 import android.content.Intent
-import android.net.Uri
 import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -34,9 +33,7 @@ import com.mehmettekin.altingunu.ui.theme.NavyBlue
 import com.mehmettekin.altingunu.ui.theme.White
 import com.mehmettekin.altingunu.utils.Constraints
 import kotlinx.coroutines.launch
-import java.text.DecimalFormat
-import java.text.DecimalFormatSymbols
-import java.util.Locale
+import com.mehmettekin.altingunu.utils.formatDecimalValue
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -372,8 +369,26 @@ private fun ResultsSettingsSummary(
                     color = Color.Gray
                 )
 
+                // Türe göre metin formatı oluştur (ResultsTable'daki gibi)
+                val formattedAmount = when (settings.itemType) {
+                    ItemType.GOLD -> {
+                        // Altın için özel metin formatı
+                        val goldName = Constraints.goldCodeToName[settings.specificItem] ?: settings.specificItem
+                        "${settings.monthlyAmount.toInt()} $goldName"
+                    }
+                    ItemType.CURRENCY -> {
+                        // Döviz için özel metin formatı
+                        val currencyName = Constraints.currencyCodeToName[settings.specificItem] ?: settings.specificItem
+                        "${settings.monthlyAmount.toInt()} $currencyName"
+                    }
+                    else -> {
+                        // TL için sayısal format
+                        formatDecimalValue(settings.monthlyAmount.toString(), null)
+                    }
+                }
+
                 Text(
-                    text = "${settings.monthlyAmount}",
+                    text = formattedAmount,
                     style = MaterialTheme.typography.bodyMedium,
                     fontWeight = FontWeight.SemiBold,
                     color = NavyBlue
@@ -521,9 +536,9 @@ private fun ResultsTable(
                             modifier = Modifier.weight(0.3f)
                         )
 
-                        // Miktar değeri zaten formatlanmış olarak geliyor
+                        val formattedAmount = formatDecimalValue(result.amount, null)
                         Text(
-                            text = result.amount,
+                            text = formattedAmount,
                             style = MaterialTheme.typography.bodyMedium,
                             color = Color(0xFF4CAF50),
                             fontWeight = FontWeight.SemiBold,
