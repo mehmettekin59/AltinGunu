@@ -43,6 +43,9 @@ import androidx.compose.ui.graphics.Shadow
 import com.mehmettekin.altingunu.ui.theme.NavyBlue
 import com.mehmettekin.altingunu.ui.theme.White
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.ui.graphics.drawscope.rotate
+import androidx.compose.ui.graphics.drawscope.translate
+import androidx.compose.ui.graphics.drawscope.withTransform
 import kotlin.math.cos
 import kotlin.math.sin
 
@@ -76,7 +79,7 @@ fun WheelScreen(
     // Handle wheel spinning animation
     LaunchedEffect(viewModel.isSpinning) {
         if (viewModel.isSpinning) {
-            val spinCount = 2 + (3 * Math.random()).toFloat()
+            val spinCount = 5 + (3 * Math.random()).toFloat()
             val targetRotation = rotationAnimatable.value + (spinCount * 360f)
 
             launch {
@@ -194,6 +197,7 @@ fun WheelScreen(
                         winners = viewModel.winners,
                         onSaveResults = { viewModel.saveResults() }
                     )
+                    Spacer(modifier = Modifier.height(12.dp))
                     // Only show save button when all participants have been selected
                     if (state.participants.isEmpty() && viewModel.winners.isNotEmpty()) {
                         Button(
@@ -434,6 +438,7 @@ private fun ParticipantList(
     }
 }
 
+
 @OptIn(ExperimentalTextApi::class)
 private fun DrawScope.drawWheel(
     participants: List<String>,
@@ -461,43 +466,70 @@ private fun DrawScope.drawWheel(
             size = Size(radius * 2, radius * 2)
         )
 
-        // Draw the text for this slice
-        val middleAngle = startAngle + (sweepAngle / 2)
-        val angleInRadians = Math.toRadians(middleAngle.toDouble())
-        val textRadius = radius * 0.65f
+        // Draw divider lines between slices for better visual separation
+        val lineAngle = startAngle * (Math.PI / 180f)
+        val lineStartX = center.x + (radius * 0.3f * cos(lineAngle)).toFloat()
+        val lineStartY = center.y + (radius * 0.3f * sin(lineAngle)).toFloat()
+        val lineEndX = center.x + (radius * cos(lineAngle)).toFloat()
+        val lineEndY = center.y + (radius * sin(lineAngle)).toFloat()
 
-        // Calculate position using trigonometry (polar to cartesian conversion)
-        val textX = center.x + (textRadius * cos(angleInRadians)).toFloat()
-        val textY = center.y + (textRadius * sin(angleInRadians)).toFloat()
+        drawLine(
+            color = Color.White.copy(alpha = 0.5f),
+            start = Offset(lineStartX, lineStartY),
+            end = Offset(lineEndX, lineEndY),
+            strokeWidth = 1.dp.toPx()
+        )
 
-        // Configure and measure text
-        val maxTextWidthPx = (radius * 0.7f).toInt()
-        val textLayoutResult = textMeasurer.measure(
-            text = AnnotatedString(participant),
-            style = TextStyle(
-                color = Color.White,
-                fontSize = 14.sp,
-                fontWeight = FontWeight.Bold,
-                shadow = Shadow(
-                    color = Color.Black,
-                    blurRadius = 3f
+        // Rotate for this slice, key insight: use the block version of rotate!
+        rotate(startAngle + sliceAngle / 2, pivot = center) {
+            // Calculate appropriate text size based on number of participants
+            val fontSize = when {
+                participants.size > 15 -> 10.sp
+                participants.size > 10 -> 12.sp
+                else -> 14.sp
+            }
+
+            // Calculate appropriate text radius based on participant count
+            val textRadius = when {
+                participants.size > 15 -> radius * 0.55f
+                participants.size > 10 -> radius * 0.6f
+                else -> radius * 0.65f
+            }
+
+            // Set maximum text width
+            val maxTextWidthPx = (radius * 0.7f).toInt()
+
+            // Measure text
+            val textLayoutResult = textMeasurer.measure(
+                text = AnnotatedString(participant),
+                style = TextStyle(
+                    color = Color.White,
+                    fontSize = fontSize,
+                    fontWeight = FontWeight.Bold,
+                    shadow = Shadow(
+                        color = Color.Black,
+                        blurRadius = 3f
+                    ),
+                    textAlign = TextAlign.Center
                 ),
-                textAlign = TextAlign.Center
-            ),
-            overflow = TextOverflow.Ellipsis,
-            maxLines = 1,
-            softWrap = false,
-            constraints = Constraints(maxWidth = maxTextWidthPx)
-        )
-
-        // Draw text centered at the calculated position
-        drawText(
-            textLayoutResult = textLayoutResult,
-            topLeft = Offset(
-                x = textX - textLayoutResult.size.width / 2,
-                y = textY - textLayoutResult.size.height / 2
+                overflow = TextOverflow.Ellipsis,
+                maxLines = 1,
+                softWrap = false,
+                constraints = Constraints(maxWidth = maxTextWidthPx)
             )
-        )
+
+            // Position text correctly
+            val textPosition = Offset(
+                x = center.x + textRadius - textLayoutResult.size.width / 2,
+                y = center.y - textLayoutResult.size.height / 2
+            )
+
+            // Draw text
+            drawText(
+                textLayoutResult = textLayoutResult,
+                topLeft = textPosition
+            )
+        }
     }
 
     // Draw wheel border
@@ -508,6 +540,7 @@ private fun DrawScope.drawWheel(
         style = Stroke(width = 3.dp.toPx())
     )
 }
+
 
 private fun DrawScope.drawPointer() {
     val center = Offset(size.width / 2, size.height / 2)

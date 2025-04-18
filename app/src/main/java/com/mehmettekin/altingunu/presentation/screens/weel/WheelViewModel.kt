@@ -11,6 +11,7 @@ import com.mehmettekin.altingunu.domain.model.ItemType
 import com.mehmettekin.altingunu.domain.model.Participant
 import com.mehmettekin.altingunu.domain.model.ParticipantsScreenWholeInformation
 import com.mehmettekin.altingunu.domain.repository.DrawRepository
+import com.mehmettekin.altingunu.utils.Constraints
 import com.mehmettekin.altingunu.utils.ResultState
 import com.mehmettekin.altingunu.utils.formatDecimalValue
 
@@ -111,6 +112,7 @@ class WheelViewModel @Inject constructor(
 
     fun spinWheel() {
         if (isSpinning || participants.isEmpty() || participants.size <= 1) return
+        rotation = 0f
         isSpinning = true
         winner = null
     }
@@ -229,27 +231,31 @@ class WheelViewModel @Inject constructor(
         }
 
         // Format for currency and gold
-
         val decimalFormat = DecimalFormat("#,##0.00", DecimalFormatSymbols.getInstance(Locale.getDefault()))
 
-// Format amount based on type - formatDecimalValue kullanarak
+        // Format amount based on type - formatDecimalValue kullanarak
         val formattedAmount = when (settings.itemType) {
             ItemType.TL -> {
                 val formattedValue = formatDecimalValue(amountPerPerson.toString(), decimalFormat)
                 "$formattedValue ₺"
             }
-            ItemType.CURRENCY, ItemType.GOLD -> {
-                val format = if (settings.itemType == ItemType.GOLD) {
-                    DecimalFormat("#,##", DecimalFormatSymbols.getInstance(Locale.getDefault()))
-                } else {
-                    decimalFormat
-                }
-
+            ItemType.CURRENCY -> {
+                val format = decimalFormat
                 val formattedValue = formatDecimalValue(amountPerPerson.toString(), format)
-                "$formattedValue ${settings.specificItem}"
+
+                // Döviz kodu yerine adını göster
+                val currencyName = Constraints.currencyCodeToName[settings.specificItem] ?: settings.specificItem
+                "$formattedValue $currencyName"
+            }
+            ItemType.GOLD -> {
+                val format = DecimalFormat("#,##", DecimalFormatSymbols.getInstance(Locale.getDefault()))
+                val formattedValue = formatDecimalValue(amountPerPerson.toString(), format)
+
+                // Altın kodu yerine adını göster
+                val goldName = Constraints.goldCodeToName[settings.specificItem] ?: settings.specificItem
+                "$formattedValue $goldName"
             }
         }
-
 
         // Starting month and year
         val calendar = Calendar.getInstance()
