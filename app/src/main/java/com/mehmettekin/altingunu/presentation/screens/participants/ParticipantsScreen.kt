@@ -21,6 +21,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowDropDown
@@ -115,6 +116,15 @@ fun ParticipantsScreen(
                         style = MaterialTheme.typography.titleLarge
                     )
                 },
+                actions = {
+                    IconButton(onClick = { navController.navigate(Screen.Enter.route) }) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Default.ArrowBack,
+                            contentDescription = "Geri Dön",
+                            tint = White
+                        )
+                    }
+                },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = Gold,
                     titleContentColor = White,
@@ -122,6 +132,7 @@ fun ParticipantsScreen(
                 )
             )
         }
+
     ) { paddingValues ->
         ParticipantsContent(
             state = state,
@@ -698,7 +709,7 @@ fun ParticipantsSection(
                 .fillMaxWidth()
                 .height(140.dp),
             shape = RoundedCornerShape(8.dp),
-            border = BorderStroke(1.dp, Color.Gray.copy(alpha = 0.2f))
+            border = BorderStroke(1.dp, Gold.copy(alpha = 0.2f))
         ) {
             if (participants.isEmpty()) {
                 Box(

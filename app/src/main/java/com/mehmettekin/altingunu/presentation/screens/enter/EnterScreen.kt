@@ -5,6 +5,7 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerDefaults
 import androidx.compose.foundation.pager.rememberPagerState
@@ -118,24 +119,7 @@ fun EnterScreen(
                     icon = { Icon(Icons.Default.Home, contentDescription = "Ana Sayfa") },
                     label = { Text("Ana Sayfa") }
                 )
-                NavigationBarItem(
-                    selected = false,
-                    onClick = { navController.navigate(Screen.Participants.route) },
-                    icon = { Icon(Icons.AutoMirrored.Filled.List, contentDescription = "Katılımcılar") },
-                    label = { Text("Katılımcılar") }
-                )
-                NavigationBarItem(
-                    selected = false,
-                    onClick = { navController.navigate(Screen.Wheel.route) },
-                    icon = { Icon(Icons.Default.Casino, contentDescription = "Çark") },
-                    label = { Text("Çark") }
-                )
-                NavigationBarItem(
-                    selected = false,
-                    onClick = { navController.navigate(Screen.Results.route) },
-                    icon = { Icon(Icons.Default.Assignment, contentDescription = "Sonuçlar") },
-                    label = { Text("Sonuçlar") }
-                )
+
                 NavigationBarItem(
                     selected = false,
                     onClick = { navController.navigate(Screen.Settings.route) },
@@ -486,7 +470,6 @@ private fun AnimatedRateCard(
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 InfoColumn(label = "Alış", value = rate.alis, textColor = textColor)
-                Spacer(Modifier.width(8.dp))
                 InfoColumn(label = "Satış", value = rate.satis, textColor = textColor)
             }
         }

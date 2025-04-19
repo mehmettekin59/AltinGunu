@@ -44,8 +44,6 @@ fun formatDecimalValue(value: String?, formatter: DecimalFormat?): String {
                 }
                 simpleFormatter.format(number)
 
-                // Alternatif: Tam sayıya yuvarlama
-                // kotlin.math.roundToLong(number).toString()
             } catch (fallbackException: Exception) {
                 // Eğer basit formatlama/yuvarlama da hata verirse
                 println("Fallback Formatting Error: ${fallbackException.message}")

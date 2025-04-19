@@ -17,8 +17,8 @@ object Constraints {
         "AYAR14" to "14 Ayar Altın",
         "ATA5_ESKI" to "5'li Ata (Eski)",
         "ATA5_YENI" to "5'li Ata (Yeni)",
-        "GREMESE_ESKI" to "Gremse Altın(Eski)",
-        "GREMESE_YENI" to "Gremse Altın(Yeni)"
+        "GREMESE_ESKI" to "Gremse (Eski)",
+        "GREMESE_YENI" to "Gremse (Yeni)"
     )
 
     val currencyCodeToName = mapOf(
@@ -41,14 +41,13 @@ object Constraints {
 
     // DataStore keys
     object DataStoreKeys {
-        const val SETTINGS_DATASTORE = "settings_datastore"
         const val API_UPDATE_INTERVAL = "api_update_interval"
         const val LANGUAGE_CODE = "language_code"
     }
 
     // Default settings
     object DefaultSettings {
-        const val DEFAULT_API_UPDATE_INTERVAL = 30 // seconds
+        const val DEFAULT_API_UPDATE_INTERVAL = 60 // seconds
         const val DEFAULT_LANGUAGE = "tr" // Turkish
     }
 }

@@ -44,6 +44,7 @@ import com.mehmettekin.altingunu.ui.theme.NavyBlue
 import com.mehmettekin.altingunu.ui.theme.White
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.ui.graphics.drawscope.rotate
+import com.mehmettekin.altingunu.ui.theme.Gold
 import kotlin.math.cos
 import kotlin.math.sin
 
@@ -125,12 +126,14 @@ fun WheelScreen(
                 title = {
                     Text(
                         "Altın Günü Çekilişi",
-                        style = MaterialTheme.typography.headlineMedium
+                        fontWeight = FontWeight.Bold,
+                        style = MaterialTheme.typography.titleLarge
                     )
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer,
-                    titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                    containerColor = Gold,
+                    titleContentColor = White,
+                    actionIconContentColor = Gold
                 )
             )
         },

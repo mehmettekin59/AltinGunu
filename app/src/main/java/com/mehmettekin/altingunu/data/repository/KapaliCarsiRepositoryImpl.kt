@@ -1,5 +1,6 @@
 package com.mehmettekin.altingunu.data.repository
 
+import com.mehmettekin.altingunu.data.local.SettingsDataStore
 import com.mehmettekin.altingunu.data.remote.KapaliCarsiApi
 import com.mehmettekin.altingunu.domain.repository.KapaliCarsiRepository
 import com.mehmettekin.altingunu.utils.ResultState
@@ -21,10 +22,12 @@ import java.io.IOException
 import javax.inject.Inject
 import javax.inject.Singleton
 import com.mehmettekin.altingunu.domain.model.ExchangeRate
+import kotlinx.coroutines.flow.map
 
 @Singleton
 class KapaliCarsiRepositoryImpl @Inject constructor(
     private val api: KapaliCarsiApi,
+    private val settingsDataStore: SettingsDataStore,
     private val externalScope: CoroutineScope
 ) : KapaliCarsiRepository {
 
@@ -37,11 +40,17 @@ class KapaliCarsiRepositoryImpl @Inject constructor(
 
     @OptIn(ExperimentalCoroutinesApi::class)
     override fun getExchangeRates(): Flow<ResultState<List<ExchangeRate>>> {
-        val automaticRefresh = flow {
-            while (true) {
-                emit(Unit)
-                delay(refreshInterval)
+        val refreshIntervalFlow = settingsDataStore.getApiUpdateInterval()
+            .map { seconds -> seconds * 1000L }
+
+        val automaticRefresh = refreshIntervalFlow.flatMapLatest {internalMs ->
+            flow {
+                while (true){
+                    emit(Unit)
+                    delay(internalMs)
+                }
             }
+
         }
 
         // Manuel ve otomatik yenilemeyi birleştir.

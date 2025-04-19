@@ -1,5 +1,7 @@
 package com.mehmettekin.altingunu.di
 
+import android.content.Context
+import com.mehmettekin.altingunu.data.local.SettingsDataStore
 import com.mehmettekin.altingunu.data.remote.KapaliCarsiApi
 import com.mehmettekin.altingunu.data.repository.DrawRepositoryImpl
 import com.mehmettekin.altingunu.data.repository.KapaliCarsiRepositoryImpl
@@ -13,6 +15,7 @@ import dagger.Binds
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
+import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -52,6 +55,8 @@ abstract class ApplicationModule {
                 .build()
                 .create(KapaliCarsiApi::class.java)
         }
+
+
 
         @Provides
         @Singleton
