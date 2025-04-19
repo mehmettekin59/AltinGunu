@@ -111,13 +111,14 @@ fun ParticipantsScreen(
                 title = {
                     Text(
                         "Gün Kurası",
-                        color = White,
                         fontWeight = FontWeight.Bold,
                         style = MaterialTheme.typography.titleLarge
                     )
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = NavyBlue
+                    containerColor = Gold,
+                    titleContentColor = White,
+                    actionIconContentColor = Gold
                 )
             )
         }
@@ -241,16 +242,16 @@ fun ParticipantsContent(
         // Continue button
         Button(
             onClick = { onEvent(ParticipantsEvent.OnContinueClick) },
-            modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(8.dp),
             colors = ButtonDefaults.buttonColors(
-                containerColor = NavyBlue
-            )
+                containerColor = Gold,
+                contentColor = White
+            ),
+            shape = RoundedCornerShape(8.dp),
+            modifier = Modifier.fillMaxWidth()
         ) {
             Icon(
                 imageVector = Icons.AutoMirrored.Filled.ArrowForward,
                 contentDescription = null,
-                tint = White
             )
             Spacer(modifier = Modifier.width(8.dp))
             Text(

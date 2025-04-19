@@ -2,6 +2,7 @@ package com.mehmettekin.altingunu.presentation.screens.enter
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.pager.HorizontalPager
@@ -47,6 +48,7 @@ import java.text.DecimalFormatSymbols
 import java.util.Locale
 import kotlin.math.absoluteValue
 import com.mehmettekin.altingunu.R
+import kotlinx.coroutines.delay
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -89,12 +91,14 @@ fun EnterScreen(
         modifier = Modifier.fillMaxSize(),
         topBar = {
             TopAppBar(
-                title = { Text("Altın ve Döviz Kurları") },
+                title = {
+                    Text("Altın ve Döviz Kurları",fontWeight = FontWeight.Bold,
+                    style = MaterialTheme.typography.titleLarge) },
                 scrollBehavior = scrollBehavior,
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer,
-                    titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer,
-                    actionIconContentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                    containerColor = Gold,
+                    titleContentColor = White,
+                    actionIconContentColor = Gold
                 ),
                 actions = {
                     IconButton(onClick = { viewModel.refreshExchangeRates() }) {
@@ -141,65 +145,66 @@ fun EnterScreen(
             }
         }
     ) { paddingValues ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues)
-                .verticalScroll(rememberScrollState())
-                .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
-        ) {
-            // Item type selector (Gold/Currency)
-            ItemTypeSelector(
-                selectedItemType = selectedItemType,
-                onItemTypeSelect = { selectedItemType = it }
-            )
 
-            // Display content based on loading state
-            when (exchangeRatesState) {
-                is ResultState.Loading -> {
-                    LoadingIndicator()
-                }
-                is ResultState.Error -> {
-                    val errorState = exchangeRatesState as ResultState.Error
-                    ErrorState(
-                        message = errorState.message.toString(),
-                        onRetry = { viewModel.refreshExchangeRates() }
-                    )
-                }
-                is ResultState.Success, is ResultState.Idle -> {
-                    // Display content based on selected type
-                    when (selectedItemType) {
-                        ItemType.GOLD -> RatesSection(
-                            title = "Altın Fiyatları",
-                            icon = painterResource(id = R.drawable.gold_bar),
-                            rates = goldRates,
-                            codeToNameMap = codeToNameMap,
-                            backgroundColor = Gold,
-                            textColor = White,
-                            iconTint = Gold
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(paddingValues)
+                    .verticalScroll(rememberScrollState())
+                    .padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                // Item type selector (Gold/Currency)
+                ItemTypeSelector(
+                    selectedItemType = selectedItemType,
+                    onItemTypeSelect = { selectedItemType = it }
+                )
+
+                // Display content based on loading state
+                when (exchangeRatesState) {
+                    is ResultState.Loading -> {
+                        LoadingIndicator()
+                    }
+                    is ResultState.Error -> {
+                        val errorState = exchangeRatesState as ResultState.Error
+                        ErrorState(
+                            message = errorState.message.toString(),
+                            onRetry = { viewModel.refreshExchangeRates() }
                         )
-                        ItemType.CURRENCY -> RatesSection(
-                            title = "Döviz Kurları",
-                            icon = painterResource(id = R.drawable.dollar),
-                            rates = currencyRates,
-                            codeToNameMap = codeToNameMap,
-                            backgroundColor = NavyBlue,
-                            textColor = White,
-                            iconTint = NavyBlue
-                        )
-                        ItemType.TL -> { /* TL case not implemented in original */ }
+                    }
+                    is ResultState.Success, is ResultState.Idle -> {
+                        // Display content based on selected type
+                        when (selectedItemType) {
+                            ItemType.GOLD -> RatesSection(
+                                title = "Altın Fiyatları",
+                                icon = painterResource(id = R.drawable.gold_bar),
+                                rates = goldRates,
+                                codeToNameMap = codeToNameMap,
+                                backgroundColor = Gold,
+                                textColor = White,
+                                iconTint = Gold
+                            )
+                            ItemType.CURRENCY -> RatesSection(
+                                title = "Döviz Kurları",
+                                icon = painterResource(id = R.drawable.dollar),
+                                rates = currencyRates,
+                                codeToNameMap = codeToNameMap,
+                                backgroundColor = NavyBlue,
+                                textColor = White,
+                                iconTint = NavyBlue
+                            )
+                            ItemType.TL -> { /* TL case not implemented in original */ }
+                        }
                     }
                 }
+
+                Spacer(modifier = Modifier.height(16.dp))
+                // Gold Day Lottery Card
+                GoldDayLotteryCard(
+                    onClick = { navController.navigate(Screen.Participants.route) }
+                )
             }
 
-            Spacer(modifier = Modifier.height(32.dp))
-
-            // Gold Day Lottery Card
-            GoldDayLotteryCard(
-                onClick = { navController.navigate(Screen.Participants.route) }
-            )
-        }
     }
 }
 
@@ -652,6 +657,7 @@ fun GoldDayLotteryCard(
                     containerColor = White,
                     contentColor = Gold
                 ),
+                shape = RoundedCornerShape(8.dp),
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Icon(
