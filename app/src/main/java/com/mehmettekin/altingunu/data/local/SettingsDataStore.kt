@@ -20,13 +20,13 @@ class SettingsDataStore @Inject constructor(
     private val languageCodeKey = stringPreferencesKey(Constraints.DataStoreKeys.LANGUAGE_CODE)
 
     // API Update Interval
-    //Bu kullanılmıyor
+
     suspend fun setApiUpdateInterval(seconds: Int) {
         context.settingsDataStore.edit { preferences ->
             preferences[apiUpdateIntervalKey] = seconds
         }
     }
-        // Kullanılmıyor
+
     fun getApiUpdateInterval(): Flow<Int> {
         return context.settingsDataStore.data.map { preferences ->
             preferences[apiUpdateIntervalKey] ?: Constraints.DefaultSettings.DEFAULT_API_UPDATE_INTERVAL
