@@ -24,6 +24,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.mehmettekin.altingunu.presentation.navigation.Screen
+import com.mehmettekin.altingunu.presentation.screens.common.CommonTopAppBar
 import com.mehmettekin.altingunu.ui.theme.Gold
 import com.mehmettekin.altingunu.ui.theme.NavyBlue
 import com.mehmettekin.altingunu.ui.theme.White
@@ -65,20 +66,11 @@ fun SettingsScreen(
     Scaffold(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
-            TopAppBar(
-                title = {
-                    Text(
-                        "Ayarlar",
-                        fontWeight = FontWeight.Bold,
-                        style = MaterialTheme.typography.titleLarge
-                    )
-                },
-                scrollBehavior = scrollBehavior,
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = Gold,
-                    titleContentColor = White,
-                    actionIconContentColor = White
-                ),
+            CommonTopAppBar(
+                title = "Ayarlar",
+                navController = navController,
+                isSettingsScreen = true,
+                onBackPressed = { navController.navigateUp() },
                 actions = {
                     IconButton(onClick = { viewModel.onEvent(SettingsEvent.OnDefaultsReset) }) {
                         Icon(
@@ -87,15 +79,7 @@ fun SettingsScreen(
                             tint = White
                         )
                     }
-                    IconButton(onClick = { navController.navigate(Screen.Enter.route) }) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Default.ArrowBack,
-                            contentDescription = "Geri Dön",
-                            tint = White
-                        )
-                    }
-                },
-
+                }
             )
         },
         snackbarHost = { SnackbarHost(snackbarHostState) }

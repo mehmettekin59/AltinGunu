@@ -28,6 +28,7 @@ import com.mehmettekin.altingunu.domain.model.DrawResult
 import com.mehmettekin.altingunu.domain.model.ItemType
 import com.mehmettekin.altingunu.domain.model.ParticipantsScreenWholeInformation
 import com.mehmettekin.altingunu.presentation.navigation.Screen
+import com.mehmettekin.altingunu.presentation.screens.common.CommonTopAppBar
 import com.mehmettekin.altingunu.ui.theme.Gold
 import com.mehmettekin.altingunu.ui.theme.NavyBlue
 import com.mehmettekin.altingunu.ui.theme.White
@@ -98,23 +99,16 @@ fun ResultScreen(
 
     Scaffold(
         topBar = {
-            TopAppBar(
-                title = {
-                    Text(
-                        "Çekiliş Sonuçları",
-                        color = White
-                    )
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = NavyBlue,
-                    titleContentColor = White
-                ),
+            CommonTopAppBar(
+                title = "Çekiliş Sonuçları",
+                navController = navController,
+                backgroundColor = NavyBlue,
+                onBackPressed = { navController.navigateUp() },
                 actions = {
                     // PDF görüntüleme butonu
                     IconButton(onClick = {
                         val pdfUri = viewModel.createPdf(context)
                         pdfUri?.let {
-                            // PDF'yi görüntüleme
                             val intent = Intent(Intent.ACTION_VIEW).apply {
                                 setDataAndType(it, "application/pdf")
                                 addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
@@ -122,7 +116,6 @@ fun ResultScreen(
                             try {
                                 pdfViewerLauncher.launch(intent)
                             } catch (e: ActivityNotFoundException) {
-                                // PDF viewer bulunamadıysa kullanıcıya bilgi ver
                                 coroutineScope.launch {
                                     snackbarHostState.showSnackbar("PDF görüntüleyici bulunamadı.")
                                 }
@@ -138,11 +131,9 @@ fun ResultScreen(
 
                     // PDF indirme butonu
                     IconButton(onClick = {
-                        // Android 10+ için izin gerekmez
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                             viewModel.savePdfToDownloads(context)
                         } else {
-                            // Android 9 ve altı için depolama izni gerekir
                             requestPermissionLauncher.launch(Manifest.permission.WRITE_EXTERNAL_STORAGE)
                         }
                     }) {

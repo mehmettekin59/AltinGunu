@@ -72,6 +72,7 @@ import androidx.navigation.NavController
 import com.mehmettekin.altingunu.domain.model.ItemType
 import com.mehmettekin.altingunu.domain.model.Participant
 import com.mehmettekin.altingunu.presentation.navigation.Screen
+import com.mehmettekin.altingunu.presentation.screens.common.CommonTopAppBar
 import com.mehmettekin.altingunu.ui.theme.Gold
 import com.mehmettekin.altingunu.ui.theme.NavyBlue
 import com.mehmettekin.altingunu.ui.theme.White
@@ -108,28 +109,10 @@ fun ParticipantsScreen(
     Scaffold(
         snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
-            TopAppBar(
-                title = {
-                    Text(
-                        "Gün Kurası",
-                        fontWeight = FontWeight.Bold,
-                        style = MaterialTheme.typography.titleLarge
-                    )
-                },
-                actions = {
-                    IconButton(onClick = { navController.navigate(Screen.Enter.route) }) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Default.ArrowBack,
-                            contentDescription = "Geri Dön",
-                            tint = White
-                        )
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = Gold,
-                    titleContentColor = White,
-                    actionIconContentColor = Gold
-                )
+            CommonTopAppBar(
+                title = "Gün Kurası",
+                navController = navController,
+                onBackPressed = { navController.navigateUp() }
             )
         }
 
@@ -485,6 +468,11 @@ fun ModernDateSelector(
     val calendar = Calendar.getInstance()
     calendar.set(Calendar.MONTH, selectedMonth - 1)
 
+    // Mevcut ay ve yılı al
+    val currentCalendar = Calendar.getInstance()
+    val currentMonth = currentCalendar.get(Calendar.MONTH) + 1  // 0-based to 1-based
+    val currentYear = currentCalendar.get(Calendar.YEAR)
+
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -548,15 +536,24 @@ fun ModernDateSelector(
 
     // Month selection dialog
     if (showMonthDialog) {
+        // Seçilebilecek ayları belirle
+        val availableMonths = if (selectedYear == currentYear) {
+            // Eğer seçili yıl mevcut yılsa, sadece mevcut ay ve sonraki aylar seçilebilir
+            (currentMonth..12).toList()
+        } else {
+            // Eğer gelecek bir yılsa, tüm aylar seçilebilir
+            (1..12).toList()
+        }
+
         DateSelectorDialog(
             title = "Ay Seçiniz",
-            options = (1..12).map {
+            options = availableMonths.map {
                 calendar.set(Calendar.MONTH, it - 1)
                 monthFormat.format(calendar.time)
             },
-            selectedIndex = selectedMonth - 1,
+            selectedIndex = availableMonths.indexOf(selectedMonth),
             onOptionSelected = { index ->
-                onMonthSelected(index + 1)
+                onMonthSelected(availableMonths[index])
                 showMonthDialog = false
             },
             onDismiss = { showMonthDialog = false }
@@ -565,13 +562,21 @@ fun ModernDateSelector(
 
     // Year selection dialog
     if (showYearDialog) {
-        val currentYear = Calendar.getInstance().get(Calendar.YEAR)
+        val yearOptions = (currentYear..currentYear + 9).toList()  // Güncel yıl ve sonraki 9 yıl
+
         DateSelectorDialog(
             title = "Yıl Seçiniz",
-            options = (0..9).map { (currentYear + it).toString() },
-            selectedIndex = selectedYear - currentYear,
+            options = yearOptions.map { it.toString() },
+            selectedIndex = yearOptions.indexOf(selectedYear),
             onOptionSelected = { index ->
-                onYearSelected(currentYear + index)
+                val newYear = yearOptions[index]
+                onYearSelected(newYear)
+
+                // Eğer yıl değişip mevcut yıla eşitlenirse ve seçili ay geçmiş bir aysa, ayı güncel aya güncelle
+                if (newYear == currentYear && selectedMonth < currentMonth) {
+                    onMonthSelected(currentMonth)
+                }
+
                 showYearDialog = false
             },
             onDismiss = { showYearDialog = false }

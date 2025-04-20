@@ -31,7 +31,6 @@ class KapaliCarsiRepositoryImpl @Inject constructor(
     private val externalScope: CoroutineScope
 ) : KapaliCarsiRepository {
 
-    private val refreshInterval = 30000L
     private val _refreshTrigger = MutableSharedFlow<Unit>(replay = 0)
 
     override fun manualRefresh() {
@@ -40,10 +39,10 @@ class KapaliCarsiRepositoryImpl @Inject constructor(
 
     @OptIn(ExperimentalCoroutinesApi::class)
     override fun getExchangeRates(): Flow<ResultState<List<ExchangeRate>>> {
-        val refreshIntervalFlow = settingsDataStore.getApiUpdateInterval()
+        val refreshInterval = settingsDataStore.getApiUpdateInterval()
             .map { seconds -> seconds * 1000L }
 
-        val automaticRefresh = refreshIntervalFlow.flatMapLatest {internalMs ->
+        val automaticRefresh = refreshInterval.flatMapLatest {internalMs ->
             flow {
                 while (true){
                     emit(Unit)

@@ -4,6 +4,7 @@ import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
@@ -44,6 +45,7 @@ import com.mehmettekin.altingunu.ui.theme.NavyBlue
 import com.mehmettekin.altingunu.ui.theme.White
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.ui.graphics.drawscope.rotate
+import com.mehmettekin.altingunu.presentation.screens.common.CommonTopAppBar
 import com.mehmettekin.altingunu.ui.theme.Gold
 import kotlin.math.cos
 import kotlin.math.sin
@@ -122,19 +124,10 @@ fun WheelScreen(
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         topBar = {
-            TopAppBar(
-                title = {
-                    Text(
-                        "Altın Günü Çekilişi",
-                        fontWeight = FontWeight.Bold,
-                        style = MaterialTheme.typography.titleLarge
-                    )
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = Gold,
-                    titleContentColor = White,
-                    actionIconContentColor = Gold
-                )
+            CommonTopAppBar(
+                title = "Altın Günü Çekilişi",
+                navController = navController,
+                onBackPressed = { navController.navigateUp() }
             )
         },
         snackbarHost = { SnackbarHost(hostState = snackbarHostState) }
@@ -203,11 +196,12 @@ fun WheelScreen(
                     if (state.participants.isEmpty() && viewModel.winners.isNotEmpty()) {
                         Button(
                             onClick = { viewModel.saveResults() },
-                            modifier = Modifier.fillMaxWidth(),
-                            shape = RoundedCornerShape(8.dp),
                             colors = ButtonDefaults.buttonColors(
-                                containerColor = NavyBlue
-                            )
+                                containerColor = Gold,
+                                contentColor = White
+                            ),
+                            shape = RoundedCornerShape(8.dp),
+                            modifier = Modifier.fillMaxWidth()
                         ) {
                             Icon(
                                 imageVector = Icons.Filled.Save,
@@ -291,7 +285,10 @@ private fun ControlButtons(
         Button(
             onClick = { viewModel.spinWheel() },
             enabled = canSpin,
-            modifier = Modifier.padding(4.dp)
+            modifier = Modifier.padding(4.dp),
+            colors = ButtonDefaults.buttonColors(
+                containerColor = Gold
+            )
         ) {
             Text("Çarkı Çevir")
         }
@@ -299,7 +296,7 @@ private fun ControlButtons(
         Button(
             onClick = { viewModel.reset() },
             colors = ButtonDefaults.buttonColors(
-                containerColor = Color.Gray
+                containerColor = NavyBlue
             ),
             modifier = Modifier.padding(4.dp)
         ) {
@@ -315,12 +312,13 @@ private fun WinnerAnnouncement(winner: String?) {
             modifier = Modifier
                 .padding(8.dp)
                 .fillMaxWidth(),
-            elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+            elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+            colors = CardDefaults.cardColors(containerColor = NavyBlue)
         ) {
             Text(
                 text = " Kazanan:🎉✨ $it ✨🎉",
                 modifier = Modifier.padding(8.dp),
-                color = Color(0xFF4CAF50),
+                color = MaterialTheme.colorScheme.surface,
                 fontWeight = FontWeight.ExtraBold,
                 fontSize = 16.sp,
                 textAlign = TextAlign.Center,
@@ -378,6 +376,7 @@ private fun ParticipantList(
     ) {
         Column(
             modifier = Modifier
+                .background(Gold)
                 .fillMaxWidth()
                 .padding(12.dp)
                 .height(160.dp)
@@ -386,7 +385,8 @@ private fun ParticipantList(
                 text = title,
                 style = MaterialTheme.typography.titleSmall,
                 fontWeight = FontWeight.Bold,
-                modifier = Modifier.padding(bottom = 8.dp)
+                modifier = Modifier.padding(bottom = 8.dp),
+                color = NavyBlue
             )
 
             HorizontalDivider(
@@ -407,7 +407,8 @@ private fun ParticipantList(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(vertical = 6.dp, horizontal = 4.dp),
-                        fontSize = 14.sp
+                        fontSize = 14.sp,
+                        color = MaterialTheme.colorScheme.surface
                     )
 
                     HorizontalDivider(
