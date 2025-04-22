@@ -4,7 +4,6 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerDefaults
 import androidx.compose.foundation.pager.rememberPagerState
@@ -33,9 +32,11 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
+import com.mehmettekin.altingunu.R
 import com.mehmettekin.altingunu.domain.model.ExchangeRate
 import com.mehmettekin.altingunu.domain.model.ItemType
 import com.mehmettekin.altingunu.presentation.navigation.Screen
+import com.mehmettekin.altingunu.presentation.screens.common.CommonTopAppBar
 import com.mehmettekin.altingunu.ui.theme.Gold
 import com.mehmettekin.altingunu.ui.theme.NavyBlue
 import com.mehmettekin.altingunu.ui.theme.White
@@ -46,8 +47,8 @@ import java.text.DecimalFormat
 import java.text.DecimalFormatSymbols
 import java.util.Locale
 import kotlin.math.absoluteValue
-import com.mehmettekin.altingunu.R
-import com.mehmettekin.altingunu.presentation.screens.common.CommonTopAppBar
+
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -57,7 +58,6 @@ fun EnterScreen(
 ) {
     // State collection
     val exchangeRatesState by viewModel.exchangeRates.collectAsStateWithLifecycle()
-    val isLoading = exchangeRatesState is ResultState.Loading
 
     // UI state
     var selectedItemType by remember { mutableStateOf(ItemType.GOLD) }
@@ -656,3 +656,5 @@ fun GoldDayLotteryCard(
         }
     }
 }
+
+
