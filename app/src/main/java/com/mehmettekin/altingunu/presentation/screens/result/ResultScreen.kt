@@ -269,7 +269,7 @@ private fun ResultsContent(
         Spacer(modifier = Modifier.height(16.dp))
 
         // Results table
-        ResultsTable(results = results, drawSettings = drawSettings)
+        ResultsTable(results = results)
 
         Spacer(modifier = Modifier.height(24.dp))
 
@@ -362,7 +362,7 @@ private fun ResultsSettingsSummary(
                     color = Color.Gray
                 )
 
-                // Türe göre metin formatı oluştur (ResultsTable'daki gibi)
+
                 val formattedAmount = ValueFormatter.formatWithSymbol(
                     settings.calculateAmountPerPerson().toString(),
                     settings.itemType,
@@ -425,7 +425,6 @@ private fun ResultsSettingsSummary(
 @Composable
 private fun ResultsTable(
     results: List<DrawResult>,
-    drawSettings: ParticipantsScreenWholeInformation?,
     modifier: Modifier = Modifier
 ) {
 
@@ -519,8 +518,7 @@ private fun ResultsTable(
                             modifier = Modifier.weight(0.3f)
                         )
                         Spacer(Modifier.width(2.dp))
-                        val amountText =result.amount
-                        Log.d("ResultScreen", "Result amount: $amountText")
+                        val amountText = result.amount
                         Text(
                             text = amountText,
                             style = MaterialTheme.typography.bodyMedium,

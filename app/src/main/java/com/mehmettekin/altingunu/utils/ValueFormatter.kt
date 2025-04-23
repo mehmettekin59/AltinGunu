@@ -48,11 +48,6 @@ object ValueFormatter {
 
     fun formatWithSymbol(value: String?, itemType: ItemType, specificItem: String = ""): String {
         val formattedValue = format(value, itemType)
-
-        return when (itemType) {
-            ItemType.TL -> "$formattedValue TL"
-            ItemType.CURRENCY -> "$formattedValue TL"
-            ItemType.GOLD -> "$formattedValue TL"
-        }
+        return formattedValue
     }
 }
