@@ -33,8 +33,8 @@ import com.mehmettekin.altingunu.ui.theme.Gold
 import com.mehmettekin.altingunu.ui.theme.NavyBlue
 import com.mehmettekin.altingunu.ui.theme.White
 import com.mehmettekin.altingunu.utils.Constraints
+import com.mehmettekin.altingunu.utils.ValueFormatter
 import kotlinx.coroutines.launch
-import com.mehmettekin.altingunu.utils.formatDecimalValue
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -362,19 +362,11 @@ private fun ResultsSettingsSummary(
                 )
 
                 // Türe göre metin formatı oluştur (ResultsTable'daki gibi)
-                val formattedAmount = when (settings.itemType) {
-                    ItemType.GOLD -> {
-                        val goldName = Constraints.goldCodeToName[settings.specificItem] ?: settings.specificItem
-                        "${formatDecimalValue(settings.calculateAmountPerPerson().toString(), null)} $goldName"
-                    }
-                    ItemType.CURRENCY -> {
-                        val currencyName = Constraints.currencyCodeToName[settings.specificItem] ?: settings.specificItem
-                        "${formatDecimalValue(settings.calculateAmountPerPerson().toString(), null)} $currencyName"
-                    }
-                    else -> {
-                        formatDecimalValue(settings.calculateAmountPerPerson().toString(), null)
-                    }
-                }
+                val formattedAmount = ValueFormatter.formatWithSymbol(
+                    settings.calculateAmountPerPerson().toString(),
+                    settings.itemType,
+                    settings.specificItem
+                )
 
                 Text(
                     text = formattedAmount,
@@ -527,9 +519,13 @@ private fun ResultsTable(
                         )
                         Spacer(Modifier.width(2.dp))
                         val amountText = if (drawSettings != null) {
-                            formatDecimalValue(drawSettings.calculateAmountPerPerson().toString(), null)
+                            ValueFormatter.formatWithSymbol(
+                                drawSettings.calculateAmountPerPerson().toString(),
+                                drawSettings.itemType,
+                                drawSettings.specificItem
+                            )
                         } else {
-                            // Fallback olarak result.amount kullanın
+                            // Fallback to result.amount
                             result.amount
                         }
                         Text(

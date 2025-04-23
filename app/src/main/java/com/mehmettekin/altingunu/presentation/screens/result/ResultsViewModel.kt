@@ -20,6 +20,7 @@ import com.mehmettekin.altingunu.domain.repository.DrawRepository
 import com.mehmettekin.altingunu.utils.Constraints
 import com.mehmettekin.altingunu.utils.ResultState
 import com.mehmettekin.altingunu.utils.UiText
+import com.mehmettekin.altingunu.utils.ValueFormatter
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -32,7 +33,6 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 import javax.inject.Inject
-import com.mehmettekin.altingunu.utils.formatDecimalValue
 
 @HiltViewModel
 class ResultsViewModel @Inject constructor(
@@ -159,7 +159,11 @@ class ResultsViewModel @Inject constructor(
         }
 
         canvas.drawText("Değer Türü: $itemTypeText", 50f, settingsInfoY, paint)
-        val formattedAmount = formatDecimalValue(settings.calculateAmountPerPerson().toString(), null)
+        val formattedAmount = ValueFormatter.formatWithSymbol(
+            settings.calculateAmountPerPerson().toString(),
+            settings.itemType,
+            settings.specificItem
+        )
         canvas.drawText("Aylık Miktar: $formattedAmount", 50f, settingsInfoY + 20, paint)
         canvas.drawText("Toplam Süre: ${settings.durationMonths} ay", 50f, settingsInfoY + 40, paint)
         canvas.drawText("Katılımcı Sayısı: ${settings.participantCount}", 50f, settingsInfoY + 60, paint)
@@ -194,8 +198,11 @@ class ResultsViewModel @Inject constructor(
             canvas.drawText("${index + 1}", 50f, y, paint)
             canvas.drawText(result.participantName, 100f, y, paint)
             canvas.drawText(result.month, 250f, y, paint)
-            val formattedAmount = formatDecimalValue(settings.calculateAmountPerPerson().toString(), null)
-           // val formattedResultAmount = formatDecimalValue(result.amount, null)
+            val formattedAmount = ValueFormatter.formatWithSymbol(
+                settings.calculateAmountPerPerson().toString(),
+                settings.itemType,
+                settings.specificItem
+            )
             canvas.drawText(formattedAmount, 400f, y, paint)
 
             y += 30

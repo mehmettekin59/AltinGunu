@@ -20,7 +20,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
@@ -42,13 +41,8 @@ import com.mehmettekin.altingunu.ui.theme.NavyBlue
 import com.mehmettekin.altingunu.ui.theme.White
 import com.mehmettekin.altingunu.utils.Constraints
 import com.mehmettekin.altingunu.utils.ResultState
-import com.mehmettekin.altingunu.utils.formatDecimalValue
-import java.text.DecimalFormat
-import java.text.DecimalFormatSymbols
-import java.util.Locale
+import com.mehmettekin.altingunu.utils.ValueFormatter
 import kotlin.math.absoluteValue
-
-
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -56,37 +50,33 @@ fun EnterScreen(
     navController: NavController,
     viewModel: KapaliCarsiViewModel = hiltViewModel()
 ) {
-    // State collection
     val exchangeRatesState by viewModel.exchangeRates.collectAsStateWithLifecycle()
 
-    // UI state
     var selectedItemType by remember { mutableStateOf(ItemType.GOLD) }
 
-    // Memorized constant data
     val goldCodeToName = remember { Constraints.goldCodeToName }
     val currencyCodeToName = remember { Constraints.currencyCodeToName }
     val goldCodeList = remember { Constraints.goldCodeList }
     val currencyCodeList = remember { Constraints.currencyCodeList }
 
-    // Combined code-to-name map for lookup
     val codeToNameMap = remember { goldCodeToName + currencyCodeToName }
 
-    // Filter exchange rates by type
-    val (goldRates, currencyRates) = remember(exchangeRatesState) {
-        when (val state = exchangeRatesState) {
-            is ResultState.Success -> {
-                val data = state.data
-                val gold = data.filter { it.code in goldCodeList.toSet() }
-                val currency = data.filter { it.code in currencyCodeList.toSet() }
-                Pair(gold, currency)
+    // Filtrelenmiş verileri bir derivedStateOf ile daha verimli hale getiriyoruz
+    val filteredRates by remember(exchangeRatesState, selectedItemType) {
+        derivedStateOf {
+            when (val state = exchangeRatesState) {
+                is ResultState.Success -> {
+                    val data = state.data
+                    when (selectedItemType) {
+                        ItemType.GOLD -> data.filter { it.code in goldCodeList.toSet() }
+                        ItemType.CURRENCY -> data.filter { it.code in currencyCodeList.toSet() }
+                        else -> emptyList()
+                    }
+                }
+                else -> emptyList()
             }
-
-            else -> Pair(emptyList(), emptyList())
         }
     }
-
-    // Main layout scaffold
-    val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -105,29 +95,28 @@ fun EnterScreen(
                 }
             )
         }
-
     ) { paddingValues ->
-
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
-                .verticalScroll(rememberScrollState())
-                .padding(16.dp),
+                .padding(16.dp)
+                .verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            // Item type selector (Gold/Currency)
+            // Item type selector
             ItemTypeSelector(
                 selectedItemType = selectedItemType,
                 onItemTypeSelect = { selectedItemType = it }
             )
+
+            Spacer(modifier = Modifier.height(16.dp))
 
             // Display content based on loading state
             when (exchangeRatesState) {
                 is ResultState.Loading -> {
                     LoadingIndicator()
                 }
-
                 is ResultState.Error -> {
                     val errorState = exchangeRatesState as ResultState.Error
                     ErrorState(
@@ -135,43 +124,67 @@ fun EnterScreen(
                         onRetry = { viewModel.refreshExchangeRates() }
                     )
                 }
-
                 is ResultState.Success, is ResultState.Idle -> {
-                    // Display content based on selected type
-                    when (selectedItemType) {
-                        ItemType.GOLD -> RatesSection(
-                            title = "Altın Fiyatları",
-                            icon = painterResource(id = R.drawable.gold_bar),
-                            rates = goldRates,
-                            codeToNameMap = codeToNameMap,
-                            backgroundColor = Gold,
-                            textColor = White,
-                            iconTint = Gold
+                    // Rate section
+                    if (filteredRates.isNotEmpty()) {
+                        RatesSectionTitle(
+                            title = if (selectedItemType == ItemType.GOLD) "Altın Fiyatları" else "Döviz Kurları",
+                            icon = if (selectedItemType == ItemType.GOLD)
+                                painterResource(id = R.drawable.gold_bar)
+                            else
+                                painterResource(id = R.drawable.dollar),
+                            iconTint = if (selectedItemType == ItemType.GOLD) Gold else NavyBlue
                         )
 
-                        ItemType.CURRENCY -> RatesSection(
-                            title = "Döviz Kurları",
-                            icon = painterResource(id = R.drawable.dollar),
-                            rates = currencyRates,
-                            codeToNameMap = codeToNameMap,
-                            backgroundColor = NavyBlue,
-                            textColor = White,
-                            iconTint = NavyBlue
-                        )
+                        Spacer(modifier = Modifier.height(8.dp))
 
-                        ItemType.TL -> { /* TL case not implemented in original */
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(220.dp)
+                                .padding(vertical = 8.dp)
+                        ) {
+                            CoverFlowCarousel(
+                                items = filteredRates,
+                                initialPageIndex = minOf(3, filteredRates.size - 1),
+                                itemWidth = 190.dp,
+                                itemHeight = 210.dp,
+                                minScale = 0.7f,
+                                centerScale = 1.05f,
+                                maxRotationY = 40f,
+                                minAlpha = 0.7f,
+                                maxElevation = 0.dp,
+                                minElevation = 0.dp,
+                                pageSpacing = (-20).dp
+                            ) { rate, modifier, elevation ->
+                                AnimatedRateCard(
+                                    rate = rate,
+                                    codeToNameMap = codeToNameMap,
+                                    backgroundColor = if (selectedItemType == ItemType.GOLD) Gold else NavyBlue,
+                                    textColor = White,
+                                    modifier = modifier,
+                                    elevation = elevation
+                                )
+                            }
                         }
+                    } else {
+                        Text(
+                            text = "${if (selectedItemType == ItemType.GOLD) "Altın" else "Döviz"} verileri için veri bulunamadı.",
+                            modifier = Modifier
+                                .padding(vertical = 8.dp)
+                                .fillMaxWidth(),
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            textAlign = TextAlign.Center
+                        )
                     }
                 }
             }
-
             Spacer(modifier = Modifier.height(16.dp))
-            // Gold Day Lottery Card
             GoldDayLotteryCard(
                 onClick = { navController.navigate(Screen.Participants.route) }
             )
         }
-
     }
 }
 
@@ -196,7 +209,7 @@ private fun ItemTypeSelector(
     val itemTypes = remember {
         listOf(
             ItemType.CURRENCY to "Döviz ($, €, £)",
-            ItemType.GOLD to "Altın (\uD83E\uDD47, \uD83E\uDE99, \uD83D\uDCB0)"
+            ItemType.GOLD to "Altın (🥇, 🪙, 💰)"
         )
     }
 
@@ -307,18 +320,17 @@ private fun ErrorState(
 }
 
 @Composable
-fun RatesSection(
+fun RatesSectionTitle(
     title: String,
-    icon: Painter,
-    rates: List<ExchangeRate>,
-    codeToNameMap: Map<String, String>,
-    backgroundColor: Color,
-    textColor: Color,
-    iconTint: Color = MaterialTheme.colorScheme.primary,
+    icon: androidx.compose.ui.graphics.painter.Painter,
+    iconTint: Color,
     modifier: Modifier = Modifier
 ) {
-    Column(modifier = modifier.fillMaxWidth()) {
-        // Section Header
+    Box(
+        modifier = modifier
+            .fillMaxWidth()
+            .height(60.dp)
+    ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -339,55 +351,9 @@ fun RatesSection(
                 color = NavyBlue
             )
         }
-        Spacer(modifier = Modifier.height(16.dp))
-
-        // CoverFlowCarousel of Rate Cards
-        if (rates.isNotEmpty()) {
-            // Box to contain the carousel
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(220.dp)  // Height appropriate for the cards
-                    .padding(vertical = 8.dp)
-            ) {
-                CoverFlowCarousel(
-                    items = rates,
-                    initialPageIndex = 3,
-                    itemWidth = 190.dp,
-                    itemHeight = 210.dp,
-                    minScale = 0.7f,
-                    centerScale = 1.05f,
-                    maxRotationY = 40f,
-                    minAlpha = 0.7f,
-                    maxElevation = 0.dp,
-                    minElevation = 0.dp,
-                    pageSpacing = (-20).dp
-                ) { rate, modifier, elevation ->
-                    AnimatedRateCard(
-                        rate = rate,
-                        codeToNameMap = codeToNameMap,
-                        backgroundColor = backgroundColor,
-                        textColor = textColor,
-                        modifier = modifier,
-                        elevation = elevation
-                    )
-                }
-            }
-        } else {
-            // Show message when no rates are available
-            Text(
-                text = "$title için veri bulunamadı.",
-                modifier = Modifier
-                    .padding(vertical = 8.dp)
-                    .fillMaxWidth(),
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                textAlign = TextAlign.Center
-            )
-        }
     }
 }
-
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun AnimatedRateCard(
     rate: ExchangeRate,
@@ -401,7 +367,7 @@ private fun AnimatedRateCard(
     val itemName = codeToNameMap[rate.code] ?: rate.code
 
     Card(
-        modifier = modifier,  // Use modifier from CoverFlowCarousel
+        modifier = modifier,
         elevation = CardDefaults.cardElevation(defaultElevation = elevation),
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(
@@ -416,7 +382,7 @@ private fun AnimatedRateCard(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            // Currency/Gold name
+
             Text(
                 text = itemName,
                 style = MaterialTheme.typography.titleMedium,
@@ -447,22 +413,18 @@ private fun AnimatedRateCard(
                 color = textColor.copy(alpha = 0.2f)
             )
 
-            // Buy/Sell info row
-           Column(
-               modifier = modifier.fillMaxWidth(),
-               horizontalAlignment = Alignment.CenterHorizontally,
-               verticalArrangement = Arrangement.SpaceEvenly
-           ) {
-               InfoColumn(label = "Alış   :", value = rate.alis, textColor = textColor)
-               InfoColumn(label = "Satış :", value = rate.satis, textColor = textColor)
-           }
 
-
-
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.SpaceEvenly
+            ) {
+                InfoColumn(label = "Alış   :", value = rate.alis, textColor = textColor)
+                InfoColumn(label = "Satış :", value = rate.satis, textColor = textColor)
+            }
         }
     }
 }
-
 
 @Composable
 private fun InfoColumn(
@@ -471,45 +433,34 @@ private fun InfoColumn(
     textColor: Color = MaterialTheme.colorScheme.onSurface,
     modifier: Modifier = Modifier
 ) {
-    // Create formatter with current locale
-    val formatter = remember {
-        val currentLocale = Locale.getDefault()
-        val symbols = DecimalFormatSymbols.getInstance(currentLocale)
-        DecimalFormat("#,##0.00", symbols)
+    val formattedValue = remember(value) {
+        ValueFormatter.format(value, ItemType.CURRENCY)
     }
 
-    // Format the value
-    val formattedValue = remember(value, formatter) {
-        formatDecimalValue(value, formatter)
+    Row(
+        modifier = modifier.fillMaxWidth().padding(horizontal = 8.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(4.dp)
+    ) {
+        Text(
+            text = label,
+            style = MaterialTheme.typography.bodyMedium,
+            fontWeight = FontWeight.Bold,
+            color = textColor.copy(alpha = 0.8f),
+            fontSize = 13.sp
+        )
+        Text(
+            text = "$formattedValue TL",
+            style = MaterialTheme.typography.bodySmall,
+            fontWeight = FontWeight.SemiBold,
+            color = textColor,
+            fontSize = 13.sp,
+            maxLines = 1
+        )
     }
-
-
-        Row(
-            modifier = modifier.fillMaxWidth().padding(horizontal = 8.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(4.dp)
-        ) {
-            Text(
-                text = label,
-                style = MaterialTheme.typography.bodyMedium,
-                fontWeight = FontWeight.Bold,
-                color = textColor.copy(alpha = 0.8f),
-                fontSize = 12.sp
-            )
-            Text(
-                text = "$formattedValue TL",
-                style = MaterialTheme.typography.bodySmall,
-                fontWeight = FontWeight.SemiBold,
-                color = textColor,
-                fontSize = 12.sp,
-                maxLines = 1
-            )
-        }
-
-
 }
 
-// CoverFlowCarousel implementation
+// Orijinal CoverFlowCarousel implementasyonu
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun <T> CoverFlowCarousel(
@@ -561,7 +512,7 @@ fun <T> CoverFlowCarousel(
         val rotationY =
             lerp(start = maxRotationY, stop = 0f, fraction = 1f - absOffset) * -pageOffset.coerceIn(
                 -1f,
-                1f
+                 1f
             )
         val alpha = lerp(start = minAlpha, stop = 1f, fraction = 1f - absOffset)
         val elevation = lerp(
@@ -594,8 +545,11 @@ private fun lerp(start: Float, stop: Float, fraction: Float): Float {
 }
 
 private fun lerp(start: Dp, stop: Dp, fraction: Float): Dp {
-    return Dp(start.value + (stop.value - start.value) * fraction)
+    return Dp(start.value + (stop.value - start.value) * fraction
+    )
 }
+
+
 
 @Composable
 fun GoldDayLotteryCard(
@@ -656,5 +610,3 @@ fun GoldDayLotteryCard(
         }
     }
 }
-
-
