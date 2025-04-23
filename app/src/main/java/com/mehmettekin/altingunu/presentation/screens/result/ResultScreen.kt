@@ -4,6 +4,7 @@ import android.Manifest
 import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.os.Build
+import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
@@ -518,16 +519,8 @@ private fun ResultsTable(
                             modifier = Modifier.weight(0.3f)
                         )
                         Spacer(Modifier.width(2.dp))
-                        val amountText = if (drawSettings != null) {
-                            ValueFormatter.formatWithSymbol(
-                                drawSettings.calculateAmountPerPerson().toString(),
-                                drawSettings.itemType,
-                                drawSettings.specificItem
-                            )
-                        } else {
-                            // Fallback to result.amount
-                            result.amount
-                        }
+                        val amountText =result.amount
+                        Log.d("ResultScreen", "Result amount: $amountText")
                         Text(
                             text = amountText,
                             style = MaterialTheme.typography.bodyMedium,

@@ -1,8 +1,6 @@
 package com.mehmettekin.altingunu.utils
 
 import com.mehmettekin.altingunu.domain.model.ItemType
-import java.text.DecimalFormat
-import java.text.DecimalFormatSymbols
 import java.text.NumberFormat
 import java.util.Locale
 
@@ -31,8 +29,12 @@ object ValueFormatter {
 
             // Format according to item type
             if (itemType == ItemType.GOLD) {
-                return parsedValue.toInt().toString()
+                // For gold, use integer with thousand separators
+                formatter.minimumFractionDigits = 0
+                formatter.maximumFractionDigits = 0
+                return formatter.format(parsedValue.toInt())
             } else {
+                // For currencies, ensure we always show 2 decimal places
                 formatter.minimumFractionDigits = 2
                 formatter.maximumFractionDigits = 2
                 return formatter.format(parsedValue)
@@ -48,9 +50,9 @@ object ValueFormatter {
         val formattedValue = format(value, itemType)
 
         return when (itemType) {
-            ItemType.TL -> "$formattedValue ₺"
-            ItemType.CURRENCY -> "$formattedValue ₺" // You could add symbol based on currency
-            ItemType.GOLD -> "$formattedValue Adet" // For gold, "Adet" means "pieces" in Turkish
+            ItemType.TL -> "$formattedValue TL"
+            ItemType.CURRENCY -> "$formattedValue TL"
+            ItemType.GOLD -> "$formattedValue TL"
         }
     }
 }

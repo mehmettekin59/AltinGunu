@@ -17,7 +17,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.navigation.NavController
 import com.mehmettekin.altingunu.presentation.navigation.Screen
-import com.mehmettekin.altingunu.ui.theme.Gold
+import com.mehmettekin.altingunu.ui.theme.NavyBlue
 import com.mehmettekin.altingunu.ui.theme.White
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -25,7 +25,7 @@ import com.mehmettekin.altingunu.ui.theme.White
 fun CommonTopAppBar(
     title: String,
     navController: NavController,
-    backgroundColor: Color = Gold,
+    backgroundColor: Color = NavyBlue,
     titleColor: Color = White,
     iconColor: Color = White,
     onBackPressed: (() -> Unit)? = null,

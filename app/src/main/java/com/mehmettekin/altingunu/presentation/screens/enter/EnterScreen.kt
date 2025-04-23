@@ -147,7 +147,7 @@ fun EnterScreen(
                             CoverFlowCarousel(
                                 items = filteredRates,
                                 initialPageIndex = minOf(3, filteredRates.size - 1),
-                                itemWidth = 190.dp,
+                                itemWidth = 200.dp,
                                 itemHeight = 210.dp,
                                 minScale = 0.7f,
                                 centerScale = 1.05f,
@@ -365,6 +365,11 @@ private fun AnimatedRateCard(
 ) {
     // Get item name from the map, or use code if not found
     val itemName = codeToNameMap[rate.code] ?: rate.code
+    val itemType = if (Constraints.goldCodeList.contains(rate.code)) {
+        ItemType.GOLD
+    } else {
+        ItemType.CURRENCY
+    }
 
     Card(
         modifier = modifier,
@@ -388,7 +393,7 @@ private fun AnimatedRateCard(
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold,
                 textAlign = TextAlign.Center,
-                maxLines = 1,
+                maxLines = 2,
                 color = textColor,
                 fontSize = 18.sp
             )
@@ -397,12 +402,12 @@ private fun AnimatedRateCard(
             rate.tarih.let {
                 Text(
                     text = "Son Güncelleme",
-                    style = MaterialTheme.typography.bodySmall,
+                    style = MaterialTheme.typography.bodyMedium,
                     color = textColor.copy(alpha = 0.7f)
                 )
                 Text(
                     text = it,
-                    style = MaterialTheme.typography.bodySmall,
+                    style = MaterialTheme.typography.bodyMedium,
                     color = textColor.copy(alpha = 0.7f)
                 )
             }
@@ -419,8 +424,8 @@ private fun AnimatedRateCard(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.SpaceEvenly
             ) {
-                InfoColumn(label = "Alış   :", value = rate.alis, textColor = textColor)
-                InfoColumn(label = "Satış :", value = rate.satis, textColor = textColor)
+                InfoColumn(label = "Alış   :", value = rate.alis, textColor = textColor, itemType = itemType, specificItem = rate.code)
+                InfoColumn(label = "Satış :", value = rate.satis, textColor = textColor, itemType = itemType, specificItem = rate.code)
             }
         }
     }
@@ -430,11 +435,13 @@ private fun AnimatedRateCard(
 private fun InfoColumn(
     label: String,
     value: String,
+    itemType: ItemType = ItemType.CURRENCY,
+    specificItem: String = "",
     textColor: Color = MaterialTheme.colorScheme.onSurface,
     modifier: Modifier = Modifier
 ) {
-    val formattedValue = remember(value) {
-        ValueFormatter.format(value, ItemType.CURRENCY)
+    val formattedValue = remember(value, itemType, specificItem) {
+        ValueFormatter.formatWithSymbol(value, itemType, specificItem)
     }
 
     Row(
@@ -447,14 +454,14 @@ private fun InfoColumn(
             style = MaterialTheme.typography.bodyMedium,
             fontWeight = FontWeight.Bold,
             color = textColor.copy(alpha = 0.8f),
-            fontSize = 13.sp
+            fontSize = 14.sp
         )
         Text(
-            text = "$formattedValue TL",
+            text = formattedValue,
             style = MaterialTheme.typography.bodySmall,
             fontWeight = FontWeight.SemiBold,
             color = textColor,
-            fontSize = 13.sp,
+            fontSize = 14.sp,
             maxLines = 1
         )
     }
@@ -589,8 +596,8 @@ fun GoldDayLotteryCard(
             Button(
                 onClick = onClick,
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = White,
-                    contentColor = Gold
+                    containerColor = NavyBlue,
+                    contentColor = White
                 ),
                 shape = RoundedCornerShape(8.dp),
                 modifier = Modifier.fillMaxWidth()

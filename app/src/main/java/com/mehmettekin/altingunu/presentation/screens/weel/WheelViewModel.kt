@@ -1,5 +1,6 @@
 package com.mehmettekin.altingunu.presentation.screens.weel
 
+import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -216,13 +217,15 @@ class WheelViewModel @Inject constructor(
         val results = mutableListOf<DrawResult>()
 
         val amountPerPerson = settings.calculateAmountPerPerson()
+        Log.d("WheelViewModel", "ItemType: ${settings.itemType}, SpecificItem: ${settings.specificItem}")
+
 
         val formattedAmount = ValueFormatter.formatWithSymbol(
             amountPerPerson.toString(),
             settings.itemType,
             settings.specificItem
         )
-
+        Log.d("WheelViewModel", "Formatted amount: $formattedAmount")
         // Starting month and year
         val calendar = Calendar.getInstance()
         calendar.set(Calendar.YEAR, settings.startYear)

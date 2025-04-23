@@ -2,6 +2,7 @@ package com.mehmettekin.altingunu.presentation.screens.participants
 
 
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.mehmettekin.altingunu.domain.model.ItemType
@@ -105,6 +106,7 @@ class ParticipantsViewModel @Inject constructor(
     }
 
     private fun handleItemTypeSelect(type: ItemType) {
+        Log.d("ParticipantsViewModel", "Selected ItemType: $type")
         _state.update { it.copy(
             selectedItemType = type,
             // Reset specific item when type changes

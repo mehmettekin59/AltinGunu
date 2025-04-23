@@ -237,7 +237,7 @@ fun ParticipantsContent(
         Button(
             onClick = { onEvent(ParticipantsEvent.OnContinueClick) },
             colors = ButtonDefaults.buttonColors(
-                containerColor = Gold,
+                containerColor = NavyBlue,
                 contentColor = White
             ),
             shape = RoundedCornerShape(8.dp),
@@ -747,7 +747,7 @@ fun ParticipantsSection(
                                 Icon(
                                     imageVector = Icons.Default.Delete,
                                     contentDescription = "Sil",
-                                    tint = Color.Red.copy(alpha = 0.7f)
+                                    tint = Gold
                                 )
                             }
                         }
