@@ -4,13 +4,13 @@ import android.Manifest
 import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.os.Build
-import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
@@ -226,7 +226,9 @@ private fun EmptyResultsView(
             onClick = onRestartClick,
             colors = ButtonDefaults.buttonColors(
                 containerColor = NavyBlue
-            )
+            ),
+            shape = RoundedCornerShape(8.dp),
+            modifier = Modifier.fillMaxWidth()
         ) {
             Icon(
                 imageVector = Icons.Default.Refresh,
@@ -279,7 +281,9 @@ private fun ResultsContent(
             colors = ButtonDefaults.buttonColors(
                 containerColor = NavyBlue
             ),
-            modifier = Modifier.fillMaxWidth(0.8f)
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(8.dp),
+
         ) {
             Icon(
                 imageVector = Icons.Default.Refresh,

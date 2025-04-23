@@ -13,7 +13,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
-import androidx.compose.material.icons.filled.Save
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -286,10 +285,11 @@ private fun ControlButtons(
         Button(
             onClick = { viewModel.spinWheel() },
             enabled = canSpin,
-            modifier = Modifier.padding(4.dp),
+            modifier = Modifier.weight(1f).padding(4.dp),
             colors = ButtonDefaults.buttonColors(
                 containerColor = Gold
-            )
+            ),
+            shape = RoundedCornerShape(8.dp)
         ) {
             Text("Çarkı Çevir")
         }
@@ -299,7 +299,8 @@ private fun ControlButtons(
             colors = ButtonDefaults.buttonColors(
                 containerColor = NavyBlue
             ),
-            modifier = Modifier.padding(4.dp)
+            shape = RoundedCornerShape(8.dp),
+            modifier = Modifier.weight(1f).padding(4.dp)
         ) {
             Text("Yeniden Başlat")
         }

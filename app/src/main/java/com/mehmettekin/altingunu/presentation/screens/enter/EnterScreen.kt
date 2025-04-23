@@ -457,7 +457,7 @@ private fun InfoColumn(
             fontSize = 14.sp
         )
         Text(
-            text = formattedValue,
+            text = "$formattedValue TL",
             style = MaterialTheme.typography.bodySmall,
             fontWeight = FontWeight.SemiBold,
             color = textColor,
