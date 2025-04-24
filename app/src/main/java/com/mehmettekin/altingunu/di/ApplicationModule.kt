@@ -7,10 +7,6 @@ import com.mehmettekin.altingunu.data.repository.UserPreferencesRepositoryImpl
 import com.mehmettekin.altingunu.domain.repository.DrawRepository
 import com.mehmettekin.altingunu.domain.repository.KapaliCarsiRepository
 import com.mehmettekin.altingunu.domain.repository.UserPreferencesRepository
-import com.mehmettekin.altingunu.domain.usecase.GetCurrentRateUseCase
-import com.mehmettekin.altingunu.domain.usecase.ValidateDrawSettingsUseCase
-import com.mehmettekin.altingunu.domain.usecase.ValidateParticipantsUseCase
-import com.mehmettekin.altingunu.presentation.screens.enter.KapaliCarsiViewModel
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import dagger.Binds
@@ -24,8 +20,6 @@ import kotlinx.coroutines.SupervisorJob
 import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
 import javax.inject.Singleton
-
-
 
 @Module
 @InstallIn(SingletonComponent::class)
@@ -59,30 +53,13 @@ abstract class ApplicationModule {
                 .create(KapaliCarsiApi::class.java)
         }
 
+
+
         @Provides
         @Singleton
         fun provideApplicationCoroutineScope(): CoroutineScope {
             return CoroutineScope(SupervisorJob() + Dispatchers.IO)
         }
-
-        @Provides
-        @Singleton
-        fun provideValidateDrawSettingsUseCase(): ValidateDrawSettingsUseCase {
-            return ValidateDrawSettingsUseCase()
-        }
-
-        @Provides
-        @Singleton
-        fun provideValidateParticipantsUseCase(): ValidateParticipantsUseCase {
-            return ValidateParticipantsUseCase()
-        }
-
-        @Provides
-        @Singleton
-        fun provideGetCurrentRateUseCase(kapaliCarsiViewModel: KapaliCarsiViewModel): GetCurrentRateUseCase {
-            return GetCurrentRateUseCase(kapaliCarsiViewModel)
-        }
-
     }
 }
 

@@ -26,15 +26,17 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.mehmettekin.altingunu.domain.model.DrawResult
+import com.mehmettekin.altingunu.domain.model.ExchangeRate
 import com.mehmettekin.altingunu.domain.model.ItemType
 import com.mehmettekin.altingunu.domain.model.ParticipantsScreenWholeInformation
-import com.mehmettekin.altingunu.domain.usecase.GetCurrentRateUseCase
 import com.mehmettekin.altingunu.presentation.navigation.Screen
 import com.mehmettekin.altingunu.presentation.screens.common.CommonTopAppBar
+import com.mehmettekin.altingunu.presentation.screens.enter.KapaliCarsiViewModel
 import com.mehmettekin.altingunu.ui.theme.Gold
 import com.mehmettekin.altingunu.ui.theme.NavyBlue
 import com.mehmettekin.altingunu.ui.theme.White
 import com.mehmettekin.altingunu.utils.Constraints
+import com.mehmettekin.altingunu.utils.ResultState
 import com.mehmettekin.altingunu.utils.ValueFormatter
 import kotlinx.coroutines.launch
 
@@ -42,8 +44,7 @@ import kotlinx.coroutines.launch
 @Composable
 fun ResultScreen(
     navController: NavController,
-    viewModel: ResultsViewModel = hiltViewModel(),
-    getCurrentRateUseCase: GetCurrentRateUseCase = hiltViewModel<ResultsViewModel>().getCurrentRateUseCase
+    viewModel: ResultsViewModel = hiltViewModel()
 ) {
     val context = LocalContext.current
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -111,19 +112,17 @@ fun ResultScreen(
                 actions = {
                     // PDF görüntüleme butonu
                     IconButton(onClick = {
-                        coroutineScope.launch {
-                            val pdfUri = viewModel.createPdf(context)
-                            pdfUri?.let {
-                                val intent = Intent(Intent.ACTION_VIEW).apply {
-                                    setDataAndType(it, "application/pdf")
-                                    addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-                                }
-                                try {
-                                    pdfViewerLauncher.launch(intent)
-                                } catch (e: ActivityNotFoundException) {
-                                    coroutineScope.launch {
-                                        snackbarHostState.showSnackbar("PDF görüntüleyici bulunamadı.")
-                                    }
+                        val pdfUri = viewModel.createPdf(context)
+                        pdfUri?.let {
+                            val intent = Intent(Intent.ACTION_VIEW).apply {
+                                setDataAndType(it, "application/pdf")
+                                addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                            }
+                            try {
+                                pdfViewerLauncher.launch(intent)
+                            } catch (e: ActivityNotFoundException) {
+                                coroutineScope.launch {
+                                    snackbarHostState.showSnackbar("PDF görüntüleyici bulunamadı.")
                                 }
                             }
                         }
@@ -152,9 +151,7 @@ fun ResultScreen(
 
                     // Share results button
                     IconButton(onClick = {
-                        coroutineScope.launch {
-                            viewModel.createPdf(context)
-                        }
+                        viewModel.createPdf(context)
                     }) {
                         Icon(
                             imageVector = Icons.Default.Share,
@@ -192,9 +189,9 @@ fun ResultScreen(
         } else {
             // Display results
             ResultsContent(
+                viewModel = viewModel,
                 results = state.results,
                 drawSettings = state.drawSettings,
-                getCurrentRateUseCase = getCurrentRateUseCase,
                 onRestartClick = {
                     viewModel.restart()
                     navController.navigate(Screen.Participants.route) {
@@ -250,9 +247,9 @@ private fun EmptyResultsView(
 
 @Composable
 private fun ResultsContent(
+    viewModel: ResultsViewModel,
     results: List<DrawResult>,
     drawSettings: ParticipantsScreenWholeInformation?,
-    getCurrentRateUseCase: GetCurrentRateUseCase,
     onRestartClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -262,10 +259,7 @@ private fun ResultsContent(
     ) {
         // Settings summary
         drawSettings?.let { settings ->
-            ResultsSettingsSummary(
-                settings = settings,
-                getCurrentRateUseCase = getCurrentRateUseCase
-            )
+            ResultsSettingsSummary(settings = settings, resultsViewModel = viewModel)
 
             Spacer(modifier = Modifier.height(24.dp))
         }
@@ -310,27 +304,11 @@ private fun ResultsContent(
 @Composable
 private fun ResultsSettingsSummary(
     settings: ParticipantsScreenWholeInformation,
-    getCurrentRateUseCase: GetCurrentRateUseCase,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    resultsViewModel: ResultsViewModel
 ) {
-    val coroutineScope = rememberCoroutineScope()
 
-    // State to hold the current rate
-    var currentRate by remember { mutableStateOf<String?>(null) }
-    var isLoadingRate by remember { mutableStateOf(false) }
-
-    // Fetch the current rate if needed
-    LaunchedEffect(settings) {
-        if ((settings.itemType == ItemType.CURRENCY || settings.itemType == ItemType.GOLD)
-            && settings.specificItem.isNotBlank()) {
-
-            isLoadingRate = true
-            coroutineScope.launch {
-                currentRate = getCurrentRateUseCase(settings.itemType, settings.specificItem)
-                isLoadingRate = false
-            }
-        }
-    }
+    val exchangeRatesState by resultsViewModel.exchangeRates.collectAsStateWithLifecycle()
 
     Card(
         modifier = modifier.fillMaxWidth(),
@@ -456,33 +434,12 @@ private fun ResultsSettingsSummary(
                 )
             }
 
-            // Display the saved price from when the participants were added
-            if (settings.currentFormattedPrice != null) {
-                Spacer(modifier = Modifier.height(4.dp))
-
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    Text(
-                        text = "Kayıt Anındaki Fiyat:",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = Color.Gray
-                    )
-
-                    Text(
-                        text = settings.currentFormattedPrice,
-                        style = MaterialTheme.typography.bodyMedium,
-                        fontWeight = FontWeight.SemiBold,
-                        color = NavyBlue
-                    )
-                }
-            }
-
-            // Display current price if relevant and available
+            // Seçilen spesifik öğenin güncel fiyatını göstermek için
+            val specificItemCode = settings.specificItem
             if ((settings.itemType == ItemType.CURRENCY || settings.itemType == ItemType.GOLD)
-                && settings.specificItem.isNotBlank()
+                && specificItemCode.isNotBlank()
             ) {
+
                 Spacer(modifier = Modifier.height(4.dp))
 
                 Row(
@@ -495,28 +452,59 @@ private fun ResultsSettingsSummary(
                         color = Color.Gray
                     )
 
-                    if (isLoadingRate) {
-                        // Show loading indicator
-                        CircularProgressIndicator(
-                            modifier = Modifier.size(16.dp),
-                            strokeWidth = 1.5.dp,
-                            color = Gold
-                        )
-                    } else if (currentRate != null) {
-                        // Show the rate
-                        Text(
-                            text = currentRate!!,
-                            style = MaterialTheme.typography.bodyMedium,
-                            fontWeight = FontWeight.SemiBold,
-                            color = NavyBlue
-                        )
-                    } else {
-                        // Show error or not available message
-                        Text(
-                            text = "Fiyat bulunamadı",
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = Color.Gray
-                        )
+                    when (exchangeRatesState) {
+                        is ResultState.Success -> {
+                            val rates =
+                                (exchangeRatesState as ResultState.Success<List<ExchangeRate>>).data
+                            val exchangeRate = rates.find { it.code == specificItemCode }
+
+                            if (exchangeRate != null) {
+                                val formattedValue = remember(exchangeRate.satis, settings.itemType, specificItemCode) {
+                                    ValueFormatter.formatWithSymbol(
+                                        exchangeRate.satis,
+                                        settings.itemType,
+                                        specificItemCode
+                                    )
+                                }
+
+                                Text(
+                                    text = "$formattedValue TL",
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    fontWeight = FontWeight.SemiBold,
+                                    color = NavyBlue
+                                )
+                            } else {
+                                Text(
+                                    text = "Fiyat bulunamadı",
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = Color.Gray
+                                )
+                            }
+                        }
+
+                        is ResultState.Loading -> {
+                            CircularProgressIndicator(
+                                modifier = Modifier.size(16.dp),
+                                strokeWidth = 1.5.dp,
+                                color = Gold
+                            )
+                        }
+
+                        is ResultState.Error -> {
+                            Text(
+                                text = "Fiyat alınamadı",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = Color.Red
+                            )
+                        }
+
+                        is ResultState.Idle -> {
+                            Text(
+                                text = "Veri bekleniyor",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = Color.Gray
+                            )
+                        }
                     }
                 }
             }
