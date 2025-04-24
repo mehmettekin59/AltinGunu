@@ -31,8 +31,8 @@ object ValueFormatter {
             if (itemType == ItemType.GOLD) {
                 // For gold, use integer with thousand separators
                 formatter.minimumFractionDigits = 0
-                formatter.maximumFractionDigits = 0
-                return formatter.format(parsedValue.toInt())
+                formatter.maximumFractionDigits = 2
+                return formatter.format(parsedValue)
             } else {
                 // For currencies, ensure we always show 2 decimal places
                 formatter.minimumFractionDigits = 2

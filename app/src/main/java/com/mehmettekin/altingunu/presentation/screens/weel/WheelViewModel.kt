@@ -217,7 +217,6 @@ class WheelViewModel @Inject constructor(
         val results = mutableListOf<DrawResult>()
 
         val amountPerPerson = settings.calculateAmountPerPerson()
-        Log.d("WheelViewModel", "ItemType: ${settings.itemType}, SpecificItem: ${settings.specificItem}")
 
 
         val formattedAmount = ValueFormatter.formatWithSymbol(
@@ -225,7 +224,7 @@ class WheelViewModel @Inject constructor(
             settings.itemType,
             settings.specificItem
         )
-        Log.d("WheelViewModel", "Formatted amount: $formattedAmount")
+
         // Starting month and year
         val calendar = Calendar.getInstance()
         calendar.set(Calendar.YEAR, settings.startYear)

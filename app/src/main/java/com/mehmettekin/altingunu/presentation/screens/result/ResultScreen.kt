@@ -26,14 +26,17 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.mehmettekin.altingunu.domain.model.DrawResult
+import com.mehmettekin.altingunu.domain.model.ExchangeRate
 import com.mehmettekin.altingunu.domain.model.ItemType
 import com.mehmettekin.altingunu.domain.model.ParticipantsScreenWholeInformation
 import com.mehmettekin.altingunu.presentation.navigation.Screen
 import com.mehmettekin.altingunu.presentation.screens.common.CommonTopAppBar
+import com.mehmettekin.altingunu.presentation.screens.enter.KapaliCarsiViewModel
 import com.mehmettekin.altingunu.ui.theme.Gold
 import com.mehmettekin.altingunu.ui.theme.NavyBlue
 import com.mehmettekin.altingunu.ui.theme.White
 import com.mehmettekin.altingunu.utils.Constraints
+import com.mehmettekin.altingunu.utils.ResultState
 import com.mehmettekin.altingunu.utils.ValueFormatter
 import kotlinx.coroutines.launch
 
@@ -284,7 +287,7 @@ private fun ResultsContent(
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(8.dp),
 
-        ) {
+            ) {
             Icon(
                 imageVector = Icons.Default.Refresh,
                 contentDescription = null,
@@ -301,6 +304,10 @@ private fun ResultsSettingsSummary(
     settings: ParticipantsScreenWholeInformation,
     modifier: Modifier = Modifier
 ) {
+    // KapaliCarsiViewModel'i direkt burada çağırıyoruz
+    val kapaliCarsiViewModel: KapaliCarsiViewModel = hiltViewModel()
+    val exchangeRatesState by kapaliCarsiViewModel.exchangeRates.collectAsStateWithLifecycle()
+
     Card(
         modifier = modifier.fillMaxWidth(),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
@@ -336,11 +343,14 @@ private fun ResultsSettingsSummary(
                 val itemTypeText = when (settings.itemType) {
                     ItemType.TL -> "TL"
                     ItemType.CURRENCY -> {
-                        val currencyName = Constraints.currencyCodeToName[settings.specificItem] ?: settings.specificItem
+                        val currencyName = Constraints.currencyCodeToName[settings.specificItem]
+                            ?: settings.specificItem
                         "Döviz ($currencyName)"
                     }
+
                     ItemType.GOLD -> {
-                        val goldName = Constraints.goldCodeToName[settings.specificItem] ?: settings.specificItem
+                        val goldName = Constraints.goldCodeToName[settings.specificItem]
+                            ?: settings.specificItem
                         "Altın ($goldName)"
                     }
                 }
@@ -365,7 +375,6 @@ private fun ResultsSettingsSummary(
                     style = MaterialTheme.typography.bodyMedium,
                     color = Color.Gray
                 )
-
 
                 val formattedAmount = ValueFormatter.formatWithSymbol(
                     settings.calculateAmountPerPerson().toString(),
@@ -421,6 +430,81 @@ private fun ResultsSettingsSummary(
                     fontWeight = FontWeight.SemiBold,
                     color = NavyBlue
                 )
+            }
+
+            // Seçilen spesifik öğenin güncel fiyatını göstermek için
+            val specificItemCode = settings.specificItem
+            if ((settings.itemType == ItemType.CURRENCY || settings.itemType == ItemType.GOLD)
+                && specificItemCode.isNotBlank()
+            ) {
+
+                Spacer(modifier = Modifier.height(4.dp))
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Text(
+                        text = "Güncel Birim Fiyat:",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = Color.Gray
+                    )
+
+                    when (exchangeRatesState) {
+                        is ResultState.Success -> {
+                            val rates =
+                                (exchangeRatesState as ResultState.Success<List<ExchangeRate>>).data
+                            val exchangeRate = rates.find { it.code == specificItemCode }
+
+                            if (exchangeRate != null) {
+                                val formattedValue = remember(exchangeRate.satis, settings.itemType, specificItemCode) {
+                                    ValueFormatter.formatWithSymbol(
+                                        exchangeRate.satis,
+                                        settings.itemType,
+                                        specificItemCode
+                                    )
+                                }
+
+                                Text(
+                                    text = "$formattedValue TL",
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    fontWeight = FontWeight.SemiBold,
+                                    color = NavyBlue
+                                )
+                            } else {
+                                Text(
+                                    text = "Fiyat bulunamadı",
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = Color.Gray
+                                )
+                            }
+                        }
+
+                        is ResultState.Loading -> {
+                            CircularProgressIndicator(
+                                modifier = Modifier.size(16.dp),
+                                strokeWidth = 1.5.dp,
+                                color = Gold
+                            )
+                        }
+
+                        is ResultState.Error -> {
+                            Text(
+                                text = "Fiyat alınamadı",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = Color.Red
+                            )
+                        }
+
+                        is ResultState.Idle -> {
+                            Text(
+                                text = "Veri bekleniyor",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = Color.Gray
+                            )
+                        }
+                    }
+                }
             }
         }
     }
