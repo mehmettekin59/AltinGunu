@@ -1,6 +1,7 @@
 package com.mehmettekin.altingunu.data.repository
 
 
+import android.util.Log
 import com.mehmettekin.altingunu.data.local.DrawResultsDataStore
 import com.mehmettekin.altingunu.domain.model.DrawResult
 import com.mehmettekin.altingunu.domain.model.Participant
@@ -42,9 +43,11 @@ class DrawRepositoryImpl @Inject constructor(
 
     override suspend fun saveDrawSettings(settings: ParticipantsScreenWholeInformation): ResultState<Unit> {
         return try {
+            Log.d("PriceDebug", "Saving draw settings with price: ${settings.currentFormattedPrice}")
             drawResultsDataStore.saveDrawSettings(settings)
             ResultState.Success(Unit)
         } catch (e: Exception) {
+            Log.e("PriceDebug", "Error saving settings: ${e.message}", e)
             ResultState.Error(UiText.dynamicString("Error saving draw settings: ${e.message}"))
         }
     }

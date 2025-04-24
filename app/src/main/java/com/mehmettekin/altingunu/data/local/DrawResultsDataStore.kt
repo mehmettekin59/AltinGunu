@@ -1,6 +1,7 @@
 package com.mehmettekin.altingunu.data.local
 
 import android.content.Context
+import android.util.Log
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import com.mehmettekin.altingunu.di.drawResultsDataStore
@@ -60,6 +61,7 @@ class DrawResultsDataStore @Inject constructor(
 
     // Participants operations
     suspend fun saveParticipants(participants: List<Participant>) {
+
         context.drawResultsDataStore.edit { preferences ->
             preferences[participantsKey] = participantsAdapter.toJson(participants)
         }
@@ -74,6 +76,7 @@ class DrawResultsDataStore @Inject constructor(
 
     // Draw Settings operations
     suspend fun saveDrawSettings(settings: ParticipantsScreenWholeInformation) {
+        Log.d("PriceDebug", "DataStore saving settings with price: ${settings.currentFormattedPrice}")
         context.drawResultsDataStore.edit { preferences ->
             preferences[drawSettingsKey] = drawSettingsAdapter.toJson(settings)
         }
@@ -82,7 +85,8 @@ class DrawResultsDataStore @Inject constructor(
     suspend fun getDrawSettings(): ParticipantsScreenWholeInformation? {
         return context.drawResultsDataStore.data.map { preferences ->
             val json = preferences[drawSettingsKey] ?: return@map null
-            drawSettingsAdapter.fromJson(json)
+           drawSettingsAdapter.fromJson(json)
+
         }.first()
     }
 }

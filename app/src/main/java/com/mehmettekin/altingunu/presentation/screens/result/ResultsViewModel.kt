@@ -17,7 +17,7 @@ import androidx.lifecycle.viewModelScope
 import com.mehmettekin.altingunu.domain.model.ItemType
 import com.mehmettekin.altingunu.domain.model.ParticipantsScreenWholeInformation
 import com.mehmettekin.altingunu.domain.repository.DrawRepository
-import com.mehmettekin.altingunu.domain.repository.KapaliCarsiRepository
+import com.mehmettekin.altingunu.domain.usecase.GetCurrentRateUseCase
 import com.mehmettekin.altingunu.utils.Constraints
 import com.mehmettekin.altingunu.utils.ResultState
 import com.mehmettekin.altingunu.utils.UiText
@@ -27,7 +27,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import java.io.File
 import java.io.FileOutputStream
@@ -39,8 +38,7 @@ import javax.inject.Inject
 @HiltViewModel
 class ResultsViewModel @Inject constructor(
     private val drawRepository: DrawRepository,
-    private val kapaliCarsiRepository: KapaliCarsiRepository
-
+    internal val getCurrentRateUseCase: GetCurrentRateUseCase
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(ResultsState())
@@ -116,7 +114,7 @@ class ResultsViewModel @Inject constructor(
         }
     }
 
-    fun createPdf(context: Context): Uri? {
+    suspend fun createPdf(context: Context): Uri? {
         val results = _state.value.results
         val settings = _state.value.drawSettings
 
@@ -127,30 +125,11 @@ class ResultsViewModel @Inject constructor(
             return null
         }
 
-        // Spesifik ürün için güncel fiyat bilgisini al
-        val specificItemCode = settings.specificItem
-        var currentPrice: String? = null
+        // Get current rate using the use case - this is a suspend function
+        var currentFormattedPrice: String? = null
         if ((settings.itemType == ItemType.CURRENCY || settings.itemType == ItemType.GOLD)
-            && specificItemCode.isNotBlank()) {
-
-            // Use a viewModelScope to fetch data from repository
-            viewModelScope.launch {
-                try {
-                    val exchangeRatesState = kapaliCarsiRepository.getExchangeRates().first()
-                    if (exchangeRatesState is ResultState.Success) {
-                        val exchangeRate = exchangeRatesState.data.find { it.code == specificItemCode }
-                        if (exchangeRate != null) {
-                            currentPrice = ValueFormatter.formatWithSymbol(
-                                exchangeRate.satis,
-                                settings.itemType,
-                                specificItemCode
-                            )
-                        }
-                    }
-                } catch (e: Exception) {
-                    // Handle any errors
-                }
-            }
+            && settings.specificItem.isNotBlank()) {
+            currentFormattedPrice = getCurrentRateUseCase(settings.itemType, settings.specificItem)
         }
 
         // Create a PDF document
@@ -183,11 +162,7 @@ class ResultsViewModel @Inject constructor(
         paint.typeface = Typeface.create(Typeface.DEFAULT, Typeface.NORMAL)
 
         // Format the item type
-        val itemTypeText = if (settings != null) {
-            getItemTypeText(settings)
-        } else {
-            "Bilinmiyor"
-        }
+        val itemTypeText = getItemTypeText(settings)
 
         canvas.drawText("Değer Türü: $itemTypeText", 50f, settingsInfoY, paint)
         val formattedAmount = ValueFormatter.formatWithSymbol(
@@ -199,10 +174,18 @@ class ResultsViewModel @Inject constructor(
         canvas.drawText("Toplam Süre: ${settings.durationMonths} ay", 50f, settingsInfoY + 40, paint)
         canvas.drawText("Katılımcı Sayısı: ${settings.participantCount}", 50f, settingsInfoY + 60, paint)
 
-        // Güncel birim fiyatını göster (eğer varsa)
+        // Güncel ve kayıt anındaki fiyat bilgilerini göster
         var nextY = settingsInfoY + 80
-        if (currentPrice != null) {
-            canvas.drawText("Güncel Birim Fiyat: $currentPrice", 50f, nextY, paint)
+
+        // Display the saved price at the time of setup
+        if (settings.currentFormattedPrice != null) {
+            canvas.drawText("Kayıt Anındaki Fiyat: ${settings.currentFormattedPrice}", 50f, nextY, paint)
+            nextY += 20 // Bir sonraki satır için Y pozisyonunu güncelle
+        }
+
+        // Display current price if available from the use case
+        if (currentFormattedPrice != null) {
+            canvas.drawText("Güncel Birim Fiyat: $currentFormattedPrice", 50f, nextY, paint)
             nextY += 20 // Bir sonraki satır için Y pozisyonunu güncelle
         }
 
@@ -236,12 +219,7 @@ class ResultsViewModel @Inject constructor(
             canvas.drawText("${index + 1}", 50f, y, paint)
             canvas.drawText(result.participantName, 100f, y, paint)
             canvas.drawText(result.month, 250f, y, paint)
-            val formattedAmount = ValueFormatter.formatWithSymbol(
-                settings.calculateAmountPerPerson().toString(),
-                settings.itemType,
-                settings.specificItem
-            )
-            canvas.drawText(formattedAmount, 400f, y, paint)
+            canvas.drawText(result.amount, 400f, y, paint)
 
             y += 30
 
@@ -285,161 +263,23 @@ class ResultsViewModel @Inject constructor(
             return null
         }
     }
-    /*
-    fun createPdf(context: Context): Uri? {
-        val results = _state.value.results
-        val settings = _state.value.drawSettings
 
-        if (results.isEmpty() || settings == null) {
-            _state.value = _state.value.copy(
-                error = UiText.dynamicString("Sonuçlar veya ayarlar bulunamadı")
-            )
-            return null
-        }
-
-        // Create a PDF document
-        val document = PdfDocument()
-
-        // Page info
-        val pageInfo = PdfDocument.PageInfo.Builder(595, 842, 1).create() // A4 size in points
-        val page = document.startPage(pageInfo)
-        var canvas = page.canvas
-
-        // Set up paint for drawing
-        val paint = Paint().apply {
-            color = Color.BLACK
-            textSize = 12f
-        }
-
-        // Title
-        val titlePaint = Paint().apply {
-            color = Color.BLACK
-            textSize = 20f
-            typeface = Typeface.create(Typeface.DEFAULT, Typeface.BOLD)
-        }
-
-        // Draw title
-        canvas.drawText("Altın Günü Çekilişi Sonuçları", 50f, 50f, titlePaint)
-
-        // Draw settings info
-        val settingsInfoY = 80f
-        paint.textSize = 12f
-        paint.typeface = Typeface.create(Typeface.DEFAULT, Typeface.NORMAL)
-
-        // Format the item type
-        val itemTypeText = if (settings != null) {
-            getItemTypeText(settings)
-        } else {
-            "Bilinmiyor"
-        }
-
-        canvas.drawText("Değer Türü: $itemTypeText", 50f, settingsInfoY, paint)
-        val formattedAmount = ValueFormatter.formatWithSymbol(
-            settings.calculateAmountPerPerson().toString(),
-            settings.itemType,
-            settings.specificItem
-        )
-        canvas.drawText("Aylık Miktar: $formattedAmount", 50f, settingsInfoY + 20, paint)
-        canvas.drawText("Toplam Süre: ${settings.durationMonths} ay", 50f, settingsInfoY + 40, paint)
-        canvas.drawText("Katılımcı Sayısı: ${settings.participantCount}", 50f, settingsInfoY + 60, paint)
-
-        // Format current date
-        val currentDate = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(Date())
-        canvas.drawText("Oluşturulma Tarihi: $currentDate", 50f, settingsInfoY + 80, paint)
-
-        // Draw table header
-        val headerY = settingsInfoY + 120
-        val tableHeaderPaint = Paint().apply {
-            color = Color.BLACK
-            textSize = 14f
-            typeface = Typeface.create(Typeface.DEFAULT, Typeface.BOLD)
-        }
-
-        canvas.drawText("Sıra", 50f, headerY, tableHeaderPaint)
-        canvas.drawText("İsim", 100f, headerY, tableHeaderPaint)
-        canvas.drawText("Ay", 250f, headerY, tableHeaderPaint)
-        canvas.drawText("Miktar", 400f, headerY, tableHeaderPaint)
-
-        // Draw horizontal line
-        val linePaint = Paint().apply {
-            color = Color.GRAY
-            strokeWidth = 1f
-        }
-        canvas.drawLine(50f, headerY + 10, 550f, headerY + 10, linePaint)
-
-        // Draw results
-        var y = headerY + 40
-        results.forEachIndexed { index, result ->
-            canvas.drawText("${index + 1}", 50f, y, paint)
-            canvas.drawText(result.participantName, 100f, y, paint)
-            canvas.drawText(result.month, 250f, y, paint)
-            val formattedAmount = ValueFormatter.formatWithSymbol(
-                settings.calculateAmountPerPerson().toString(),
-                settings.itemType,
-                settings.specificItem
-            )
-            canvas.drawText(formattedAmount, 400f, y, paint)
-
-            y += 30
-
-            // Add a page break if needed
-            if (y > 800) {
-                document.finishPage(page)
-                val newPageInfo = PdfDocument.PageInfo.Builder(595, 842, document.pages.size + 1).create()
-                val newPage = document.startPage(newPageInfo)
-                canvas = newPage.canvas
-                y = 50.toFloat()
-            }
-        }
-
-        // Finish the page
-        document.finishPage(page)
-
-        try {
-            // Create a file to write the PDF
-            val fileName = "altin_gunu_cekilisi_${currentDate.replace("/", "")}.pdf"
-            val file = File(context.filesDir, fileName)
-            val fos = FileOutputStream(file)
-
-            document.writeTo(fos)
-            document.close()
-            fos.close()
-
-            // Get a content URI for the file
-            val authority = "${context.packageName}.fileprovider"
-            val uri = FileProvider.getUriForFile(context, authority, file)
-
-            _state.value = _state.value.copy(
-                pdfUri = uri
-            )
-
-            return uri
-        } catch (e: Exception) {
-            _state.value = _state.value.copy(
-                error = UiText.dynamicString("PDF oluşturulurken hata: ${e.message}")
-            )
-            document.close()
-            return null
-        }
-    } */
-
-    // PDF'yi indirilenler klasörüne kaydetme
     fun savePdfToDownloads(context: Context) {
         viewModelScope.launch {
             try {
                 _state.value = _state.value.copy(isLoading = true)
 
-                // Önce normal PDF URI oluştur
+                // Generate PDF with current price information using the use case
                 val uri = createPdf(context)
 
                 if (uri != null) {
-                    // Dosya adını oluştur
+                    // Create filename with timestamp for uniqueness
                     val currentDate = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(Date())
                     val fileName = "altin_gunu_cekilisi_$currentDate.pdf"
 
-                    // Downloads klasörüne kaydet
+                    // Handle different Android versions differently
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                        // Android 10+ için MediaStore API kullan
+                        // Android 10+ using MediaStore API
                         val contentValues = ContentValues().apply {
                             put(MediaStore.Downloads.DISPLAY_NAME, fileName)
                             put(MediaStore.Downloads.MIME_TYPE, "application/pdf")
@@ -452,39 +292,41 @@ class ResultsViewModel @Inject constructor(
 
                         if (pdfUri != null) {
                             contentResolver.openOutputStream(pdfUri)?.use { outputStream ->
-                                // Orijinal PDF içeriğini oku
-                                val inputStream = context.contentResolver.openInputStream(uri)
-                                inputStream?.use { input ->
+                                // Copy from the temporary file to the MediaStore location
+                                context.contentResolver.openInputStream(uri)?.use { input ->
                                     input.copyTo(outputStream)
                                 }
                             }
 
+                            // Update the IS_PENDING flag to make the file visible
                             contentValues.clear()
                             contentValues.put(MediaStore.Downloads.IS_PENDING, 0)
                             contentResolver.update(pdfUri, contentValues, null, null)
 
-                            // Kullanıcıya bildir
+                            // Update state with success message
                             _state.value = _state.value.copy(
                                 isLoading = false,
                                 message = UiText.dynamicString("PDF indirilenler klasörüne kaydedildi: $fileName")
                             )
+                        } else {
+                            _state.value = _state.value.copy(
+                                isLoading = false,
+                                error = UiText.dynamicString("PDF'i kaydedemedi: MediaStore URI oluşturulamadı")
+                            )
                         }
                     } else {
-                        // Android 9 ve altı için doğrudan Downloads klasörüne kaydet
+                        // Pre-Android 10 using direct file access
                         val downloadsDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
                         val file = File(downloadsDir, fileName)
 
-                        // Orijinal PDF içeriğini oku ve kaydet
-                        val inputStream = context.contentResolver.openInputStream(uri)
-                        val outputStream = FileOutputStream(file)
-
-                        inputStream?.use { input ->
-                            outputStream.use { output ->
-                                input.copyTo(output)
+                        // Create output stream and copy file contents
+                        FileOutputStream(file).use { outputStream ->
+                            context.contentResolver.openInputStream(uri)?.use { input ->
+                                input.copyTo(outputStream)
                             }
                         }
 
-                        // MediaStore'u güncelle
+                        // Notify MediaScanner about the new file so it appears in Downloads
                         MediaScannerConnection.scanFile(
                             context,
                             arrayOf(file.absolutePath),
@@ -492,7 +334,7 @@ class ResultsViewModel @Inject constructor(
                             null
                         )
 
-                        // Kullanıcıya bildir
+                        // Update state with success message
                         _state.value = _state.value.copy(
                             isLoading = false,
                             message = UiText.dynamicString("PDF indirilenler klasörüne kaydedildi: $fileName")
@@ -505,6 +347,7 @@ class ResultsViewModel @Inject constructor(
                     )
                 }
             } catch (e: Exception) {
+                // Handle any errors that occur during the process
                 _state.value = _state.value.copy(
                     isLoading = false,
                     error = UiText.dynamicString("PDF kaydedilirken hata: ${e.message}")

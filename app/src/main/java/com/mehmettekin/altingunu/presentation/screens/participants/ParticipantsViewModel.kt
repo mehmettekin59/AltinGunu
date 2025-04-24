@@ -1,7 +1,5 @@
 package com.mehmettekin.altingunu.presentation.screens.participants
 
-
-
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -9,9 +7,9 @@ import com.mehmettekin.altingunu.domain.model.ItemType
 import com.mehmettekin.altingunu.domain.model.Participant
 import com.mehmettekin.altingunu.domain.model.ParticipantsScreenWholeInformation
 import com.mehmettekin.altingunu.domain.repository.DrawRepository
+import com.mehmettekin.altingunu.domain.usecase.GetCurrentRateUseCase
 import com.mehmettekin.altingunu.domain.usecase.ValidateDrawSettingsUseCase
 import com.mehmettekin.altingunu.domain.usecase.ValidateParticipantsUseCase
-import com.mehmettekin.altingunu.utils.Constraints
 import com.mehmettekin.altingunu.utils.ResultState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -29,7 +27,8 @@ import javax.inject.Inject
 class ParticipantsViewModel @Inject constructor(
     private val drawRepository: DrawRepository,
     private val validateDrawSettingsUseCase: ValidateDrawSettingsUseCase,
-    private val validateParticipantsUseCase: ValidateParticipantsUseCase
+    private val validateParticipantsUseCase: ValidateParticipantsUseCase,
+    private val getCurrentRateUseCase: GetCurrentRateUseCase
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(ParticipantsState())
@@ -48,8 +47,8 @@ class ParticipantsViewModel @Inject constructor(
 
         // Set currency and gold options from Constants
         _state.update { it.copy(
-            currencyOptions = Constraints.currencyCodeList,
-            goldOptions = Constraints.goldCodeList
+            currencyOptions = com.mehmettekin.altingunu.utils.Constraints.currencyCodeList,
+            goldOptions = com.mehmettekin.altingunu.utils.Constraints.goldCodeList
         ) }
     }
 
@@ -194,7 +193,13 @@ class ParticipantsViewModel @Inject constructor(
         viewModelScope.launch {
             _state.update { it.copy(isLoading = true) }
 
-            // Save settings
+            // Get current price for the selected item using the dedicated use case
+            val currentFormattedPrice = getCurrentRateUseCase(
+                _state.value.selectedItemType,
+                _state.value.selectedSpecificItem
+            )
+
+            // Save settings with the current price
             val participantCount = _state.value.participantCount.toIntOrNull() ?: 0
             val monthlyAmount = _state.value.monthlyAmount.toDoubleOrNull() ?: 0.0
             val durationMonths = _state.value.durationMonths.toIntOrNull() ?: 0
@@ -207,7 +212,8 @@ class ParticipantsViewModel @Inject constructor(
                 monthlyAmount = monthlyAmount,
                 durationMonths = durationMonths,
                 startMonth = _state.value.startMonth,
-                startYear = _state.value.startYear
+                startYear = _state.value.startYear,
+                currentFormattedPrice = currentFormattedPrice
             )
 
             val saveResult = drawRepository.saveDrawSettings(settings)

@@ -10,7 +10,7 @@ import com.mehmettekin.altingunu.domain.model.DrawResult
 import com.mehmettekin.altingunu.domain.model.Participant
 import com.mehmettekin.altingunu.domain.model.ParticipantsScreenWholeInformation
 import com.mehmettekin.altingunu.domain.repository.DrawRepository
-import com.mehmettekin.altingunu.presentation.screens.enter.KapaliCarsiViewModel
+import com.mehmettekin.altingunu.domain.repository.KapaliCarsiRepository
 import com.mehmettekin.altingunu.utils.ResultState
 import com.mehmettekin.altingunu.utils.ValueFormatter
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -25,7 +25,7 @@ import javax.inject.Inject
 @HiltViewModel
 class WheelViewModel @Inject constructor(
     private val drawRepository: DrawRepository,
-    private val kapaliCarsiViewModel: KapaliCarsiViewModel
+    private val kapaliCarsiRepository: KapaliCarsiRepository
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(WheelState())
@@ -220,7 +220,8 @@ class WheelViewModel @Inject constructor(
         val amountPerPerson = settings.calculateAmountPerPerson()
 
 
-        val formattedAmount = ValueFormatter.formatWithSymbol(
+        val formattedAmount = settings.currentFormattedPrice ?:
+        ValueFormatter.formatWithSymbol(
             amountPerPerson.toString(),
             settings.itemType,
             settings.specificItem
