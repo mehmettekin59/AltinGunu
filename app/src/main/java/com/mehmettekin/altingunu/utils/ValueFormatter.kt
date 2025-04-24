@@ -23,7 +23,7 @@ object ValueFormatter {
             val parsedValue = try {
                 parser.parse(value)?.toDouble() ?: 0.0
             } catch (e: Exception) {
-                // Fallback - try direct conversion if parsing fails
+                e.message
                 value.toDoubleOrNull() ?: 0.0
             }
 
@@ -35,11 +35,12 @@ object ValueFormatter {
                 return formatter.format(parsedValue)
             } else {
                 // For currencies, ensure we always show 2 decimal places
-                formatter.minimumFractionDigits = 2
+                formatter.minimumFractionDigits = 0
                 formatter.maximumFractionDigits = 2
                 return formatter.format(parsedValue)
             }
         } catch (e: Exception) {
+            e.message
             return if (itemType == ItemType.GOLD) "0" else "0,00"
         }
     }

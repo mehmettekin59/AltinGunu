@@ -269,7 +269,13 @@ private fun WheelSection(
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        WinnerAnnouncement(winner = viewModel.winner)
+       // WinnerAnnouncement(winner = viewModel.winner)
+
+        WinnerAnnouncement(winner = if (participants.isEmpty() && viewModel.winners.size > 1)
+            viewModel.winners[viewModel.winners.size - 2] // Son kazanandan bir önceki kazanan
+        else
+            viewModel.winner)
+
     }
 }
 

@@ -566,7 +566,8 @@ private fun ResultsTable(
                     style = MaterialTheme.typography.bodyMedium,
                     fontWeight = FontWeight.Bold,
                     color = Gold,
-                    modifier = Modifier.weight(0.2f)
+                    modifier = Modifier.weight(0.2f),
+                    textAlign = TextAlign.Center
                 )
             }
 
@@ -614,7 +615,8 @@ private fun ResultsTable(
                             style = MaterialTheme.typography.bodyMedium,
                             color = Color(0xFF4CAF50),
                             fontWeight = FontWeight.SemiBold,
-                            modifier = Modifier.weight(0.2f)
+                            modifier = Modifier.weight(0.2f),
+                            textAlign = TextAlign.Center
                         )
                     }
                 }

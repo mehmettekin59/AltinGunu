@@ -3,6 +3,7 @@ package com.mehmettekin.altingunu.presentation.screens.participants
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.mehmettekin.altingunu.R
 import com.mehmettekin.altingunu.domain.model.ItemType
 import com.mehmettekin.altingunu.domain.model.Participant
 import com.mehmettekin.altingunu.domain.model.ParticipantsScreenWholeInformation
@@ -11,6 +12,7 @@ import com.mehmettekin.altingunu.domain.usecase.ValidateDrawSettingsUseCase
 import com.mehmettekin.altingunu.domain.usecase.ValidateParticipantsUseCase
 import com.mehmettekin.altingunu.utils.Constraints
 import com.mehmettekin.altingunu.utils.ResultState
+import com.mehmettekin.altingunu.utils.UiText
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -77,8 +79,21 @@ class ParticipantsViewModel @Inject constructor(
 
     private fun handleAddParticipant(name: String) {
         if (name.isNotBlank()) {
+            // Aynı isimde başka bir katılımcı var mı kontrol et
+            val duplicateName = _state.value.participants.any {
+                it.name.lowercase() == name.trim().lowercase()
+            }
+
+            if (duplicateName) {
+                // Aynı isimde katılımcı varsa hata mesajı göster
+                _state.update { it.copy(
+                    error = UiText.stringResource(R.string.error_duplicate_names)
+                ) }
+                return
+            }
+
             val updatedParticipants = _state.value.participants.toMutableList()
-            updatedParticipants.add(Participant(name = name))
+            updatedParticipants.add(Participant(name = name.trim()))
 
             // Update participant count to match the actual number of participants
             val countStr = (updatedParticipants.size).toString()
