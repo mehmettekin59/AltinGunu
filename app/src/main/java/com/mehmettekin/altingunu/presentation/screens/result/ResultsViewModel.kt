@@ -144,7 +144,7 @@ class ResultsViewModel @Inject constructor(
                                 exchangeRate.satis,
                                 settings.itemType,
                                 specificItemCode
-                            ) + " TL"
+                            )
                         }
                     }
                 } catch (e: Exception) {

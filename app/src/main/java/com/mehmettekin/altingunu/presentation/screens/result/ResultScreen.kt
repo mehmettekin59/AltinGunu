@@ -466,7 +466,7 @@ private fun ResultsSettingsSummary(
                                 }
 
                                 Text(
-                                    text = "$formattedValue TL",
+                                    text = formattedValue,
                                     style = MaterialTheme.typography.bodyMedium,
                                     fontWeight = FontWeight.SemiBold,
                                     color = NavyBlue
