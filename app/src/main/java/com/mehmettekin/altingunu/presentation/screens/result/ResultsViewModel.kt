@@ -249,6 +249,7 @@ class ResultsViewModel @Inject constructor(
             color = Color.BLACK
             textSize = 14f
             typeface = Typeface.create(Typeface.DEFAULT, Typeface.BOLD)
+            textAlign = Paint.Align.CENTER
         }
 
         // Adjusted X positions for table headers to align with columns
@@ -331,24 +332,27 @@ class ResultsViewModel @Inject constructor(
             try {
                 _state.value = _state.value.copy(isLoading = true)
 
-                // Re-create the PDF content into a temporary file
-                val tempPdfUri = createPdf(context) // This creates the PDF and stores its URI in _state.value.pdfUri
+                // Önce PDF'i geçici bir dosyaya oluştur ve URI'sini al.
+                // Bu fonksiyon aynı zamanda _state.value.pdfUri'yi de günceller.
+                val tempPdfUri = createPdf(context)
+
+                // Geçici dosyayı silmek için File nesnesini oluşturacağız.
+                // lastPathSegment null olabileceğinden null kontrolü yapmalıyız.
+                val tempFileNameForCleanup = tempPdfUri?.lastPathSegment
+                val tempFileForCleanup = if (tempFileNameForCleanup != null) File(context.filesDir, tempFileNameForCleanup) else null
+
 
                 if (tempPdfUri != null) {
-                    val sourceFile = File(context.filesDir, tempPdfUri.lastPathSegment) // Get the temporary file
+                    // İndirilenler klasörü için dosya adı oluştur (Bu, hedef dosyanın adıdır)
+                    val destFileName = "altin_gunu_cekilisi_${SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(Date())}.pdf"
 
-                    // File name for Downloads folder
-                    val currentDate = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(Date())
-                    val fileName = "altin_gunu_cekilisi_$currentDate.pdf"
-
-                    // Downloads klasörüne kaydet
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                         // Android 10+ için MediaStore API kullan
                         val contentValues = ContentValues().apply {
-                            put(MediaStore.Downloads.DISPLAY_NAME, fileName)
+                            put(MediaStore.Downloads.DISPLAY_NAME, destFileName) // Hedef dosya adını kullan
                             put(MediaStore.Downloads.MIME_TYPE, "application/pdf")
-                            put(MediaStore.Downloads.RELATIVE_PATH, Environment.DIRECTORY_DOWNLOADS) // Save directly to Downloads
-                            put(MediaStore.Downloads.IS_PENDING, 1) // Mark as pending
+                            put(MediaStore.Downloads.RELATIVE_PATH, Environment.DIRECTORY_DOWNLOADS) // Doğrudan Downloads'a kaydet
+                            put(MediaStore.Downloads.IS_PENDING, 1) // Beklemede olarak işaretle
                         }
 
                         val contentResolver = context.contentResolver
@@ -356,51 +360,53 @@ class ResultsViewModel @Inject constructor(
                         val pdfCollectionUri = contentResolver.insert(downloadUri, contentValues)
 
                         if (pdfCollectionUri != null) {
-                            // Copy the content from the temporary file to the Downloads destination URI
-                            context.contentResolver.openInputStream(tempPdfUri)?.use { inputStream ->
+                            // Geçici dosyanın URI'sinden içeriği oku ve Downloads hedef URI'sine kopyala
+                            context.contentResolver.openInputStream(tempPdfUri)?.use { inputStream -> // tempPdfUri'den doğrudan oku
                                 contentResolver.openOutputStream(pdfCollectionUri)?.use { outputStream ->
                                     inputStream.copyTo(outputStream)
                                 }
                             }
 
-                            // Mark the file as not pending
+                            // Dosyayı "beklemede değil" olarak işaretle
                             contentValues.clear()
                             contentValues.put(MediaStore.Downloads.IS_PENDING, 0)
                             contentResolver.update(pdfCollectionUri, contentValues, null, null)
 
-                            // Clean up the temporary file
-                            sourceFile.delete()
+                            // Geçici dosyayı sil
+                            tempFileForCleanup?.delete()
 
-                            // Kullanıcıya bildir
+
                             _state.value = _state.value.copy(
                                 isLoading = false,
-                                message = UiText.dynamicString("PDF indirilenler klasörüne kaydedildi: $fileName")
+                                message = UiText.dynamicString("PDF indirilenler klasörüne kaydedildi: $destFileName")
                             )
                         } else {
+                            // Kaydetme başarısız olursa geçici dosyayı silmeye çalış
+                            tempFileForCleanup?.delete()
+
                             _state.value = _state.value.copy(
                                 isLoading = false,
                                 error = UiText.dynamicString("Dosya oluşturulamadı (Android 10+)")
                             )
-                            // Clean up the temporary file even if saving failed
-                            sourceFile.delete()
                         }
                     } else {
                         // Android 9 ve altı için doğrudan Downloads klasörüne kaydet
                         val downloadsDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
-                        downloadsDir.mkdirs() // Ensure directory exists
-                        val destinationFile = File(downloadsDir, fileName)
+                        downloadsDir.mkdirs() // Dizinin var olduğundan emin ol
+                        val destinationFile = File(downloadsDir, destFileName) // Hedef dosya adını kullan
 
-                        // Copy the content from the temporary file to the Downloads destination file
-                        val inputStream = FileInputStream(sourceFile)
-                        val outputStream = FileOutputStream(destinationFile)
-
-                        inputStream.use { input ->
-                            outputStream.use { output ->
-                                input.copyTo(output)
+                        // Geçici dosyanın URI'sinden içeriği oku ve hedef dosyaya kopyala
+                        context.contentResolver.openInputStream(tempPdfUri)?.use { inputStream -> // tempPdfUri'den doğrudan oku
+                            FileOutputStream(destinationFile).use { outputStream ->
+                                inputStream.copyTo(outputStream)
                             }
                         }
 
-                        // MediaStore'u güncelle (needed on older Android for the file to appear)
+                        // Geçici dosyayı sil
+                        tempFileForCleanup?.delete()
+
+
+                        // MediaStore'u güncelle (eski Android'lerde dosyanın görünmesi için gerekli)
                         MediaScannerConnection.scanFile(
                             context,
                             arrayOf(destinationFile.absolutePath),
@@ -408,17 +414,13 @@ class ResultsViewModel @Inject constructor(
                             null
                         )
 
-                        // Clean up the temporary file
-                        sourceFile.delete()
-
-                        // Kullanıcıya bildir
                         _state.value = _state.value.copy(
                             isLoading = false,
-                            message = UiText.dynamicString("PDF indirilenler klasörüne kaydedildi: $fileName")
+                            message = UiText.dynamicString("PDF indirilenler klasörüne kaydedildi: $destFileName")
                         )
                     }
                 } else {
-                    // createPdf failed, error message already set there
+                    // createPdf başarısız oldu, hata mesajı orada zaten ayarlandı
                     _state.value = _state.value.copy(isLoading = false)
                 }
             } catch (e: Exception) {
