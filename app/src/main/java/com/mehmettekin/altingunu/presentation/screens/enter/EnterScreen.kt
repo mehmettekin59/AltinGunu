@@ -41,6 +41,7 @@ import com.mehmettekin.altingunu.ui.theme.NavyBlue
 import com.mehmettekin.altingunu.ui.theme.White
 import com.mehmettekin.altingunu.utils.Constraints
 import com.mehmettekin.altingunu.utils.ResultState
+import com.mehmettekin.altingunu.utils.UiText
 import com.mehmettekin.altingunu.utils.ValueFormatter
 import kotlin.math.absoluteValue
 
@@ -82,13 +83,13 @@ fun EnterScreen(
         modifier = Modifier.fillMaxSize(),
         topBar = {
             CommonTopAppBar(
-                title = "Altın ve Döviz Kurları",
+                title = UiText.stringResource(R.string.gold_and_currency).asString(),
                 navController = navController,
                 actions = {
                     IconButton(onClick = { viewModel.refreshExchangeRates() }) {
                         Icon(
                             Icons.Default.Refresh,
-                            contentDescription = "Yenile",
+                            contentDescription = UiText.stringResource(R.string.refresh).asString(),
                             tint = White
                         )
                     }
@@ -128,7 +129,8 @@ fun EnterScreen(
                     // Rate section
                     if (filteredRates.isNotEmpty()) {
                         RatesSectionTitle(
-                            title = if (selectedItemType == ItemType.GOLD) "Altın Fiyatları" else "Döviz Kurları",
+                            title = if (selectedItemType == ItemType.GOLD) UiText.stringResource(R.string.gold_price).asString()
+                            else UiText.stringResource(R.string.currencies).asString(),
                             icon = if (selectedItemType == ItemType.GOLD)
                                 painterResource(id = R.drawable.gold_bar)
                             else
@@ -168,8 +170,13 @@ fun EnterScreen(
                             }
                         }
                     } else {
+                        val dataType = if (selectedItemType == ItemType.GOLD) {
+                            UiText.stringResource(R.string.gold)
+                        } else {
+                            UiText.stringResource(R.string.currency)
+                        }
                         Text(
-                            text = "${if (selectedItemType == ItemType.GOLD) "Altın" else "Döviz"} verileri için veri bulunamadı.",
+                            text = UiText.stringResource(R.string.data_not_found, dataType.asString()).asString(),
                             modifier = Modifier
                                 .padding(vertical = 8.dp)
                                 .fillMaxWidth(),
@@ -291,7 +298,7 @@ private fun ErrorState(
     ) {
         Icon(
             imageVector = Icons.Default.WarningAmber,
-            contentDescription = "Hata",
+            contentDescription = UiText.stringResource(R.string.error).asString(),
             tint = MaterialTheme.colorScheme.error,
             modifier = Modifier.size(48.dp)
         )
@@ -299,7 +306,11 @@ private fun ErrorState(
         Spacer(modifier = Modifier.height(8.dp))
 
         Text(
-            text = "Veri yüklenemedi${if (!message.isNullOrBlank()) ": $message" else ". Tekrar deneyin."}",
+            text = if (!message.isNullOrBlank()) {
+                UiText.stringResource(R.string.data_load_failed, message)
+            } else {
+                UiText.stringResource(R.string.data_load_failed_retry)
+            }.asString(),
             color = MaterialTheme.colorScheme.error,
             textAlign = TextAlign.Center,
             style = MaterialTheme.typography.bodyLarge
@@ -314,7 +325,7 @@ private fun ErrorState(
                 modifier = Modifier.size(ButtonDefaults.IconSize)
             )
             Spacer(Modifier.size(ButtonDefaults.IconSpacing))
-            Text("Tekrar Dene")
+            Text(UiText.stringResource(R.string.retry).asString())
         }
     }
 }
@@ -401,7 +412,7 @@ private fun AnimatedRateCard(
             // Last updated timestamp (if available)
             rate.tarih.let {
                 Text(
-                    text = "Son Güncelleme",
+                    text = UiText.stringResource(R.string.last_update).asString(),
                     style = MaterialTheme.typography.bodyMedium,
                     color = textColor.copy(alpha = 0.7f)
                 )
@@ -424,8 +435,8 @@ private fun AnimatedRateCard(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.SpaceEvenly
             ) {
-                InfoColumn(label = "Alış   :", value = rate.alis, textColor = textColor, itemType = itemType, specificItem = rate.code)
-                InfoColumn(label = "Satış :", value = rate.satis, textColor = textColor, itemType = itemType, specificItem = rate.code)
+                InfoColumn(label = UiText.stringResource(R.string.buy).asString(), value = rate.alis, textColor = textColor, itemType = itemType, specificItem = rate.code)
+                InfoColumn(label = UiText.stringResource(R.string.sell).asString(), value = rate.satis, textColor = textColor, itemType = itemType, specificItem = rate.code)
             }
         }
     }
@@ -445,7 +456,9 @@ private fun InfoColumn(
     }
 
     Row(
-        modifier = modifier.fillMaxWidth().padding(horizontal = 8.dp),
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(horizontal = 8.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(4.dp)
     ) {
@@ -577,7 +590,7 @@ fun GoldDayLotteryCard(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
-                text = "Altın Günü",
+                text = UiText.stringResource(R.string.gold_day).asString(),
                 style = MaterialTheme.typography.titleLarge,
                 color = White,
                 fontWeight = FontWeight.Bold
@@ -586,7 +599,7 @@ fun GoldDayLotteryCard(
             Spacer(modifier = Modifier.height(8.dp))
 
             Text(
-                text = "Altın günü için çekiliş düzenleyin",
+                text = UiText.stringResource(R.string.set_up_raffle_for_thegold_day).asString(),
                 style = MaterialTheme.typography.bodyMedium,
                 color = White.copy(alpha = 0.8f)
             )
@@ -610,7 +623,7 @@ fun GoldDayLotteryCard(
                 Spacer(modifier = Modifier.width(8.dp))
 
                 Text(
-                    text = "Katılımcıları Gir",
+                    text = UiText.stringResource(R.string.enter_the_participants).asString(),
                     style = MaterialTheme.typography.labelLarge
                 )
             }

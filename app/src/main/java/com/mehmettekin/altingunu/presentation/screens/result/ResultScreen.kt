@@ -19,24 +19,26 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
+import com.mehmettekin.altingunu.R
 import com.mehmettekin.altingunu.domain.model.DrawResult
 import com.mehmettekin.altingunu.domain.model.ExchangeRate
 import com.mehmettekin.altingunu.domain.model.ItemType
 import com.mehmettekin.altingunu.domain.model.ParticipantsScreenWholeInformation
 import com.mehmettekin.altingunu.presentation.navigation.Screen
 import com.mehmettekin.altingunu.presentation.screens.common.CommonTopAppBar
-import com.mehmettekin.altingunu.presentation.screens.enter.KapaliCarsiViewModel
 import com.mehmettekin.altingunu.ui.theme.Gold
 import com.mehmettekin.altingunu.ui.theme.NavyBlue
 import com.mehmettekin.altingunu.ui.theme.White
 import com.mehmettekin.altingunu.utils.Constraints
 import com.mehmettekin.altingunu.utils.ResultState
+import com.mehmettekin.altingunu.utils.UiText
 import com.mehmettekin.altingunu.utils.ValueFormatter
 import kotlinx.coroutines.launch
 
@@ -67,7 +69,7 @@ fun ResultScreen(
             // İzin verilmediğinde kullanıcıya bilgi ver
             snackbarHostState.currentSnackbarData?.dismiss()
             coroutineScope.launch {
-                snackbarHostState.showSnackbar("PDF kaydetmek için depolama izni gerekli")
+                snackbarHostState.showSnackbar(UiText.stringResource(R.string.storage_permission_required).asString(context))
             }
         }
     }
@@ -96,7 +98,9 @@ fun ResultScreen(
                 putExtra(Intent.EXTRA_STREAM, uri)
                 addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
             }
-            context.startActivity(Intent.createChooser(intent, "Çekiliş Sonuçlarını Paylaş"))
+            context.startActivity(Intent.createChooser(intent,
+                UiText.stringResource(R.string.share_the_raffle_results).asString(context))
+            )
             viewModel.clearPdfUri()
         }
     }
@@ -104,7 +108,7 @@ fun ResultScreen(
     Scaffold(
         topBar = {
             CommonTopAppBar(
-                title = "Çekiliş Sonuçları",
+                title = UiText.stringResource(R.string.the_raffle_results).asString(),
                 navController = navController,
                 backgroundColor = NavyBlue,
                 isSettingsScreen = true,
@@ -122,14 +126,14 @@ fun ResultScreen(
                                 pdfViewerLauncher.launch(intent)
                             } catch (e: ActivityNotFoundException) {
                                 coroutineScope.launch {
-                                    snackbarHostState.showSnackbar("PDF görüntüleyici bulunamadı.")
+                                    snackbarHostState.showSnackbar(UiText.stringResource(R.string.pdf_viewer_not_found).asString(context))
                                 }
                             }
                         }
                     }) {
                         Icon(
                             imageVector = Icons.Default.Visibility,
-                            contentDescription = "PDF Görüntüle",
+                            contentDescription = UiText.stringResource(R.string.view_pdf).asString(),
                             tint = White
                         )
                     }
@@ -144,7 +148,7 @@ fun ResultScreen(
                     }) {
                         Icon(
                             imageVector = Icons.Default.Download,
-                            contentDescription = "PDF İndir",
+                            contentDescription = UiText.stringResource(R.string.download_pdf).asString(),
                             tint = White
                         )
                     }
@@ -155,7 +159,7 @@ fun ResultScreen(
                     }) {
                         Icon(
                             imageVector = Icons.Default.Share,
-                            contentDescription = "Sonuçları Paylaş",
+                            contentDescription = UiText.stringResource(R.string.share_results).asString(),
                             tint = White
                         )
                     }
@@ -218,7 +222,7 @@ private fun EmptyResultsView(
         verticalArrangement = Arrangement.Center
     ) {
         Text(
-            text = "Henüz çekiliş sonucu bulunmuyor",
+            text = UiText.stringResource(R.string.no_raffle_result).asString(),
             style = MaterialTheme.typography.headlineSmall,
             textAlign = TextAlign.Center,
             modifier = Modifier.padding(16.dp)
@@ -240,7 +244,7 @@ private fun EmptyResultsView(
                 modifier = Modifier.size(ButtonDefaults.IconSize)
             )
             Spacer(modifier = Modifier.width(8.dp))
-            Text("Yeni Çekiliş Başlat")
+            Text(stringResource(R.string.start_a_new_raffle))
         }
     }
 }
@@ -266,7 +270,7 @@ private fun ResultsContent(
 
         // Results header
         Text(
-            text = "Çekiliş Sonuçları",
+            text = UiText.stringResource(R.string.the_raffle_results).asString(),
             style = MaterialTheme.typography.titleLarge,
             fontWeight = FontWeight.Bold,
             color = NavyBlue,
@@ -296,7 +300,7 @@ private fun ResultsContent(
                 modifier = Modifier.size(ButtonDefaults.IconSize)
             )
             Spacer(modifier = Modifier.width(8.dp))
-            Text("Yeni Çekiliş Başlat")
+            Text(UiText.stringResource(R.string.start_a_new_raffle).asString())
         }
     }
 }
@@ -323,7 +327,7 @@ private fun ResultsSettingsSummary(
                 .padding(16.dp)
         ) {
             Text(
-                text = "Çekiliş Bilgileri",
+                text = UiText.stringResource(R.string.raffle_info).asString(),
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold,
                 color = NavyBlue
@@ -337,7 +341,7 @@ private fun ResultsSettingsSummary(
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Text(
-                    text = "Değer Türü:",
+                    text = UiText.stringResource(R.string.value_type).asString(),
                     style = MaterialTheme.typography.bodyMedium,
                     color = Color.Gray
                 )
@@ -373,7 +377,7 @@ private fun ResultsSettingsSummary(
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Text(
-                    text = "Aylık Miktar:",
+                    text = UiText.stringResource(R.string.monthly_amount).asString(),
                     style = MaterialTheme.typography.bodyMedium,
                     color = Color.Gray
                 )
@@ -400,7 +404,7 @@ private fun ResultsSettingsSummary(
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Text(
-                    text = "Toplam Süre:",
+                    text = UiText.stringResource(R.string.total_duration).asString(),
                     style = MaterialTheme.typography.bodyMedium,
                     color = Color.Gray
                 )
@@ -421,7 +425,7 @@ private fun ResultsSettingsSummary(
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Text(
-                    text = "Katılımcı Sayısı:",
+                    text = UiText.stringResource(R.string.participant_count).asString(),
                     style = MaterialTheme.typography.bodyMedium,
                     color = Color.Gray
                 )
@@ -447,7 +451,7 @@ private fun ResultsSettingsSummary(
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
                     Text(
-                        text = "Güncel Birim Fiyat:",
+                        text = UiText.stringResource(R.string.current_unit_price).asString(),
                         style = MaterialTheme.typography.bodyMedium,
                         color = Color.Gray
                     )

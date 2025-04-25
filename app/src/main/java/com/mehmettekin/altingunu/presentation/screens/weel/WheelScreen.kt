@@ -45,8 +45,10 @@ import com.mehmettekin.altingunu.ui.theme.NavyBlue
 import com.mehmettekin.altingunu.ui.theme.White
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.ui.graphics.drawscope.rotate
+import com.mehmettekin.altingunu.R
 import com.mehmettekin.altingunu.presentation.screens.common.CommonTopAppBar
 import com.mehmettekin.altingunu.ui.theme.Gold
+import com.mehmettekin.altingunu.utils.UiText
 import kotlin.math.cos
 import kotlin.math.sin
 
@@ -58,6 +60,10 @@ val colors = listOf(
     Color(0xFF1982C4), Color(0xFF6A4C93), Color(0xFFF15BB5), Color(0xFFFEE440),
     Color(0xFF00BBF9), Color(0xFF00F5D4), Color(0xFF9B5DE5), Color(0xFFF15BB5)
 )
+enum class ParticipantListType {
+    REMAINING,
+    WINNERS
+}
 
 @OptIn(ExperimentalTextApi::class, ExperimentalMaterial3Api::class)
 @Composable
@@ -125,7 +131,7 @@ fun WheelScreen(
         modifier = Modifier.fillMaxSize(),
         topBar = {
             CommonTopAppBar(
-                title = "Altın Günü Çekilişi",
+                title = UiText.stringResource(R.string.raffle_for_thegold_day).asString(),
                 navController = navController,
                 onBackPressed = { navController.navigateUp() }
             )
@@ -210,7 +216,7 @@ fun WheelScreen(
                             )
                             Spacer(modifier = Modifier.width(8.dp))
                             Text(
-                                "Devam Et",
+                                text = UiText.stringResource(R.string.continue_button).asString(),
                                 fontWeight = FontWeight.Bold,
                                 color = White
                             )
@@ -235,7 +241,7 @@ private fun WheelSection(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(
-            "Çark",
+            UiText.stringResource(R.string.wheel).asString(),
             style = MaterialTheme.typography.titleLarge,
             modifier = Modifier.padding(bottom = 2.dp)
         )
@@ -272,7 +278,7 @@ private fun WheelSection(
        // WinnerAnnouncement(winner = viewModel.winner)
 
         WinnerAnnouncement(winner = if (participants.isEmpty() && viewModel.winners.size > 1)
-            viewModel.winners[viewModel.winners.size - 2] // Son kazanandan bir önceki kazanan
+            viewModel.winners[viewModel.winners.size - 2]
         else
             viewModel.winner)
 
@@ -291,13 +297,15 @@ private fun ControlButtons(
         Button(
             onClick = { viewModel.spinWheel() },
             enabled = canSpin,
-            modifier = Modifier.weight(1f).padding(4.dp),
+            modifier = Modifier
+                .weight(1f)
+                .padding(4.dp),
             colors = ButtonDefaults.buttonColors(
                 containerColor = Gold
             ),
             shape = RoundedCornerShape(8.dp)
         ) {
-            Text("Çarkı Çevir")
+            Text(UiText.stringResource(R.string.spin_wheel).asString())
         }
 
         Button(
@@ -306,9 +314,11 @@ private fun ControlButtons(
                 containerColor = NavyBlue
             ),
             shape = RoundedCornerShape(8.dp),
-            modifier = Modifier.weight(1f).padding(4.dp)
+            modifier = Modifier
+                .weight(1f)
+                .padding(4.dp)
         ) {
-            Text("Yeniden Başlat")
+            Text(UiText.stringResource(R.string.restart).asString())
         }
     }
 }
@@ -324,7 +334,7 @@ private fun WinnerAnnouncement(winner: String?) {
             colors = CardDefaults.cardColors(containerColor = NavyBlue)
         ) {
             Text(
-                text = " Kazanan:🎉✨ $it ✨🎉",
+                text = UiText.stringResource(R.string.winner_celebration, it).asString(),
                 modifier = Modifier.padding(8.dp),
                 color = MaterialTheme.colorScheme.surface,
                 fontWeight = FontWeight.ExtraBold,
@@ -354,16 +364,18 @@ private fun ParticipantsSection(
             horizontalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             ParticipantList(
-                title = "Kalan Katılımcılar (${remainingParticipants.size})",
+                title = UiText.stringResource(R.string.remaining_participants_special, remainingParticipants.size).asString(),
                 participants = remainingParticipants,
                 modifier = Modifier.weight(1f),
+                listType = ParticipantListType.REMAINING,
                 showIndex = false
             )
 
             ParticipantList(
-                title = "Kazananlar (${winners.size})",
+                title = UiText.stringResource(R.string.winners_special, winners.size).asString(),
                 participants = winners,
                 modifier = Modifier.weight(1f),
+                listType = ParticipantListType.WINNERS,
                 showIndex = true
             )
         }
@@ -375,6 +387,7 @@ private fun ParticipantsSection(
 private fun ParticipantList(
     title: String,
     participants: List<String>,
+    listType: ParticipantListType,
     modifier: Modifier,
     showIndex: Boolean = false
 ) {
@@ -431,9 +444,12 @@ private fun ParticipantList(
                 if (participants.isEmpty()) {
                     item {
                         Text(
-                            text = if (title.startsWith("Kalan"))
-                                "Tüm katılımcılar seçildi!"
-                            else "Henüz kazanan yok",
+                            text = when(listType) {
+                                ParticipantListType.REMAINING ->
+                                    UiText.stringResource(R.string.all_participants_have_been_selected).asString()
+                                ParticipantListType.WINNERS ->
+                                    UiText.stringResource(R.string.there_is_no_winner_yet).asString()
+                            },
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(16.dp),

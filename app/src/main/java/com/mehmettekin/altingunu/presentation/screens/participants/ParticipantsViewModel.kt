@@ -119,7 +119,6 @@ class ParticipantsViewModel @Inject constructor(
     }
 
     private fun handleItemTypeSelect(type: ItemType) {
-        Log.d("ParticipantsViewModel", "Selected ItemType: $type")
         _state.update { it.copy(
             selectedItemType = type,
             // Reset specific item when type changes

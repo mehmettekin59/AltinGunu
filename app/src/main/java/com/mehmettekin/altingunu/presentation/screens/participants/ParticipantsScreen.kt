@@ -21,7 +21,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowDropDown
@@ -50,8 +49,6 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -63,12 +60,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
+import com.mehmettekin.altingunu.R
 import com.mehmettekin.altingunu.domain.model.ItemType
 import com.mehmettekin.altingunu.domain.model.Participant
 import com.mehmettekin.altingunu.presentation.navigation.Screen
@@ -77,6 +76,7 @@ import com.mehmettekin.altingunu.ui.theme.Gold
 import com.mehmettekin.altingunu.ui.theme.NavyBlue
 import com.mehmettekin.altingunu.ui.theme.White
 import com.mehmettekin.altingunu.utils.Constraints
+import com.mehmettekin.altingunu.utils.UiText
 import kotlinx.coroutines.flow.collectLatest
 import java.text.SimpleDateFormat
 import java.util.Calendar
@@ -110,7 +110,7 @@ fun ParticipantsScreen(
         snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
             CommonTopAppBar(
-                title = "Gün Kurası",
+                title = UiText.stringResource(R.string.add_participant).asString(),
                 navController = navController,
                 onBackPressed = { navController.navigateUp() }
             )
@@ -173,8 +173,8 @@ fun ParticipantsContent(
             value = state.monthlyAmount,
             onValueChange = { onEvent(ParticipantsEvent.OnMonthlyAmountChange(it)) },
             label = when (state.selectedItemType) {
-                ItemType.GOLD -> "Altın Sayısı (Adet)"
-                else -> "Aylık Miktar"
+                ItemType.GOLD -> UiText.stringResource(R.string.number_of_gold).asString()
+                else -> UiText.stringResource(R.string.monthly_amount).asString()
             },
             keyboardType = KeyboardType.Decimal,
             leadingIcon = {
@@ -192,7 +192,7 @@ fun ParticipantsContent(
         ModernTextField(
             value = state.durationMonths,
             onValueChange = { onEvent(ParticipantsEvent.OnDurationChange(it)) },
-            label = "Gün kaç ay sürecek?",
+            label = stringResource(R.string.how_many_months_will_it_last),
             keyboardType = KeyboardType.Number,
             leadingIcon = {
                 Icon(
@@ -207,7 +207,7 @@ fun ParticipantsContent(
 
         // Starting month and year
         Text(
-            text = "Başlangıç Tarihi",
+            text = UiText.stringResource(R.string.starting_date).asString(),
             style = MaterialTheme.typography.titleMedium,
             color = NavyBlue,
             fontWeight = FontWeight.Medium
@@ -249,7 +249,7 @@ fun ParticipantsContent(
             )
             Spacer(modifier = Modifier.width(8.dp))
             Text(
-                "Devam Et",
+                UiText.stringResource(R.string.continue_button).asString(),
                 fontWeight = FontWeight.Bold,
                 color = White
             )
@@ -288,7 +288,7 @@ fun ItemTypeSelector(
 ) {
     Column {
         Text(
-            text = "Toplanacak Değer Türü",
+            text = UiText.stringResource(R.string.type_of_value_to_be_collected).asString(),
             style = MaterialTheme.typography.titleMedium,
             color = NavyBlue,
             fontWeight = FontWeight.Medium
@@ -372,7 +372,8 @@ fun SpecificItemSelector(
 ) {
     var expanded by remember { mutableStateOf(false) }
 
-    val title = if (selectedItemType == ItemType.CURRENCY) "Döviz Türü" else "Altın Türü"
+    val title = if (selectedItemType == ItemType.CURRENCY) UiText.stringResource(R.string.type_of_currency).asString()
+    else UiText.stringResource(R.string.type_of_gold).asString()
 
     val options = if (selectedItemType == ItemType.CURRENCY) {
         currencyOptions.map { Constraints.currencyCodeToName[it] ?: it }
@@ -413,7 +414,7 @@ fun SpecificItemSelector(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = selectedValue.ifEmpty { "Seçiniz" },
+                    text = selectedValue.ifEmpty { UiText.stringResource(R.string.select).asString() },
                     color = if (selectedValue.isEmpty()) Color.Gray.copy(alpha = 0.5f) else Color.DarkGray
                 )
 
@@ -546,7 +547,7 @@ fun ModernDateSelector(
         }
 
         DateSelectorDialog(
-            title = "Ay Seçiniz",
+            title = UiText.stringResource(R.string.select_month).asString(),
             options = availableMonths.map {
                 calendar.set(Calendar.MONTH, it - 1)
                 monthFormat.format(calendar.time)
@@ -565,7 +566,7 @@ fun ModernDateSelector(
         val yearOptions = (currentYear..currentYear + 9).toList()  // Güncel yıl ve sonraki 9 yıl
 
         DateSelectorDialog(
-            title = "Yıl Seçiniz",
+            title = UiText.stringResource(R.string.select_year).asString(),
             options = yearOptions.map { it.toString() },
             selectedIndex = yearOptions.indexOf(selectedYear),
             onOptionSelected = { index ->
@@ -651,7 +652,7 @@ fun DateSelectorDialog(
                     contentColor = Gold
                 )
             ) {
-                Text("Kapat")
+                Text(UiText.stringResource(R.string.close).asString())
             }
         }
     )
@@ -667,7 +668,7 @@ fun ParticipantsSection(
 
     Column {
         Text(
-            text = "Katılımcılar (${participants.size})",
+            text = UiText.stringResource(R.string.participants_count, participants.size).asString(),
             style = MaterialTheme.typography.titleMedium,
             color = NavyBlue,
             fontWeight = FontWeight.Medium
@@ -679,7 +680,7 @@ fun ParticipantsSection(
         OutlinedTextField(
             value = name,
             onValueChange = { name = it },
-            label = { Text("Katılımcı Adı") },
+            label = { Text(UiText.stringResource(R.string.participant_name).asString()) },
             modifier = Modifier.fillMaxWidth(),
             colors = OutlinedTextFieldDefaults.colors(
                 focusedBorderColor = Gold,
@@ -699,7 +700,7 @@ fun ParticipantsSection(
                 ) {
                     Icon(
                         imageVector = Icons.Default.Add,
-                        contentDescription = "Ekle",
+                        contentDescription = UiText.stringResource(R.string.add_button_description).asString(),
                         tint = Gold
                     )
                 }
@@ -722,7 +723,7 @@ fun ParticipantsSection(
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
-                        "Henüz katılımcı eklenmedi",
+                        UiText.stringResource(R.string.no_participants_have_been_added_yet).asString(),
                         color = Color.Gray
                     )
                 }
@@ -746,7 +747,7 @@ fun ParticipantsSection(
                             ) {
                                 Icon(
                                     imageVector = Icons.Default.Delete,
-                                    contentDescription = "Sil",
+                                    contentDescription = UiText.stringResource(R.string.delete).asString(),
                                     tint = Gold
                                 )
                             }
@@ -773,7 +774,7 @@ fun ConfirmationDialog(
         onDismissRequest = onDismiss,
         title = {
             Text(
-                "Kura Bilgilerini Onaylayın",
+                text =  UiText.stringResource(R.string.confirm_information).asString(),
                 color = NavyBlue,
                 fontWeight = FontWeight.Bold
             )
@@ -784,29 +785,28 @@ fun ConfirmationDialog(
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 ConfirmationItem(
-                    label = "Katılımcı Sayısı",
-                    value = "${state.participants.size} kişi"
+                    label = UiText.stringResource(R.string.participants_count).asString(),
+                    value = UiText.stringResource(R.string.participant_count_special,state.participants.size).asString()
                 )
-
                 val valueTypeAndItem = when(state.selectedItemType) {
                     ItemType.TL -> state.selectedItemType.displayName
-                    ItemType.CURRENCY -> "Döviz (${Constraints.currencyCodeToName[state.selectedSpecificItem] ?: state.selectedSpecificItem})"
-                    ItemType.GOLD -> "Altın (${Constraints.goldCodeToName[state.selectedSpecificItem] ?: state.selectedSpecificItem})"
+                    ItemType.CURRENCY -> UiText.stringResource(R.string.currency_with_type, Constraints.currencyCodeToName[state.selectedSpecificItem] ?: state.selectedSpecificItem).asString()
+                    ItemType.GOLD -> UiText.stringResource(R.string.gold_with_type, Constraints.goldCodeToName[state.selectedSpecificItem] ?: state.selectedSpecificItem).asString()
                 }
 
                 ConfirmationItem(
-                    label = "Toplanacak Değer",
+                    label = UiText.stringResource(R.string.type_of_value_to_be_collected).asString(),
                     value = valueTypeAndItem
                 )
 
                 ConfirmationItem(
-                    label = "Aylık Miktar",
+                    label = UiText.stringResource(R.string.monthly_amount).asString(),
                     value = state.monthlyAmount
                 )
 
                 ConfirmationItem(
-                    label = "Süre(Ay)",
-                    value = "${state.durationMonths} ay"
+                    label = UiText.stringResource(R.string.duration).asString(),
+                    value = UiText.stringResource(R.string.duration_months,state.durationMonths).asString()
                 )
 
                 // Başlangıç ayı ve yılı
@@ -816,7 +816,7 @@ fun ConfirmationDialog(
                 val monthName = monthFormat.format(calendar.time)
 
                 ConfirmationItem(
-                    label = "Başlangıç",
+                    label = UiText.stringResource(R.string.starting_date).asString(),
                     value = "$monthName ${state.startYear}"
                 )
             }
@@ -829,7 +829,7 @@ fun ConfirmationDialog(
                 ),
                 shape = RoundedCornerShape(8.dp)
             ) {
-                Text("Onaylıyorum")
+                Text(UiText.stringResource(R.string.confirm).asString())
             }
         },
         dismissButton = {
@@ -841,7 +841,7 @@ fun ConfirmationDialog(
                 border = BorderStroke(1.dp, NavyBlue),
                 shape = RoundedCornerShape(8.dp)
             ) {
-                Text("İptal")
+                Text(UiText.stringResource(R.string.cancel).asString())
             }
         }
     )

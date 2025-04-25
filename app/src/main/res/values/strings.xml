@@ -4,15 +4,17 @@
     <string name="cancel">İptal</string>
     <string name="error">Hata</string>
     <string name="retry">Tekrar Dene</string>
+    <string name="close">Kapat</string>
+    <string name="delete">Delete</string>
 
-    <!-- Screen Titles -->
+
     <string name="title_home">Ana Sayfa</string>
     <string name="title_participants">Katılımcılar</string>
     <string name="title_wheel">Çekiliş Çarkı</string>
     <string name="title_results">Sonuçlar</string>
     <string name="title_settings">Ayarlar</string>
 
-    <!-- Participants Screen -->
+
     <string name="error_no_participants">Lütfen en az bir katılımcı ekleyin</string>
     <string name="error_min_participants">Çekiliş için en az 2 katılımcı gereklidir</string>
     <string name="error_duplicate_names">Aynı isimde birden fazla katılımcı olamaz</string>
@@ -22,24 +24,45 @@
     <string name="error_invalid_monthly_amount">Geçersiz aylık miktar</string>
     <string name="error_invalid_duration">Geçersiz süre</string>
     <string name="error_specific_item_not_selected">Lütfen bir tür seçin</string>
+    <string name="enter_the_participants">Katılımcıları Gir</string>
+    <string name="add_participant">Katılımcı Ekleme</string>
+    <string name="number_of_gold">Altın Sayısı (Adet)</string>
+    <string name="how_many_months_will_it_last">Altın Günü, kaç ay sürecek?</string>
+    <string name="starting_date">Başlangıç Tarihi</string>
+    <string name="continue_button">Devam et</string>
+    <string name="select">Seçiniz</string>
+    <string name="select_month">Ay Seçiniz</string>
+    <string name="select_year">Yıl Seçiniz</string>
+    <string name="participants_count">Katlımcı Sayısı</string>
+    <string name="participant_name">Katılımcı Adı</string>
+    <string name="add_button_description">Ekle</string>
+    <string name="no_participants_have_been_added_yet">Henüz katılımcı eklenmedi</string>
+    <string name="participant_count_special">%1$d kişi</string>
+    <string name="gold_with_type">Altın (%1$s)</string>
+    <string name="currency_with_type">Döviz (%1$s)</string>
+    <string name="duration_months">(%1$s) ay</string>
 
-    <!-- Wheel Screen -->
+
     <string name="spin_wheel">Çarkı Çevir</string>
     <string name="restart">Yeniden Başlat</string>
     <string name="winner">Kazanan</string>
+    <string name="winner_celebration">Kazanan:🎉✨ %1$s ✨🎉</string>
     <string name="remaining_participants">Kalan Katılımcılar</string>
+    <string name="remaining_participants_special">Kalan Katılımcılar: (%1$d)</string>
     <string name="winners">Kazananlar</string>
+    <string name="winners_special">Kazananlar: (%1$d) </string>
     <string name="all_participants_selected">Tüm katılımcılar seçildi!</string>
     <string name="no_winners_yet">Henüz kazanan yok</string>
     <string name="save_results">Sonuçları Kaydet</string>
+    <string name="there_is_no_winner_yet">Henüz kazanan yok</string>
 
-    <!-- Results Screen -->
+
     <string name="no_results">Henüz çekiliş sonucu bulunmuyor</string>
     <string name="start_new_draw">Yeni Çekiliş Başlat</string>
-    <string name="draw_info">Çekiliş Bilgileri</string>
+    <string name="raffle_info">Çekiliş Bilgileri</string>
     <string name="value_type">Değer Türü</string>
     <string name="monthly_amount">Aylık Miktar</string>
-    <string name="duration">Süre</string>
+    <string name="duration">Süre(Ay)</string>
     <string name="participant_count">Katılımcı Sayısı</string>
     <string name="name">İsim</string>
     <string name="month">Ay</string>
@@ -47,11 +70,44 @@
     <string name="download_pdf">PDF İndir</string>
     <string name="share_results">Sonuçları Paylaş</string>
 
-    <!-- Settings Screen -->
+
     <string name="language">Dil</string>
     <string name="turkish">Türkçe</string>
     <string name="english">English</string>
     <string name="arabic">Arabic</string>
     <string name="app_info">Uygulama Bilgileri</string>
     <string name="app_version">Versiyon</string>
+    <string name="gold_and_currency">Altın ve Döviz Kurları</string>
+    <string name="refresh">Yenile</string>
+    <string name="gold_price">Altın Fiyatları</string>
+    <string name="currencies">Döviz Kurları</string>
+    <string name="gold">Altın</string>
+    <string name="currency">Döviz</string>
+    <string name="data_not_found">"%1$s" verileri için veri bulunamadı.</string>
+    <string name="data_load_failed">Veri yüklenemedi: %1$s</string>
+    <string name="data_load_failed_retry">Veri yüklenemedi. Tekrar deneyin.</string>
+    <string name="last_update">Son Güncelleme</string>
+    <string name="buy">Alış &#160; :&#9;</string>
+    <string name="sell">Satış :</string>
+    <string name="set_up_raffle_for_thegold_day">Altın günü için çekiliş düzenleyin</string>
+    <string name="raffle_for_thegold_day">Altın Günü Çekilişi</string>
+    <string name="gold_day">Altın Günü</string>
+    <string name="type_of_value_to_be_collected">Toplanacak Değer</string>
+    <string name="type_of_currency">Döviz Türü</string>
+    <string name="type_of_gold">Altın Türü</string>
+    <string name="confirm_information">Bilgileri Onaylayın</string>
+    <string name="confirm">Onaylıyorum</string>
+    <string name="all_participants_have_been_selected">Tüm katılımcılar seçildi!</string>
+    <string name="wheel">Çark</string>
+    <string name="storage_permission_required">PDF kaydetmek için depolama izni gerekli</string>
+    <string name="share_the_raffle_results">Çekiliş Sonuçlarını Paylaş</string>
+    <string name="the_raffle_results">Çekiliş Sonuçları</string>
+    <string name="pdf_viewer_not_found">PDF görüntüleyici bulunamadı.</string>
+    <string name="view_pdf">PDF Görüntüle</string>
+    <string name="no_raffle_result">Henüz çekiliş sonucu bulunmuyor</string>
+    <string name="start_a_new_raffle">Yeni Çekiliş Başlat</string>
+    <string name="total_duration">Toplam Süre:</string>
+    <string name="current_unit_price">Güncel Birim Fiyat:</string>
+
+
 </resources>

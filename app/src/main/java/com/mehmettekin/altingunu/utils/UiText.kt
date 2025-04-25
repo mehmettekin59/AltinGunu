@@ -1,5 +1,6 @@
 package com.mehmettekin.altingunu.utils
 
+
 import android.content.Context
 import androidx.annotation.StringRes
 import androidx.compose.runtime.Composable
@@ -22,8 +23,8 @@ sealed class UiText {
     fun asString(): String {
         return when (this) {
             is DynamicString -> value
-            is StringResource -> stringResource(resId, *args)
-        }.toString()
+            is StringResource -> androidx.compose.ui.res.stringResource(id = resId, *args)
+        }
     }
 
     companion object {
@@ -31,3 +32,6 @@ sealed class UiText {
         fun stringResource(@StringRes resId: Int, vararg args: Any): UiText = StringResource(resId, *args)
     }
 }
+
+
+

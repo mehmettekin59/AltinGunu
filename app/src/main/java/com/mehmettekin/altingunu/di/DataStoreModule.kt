@@ -7,7 +7,6 @@ import androidx.datastore.preferences.preferencesDataStore
 import com.mehmettekin.altingunu.data.local.DrawResultsDataStore
 import com.mehmettekin.altingunu.data.local.SettingsDataStore
 import com.squareup.moshi.Moshi
-import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn

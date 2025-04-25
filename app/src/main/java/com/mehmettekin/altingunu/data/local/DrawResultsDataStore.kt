@@ -76,7 +76,6 @@ class DrawResultsDataStore @Inject constructor(
 
     // Draw Settings operations
     suspend fun saveDrawSettings(settings: ParticipantsScreenWholeInformation) {
-        Log.d("PriceDebug", "DataStore saving settings with price: ${settings.currentFormattedPrice}")
         context.drawResultsDataStore.edit { preferences ->
             preferences[drawSettingsKey] = drawSettingsAdapter.toJson(settings)
         }
