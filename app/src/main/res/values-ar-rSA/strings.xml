@@ -1,5 +1,136 @@
-<?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="gold_and_currency">Altın ve Döviz Kurları</string>
-    <string name="refresh">Yenile</string>
+    <string name="app_name">AltinGunu</string>
+    <string name="ok">موافق</string>
+    <string name="cancel">إلغاء</string>
+    <string name="error">خطأ</string>
+    <string name="retry">إعادة المحاولة</string>
+    <string name="close">إغلاق</string>
+    <string name="delete">حذف</string>
+    <string name="what_is_the_app_name">يوم الذهب</string>
+
+    <string name="title_home">الصفحة الرئيسية</string>
+    <string name="title_participants">المشاركون</string>
+    <string name="title_wheel">عجلة السحب</string>
+    <string name="title_results">النتائج</string>
+    <string name="title_settings">الإعدادات</string>
+    <string name="title_default_settings">الإعدادات الافتراضية</string>
+    <string name="error_returning_to_default_settings">الإعدادات الافتراضية</string>
+
+    <string name="error_no_participants">الرجاء إضافة مشارك واحد على الأقل</string>
+    <string name="error_min_participants">مطلوب مشاركين اثنين على الأقل للسحب</string>
+    <string name="error_duplicate_names">لا يمكن وجود أكثر من مشارك بنفس الاسم</string>
+    <string name="error_empty_names">لا يمكن ترك أسماء المشاركين فارغة</string>
+    <string name="error_invalid_participant_count">عدد مشاركين غير صالح</string>
+    <string name="error_participant_count_mismatch">عدد المشاركين لا يتطابق مع المشاركين المدخلين</string>
+    <string name="error_invalid_monthly_amount">المبلغ الشهري غير صالح</string>
+    <string name="error_invalid_duration">المدة غير صالحة</string>
+    <string name="error_specific_item_not_selected">الرجاء اختيار نوع</string>
+    <string name="enter_the_participants">أدخل المشاركين</string>
+    <string name="add_participant">إضافة المشاركين</string>
+    <string name="number_of_gold">عدد قطع الذهب (بالوحدات)</string>
+    <string name="how_many_months_will_it_last">كم شهر سيستمر يوم الذهب؟</string>
+    <string name="starting_date">تاريخ البدء</string>
+    <string name="continue_button">متابعة</string>
+    <string name="select">اختر</string>
+    <string name="select_month">اختر الشهر</string>
+    <string name="select_year">اختر السنة</string>
+    <string name="participants_count">عدد المشاركين</string>
+    <string name="participant_name">اسم المشارك</string>
+    <string name="add_button_description">إضافة</string>
+    <string name="no_participants_have_been_added_yet">لم تتم إضافة مشاركين بعد</string>
+    <string name="participant_count_special">%1$d شخص</string>
+    <string name="gold_with_type">ذهب (%1$s)</string>
+    <string name="currency_with_type">عملة (%1$s)</string>
+    <string name="duration_months">(%1$s) شهر</string>
+
+    <string name="spin_wheel">تدوير العجلة</string>
+    <string name="restart">إعادة البدء</string>
+    <string name="winner">الفائز</string>
+    <string name="winner_celebration">الفائز:🎉✨ %1$s ✨🎉</string>
+    <string name="remaining_participants">المشاركون المتبقون</string>
+    <string name="remaining_participants_special">المشاركون المتبقون: (%1$d)</string>
+    <string name="winners">الفائزون</string>
+    <string name="winners_special">الفائزون: (%1$d) </string>
+    <string name="all_participants_selected">تم اختيار جميع المشاركين!</string>
+    <string name="no_winners_yet">لا يوجد فائزون بعد</string>
+    <string name="save_results">حفظ النتائج</string>
+    <string name="there_is_no_winner_yet">لا يوجد فائز بعد</string>
+
+    <string name="no_results">لا توجد نتائج سحب بعد</string>
+    <string name="start_new_draw">بدء سحب جديد</string>
+    <string name="raffle_info">معلومات السحب</string>
+    <string name="value_type">نوع القيمة</string>
+    <string name="monthly_amount">المبلغ الشهري</string>
+    <string name="duration">المدة (أشهر)</string>
+    <string name="participant_count">عدد المشاركين</string>
+    <string name="name">الاسم</string>
+    <string name="month">الشهر</string>
+    <string name="amount">المبلغ</string>
+    <string name="download_pdf">تنزيل PDF</string>
+    <string name="share_results">مشاركة النتائج</string>
+
+    <string name="language">اللغة</string>
+    <string name="app_info">معلومات التطبيق</string>
+    <string name="app_version">الإصدار</string>
+    <string name="gold_and_currency">أسعار الذهب والعملات</string>
+    <string name="refresh">تحديث</string>
+    <string name="gold_price">أسعار الذهب</string>
+    <string name="currencies">أسعار العملات</string>
+    <string name="gold">ذهب</string>
+    <string name="currency">عملة</string>
+    <string name="data_not_found">لم يتم العثور على بيانات لـ "%1$s".</string>
+    <string name="data_load_failed">فشل تحميل البيانات: %1$s</string>
+    <string name="data_load_failed_retry">فشل تحميل البيانات. حاول مرة أخرى.</string>
+    <string name="last_update">آخر تحديث</string>
+    <string name="buy">شراء &#160; :&#9;</string>
+    <string name="sell">بيع :</string>
+    <string name="set_up_raffle_for_thegold_day">إعداد سحب ليوم الذهب</string>
+    <string name="raffle_for_thegold_day">سحب يوم الذهب</string>
+    <string name="gold_day">يوم الذهب</string>
+    <string name="type_of_value_to_be_collected">نوع القيمة المراد جمعها</string>
+    <string name="type_of_currency">نوع العملة</string>
+    <string name="type_of_gold">نوع الذهب</string>
+    <string name="confirm_information">تأكيد المعلومات</string>
+    <string name="confirm">تأكيد</string>
+    <string name="all_participants_have_been_selected">تم اختيار جميع المشاركين!</string>
+    <string name="wheel">العجلة</string>
+    <string name="storage_permission_required">مطلوب إذن التخزين لحفظ ملف PDF</string>
+    <string name="share_the_raffle_results">مشاركة نتائج السحب</string>
+    <string name="the_raffle_results">نتائج السحب</string>
+    <string name="pdf_viewer_not_found">لم يتم العثور على عارض PDF.</string>
+    <string name="view_pdf">عرض PDF</string>
+    <string name="no_raffle_result">لا توجد نتائج سحب بعد</string>
+    <string name="start_a_new_raffle">بدء سحب جديد</string>
+    <string name="total_duration">المدة الإجمالية:</string>
+    <string name="current_unit_price">السعر الحالي للوحدة:</string>
+    <string name="error_no_internet">تحقق من اتصالك بالإنترنت. جهازك غير متصل بالإنترنت.</string>
+    <string name="unexpected_error_occurred">حدث خطأ غير متوقع</string>
+    <string name="couldnt_reach_server_no_internet_connection">تعذر الوصول إلى الخادم، تحقق من اتصالك بالإنترنت</string>
+    <string name="error_unknown_error_occurred">حدث خطأ غير معروف</string>
+    <string name="error_saving_draw_results">فشل حفظ نتائج السحب: %1$s</string>
+    <string name="error_retrieving_draw_results">خطأ في استرجاع نتائج السحب: %1$s</string>
+    <string name="error_clearing_draw_results">خطأ في مسح نتائج السحب المحفوظة: %1$s</string>
+    <string name="error_retrieving_draw_settings">خطأ في استرجاع إعدادات السحب: %1$s</string>
+    <string name="error_saving_draw_settings">خطأ في حفظ إعدادات السحب: %1$s</string>
+    <string name="error_retrieving_participants">تعذر استرجاع المشاركين: %1$s</string>
+    <string name="error_saving_participants">تعذر حفظ المشاركين: %1$s</string>
+    <string name="price_not_found">لم يتم العثور على السعر</string>
+    <string name="could_not_get_price">تعذر الحصول على السعر</string>
+    <string name="waiting_for_data">بانتظار البيانات</string>
+    <string name="data_is_loading">جاري التحميل...</string>
+    <string name="line_or_queue">الترتيب</string>
+    <string name="result_and_settings_are_not_found">لم يتم العثور على النتائج أو الإعدادات</string>
+    <string name="gold_day_raffle_results">نتائج سحب يوم الذهب</string>
+    <string name="creation_date">تاريخ الإنشاء:</string>
+    <string name="error_when_create_pdf">خطأ أثناء إنشاء ملف PDF: %1$s</string>
+    <string name="pdf_was_saved_to_the_downloads_older">تم حفظ ملف PDF في مجلد التنزيلات: %1$s</string>
+    <string name="pdf_file_could_not_be_created">تعذر إنشاء الملف (Android 10+)</string>
+    <string name="language_selection">اختيار اللغة</string>
+    <string name="data_update_frequency">تكرار تحديث البيانات</string>
+    <string name="choose_data_update_fruquency">اختر تكرار تحديث بيانات الذهب والعملات</string>
+    <string name="normal">(عادي)</string>
+    <string name="app_information">معلومات التطبيق</string>
+    <string name="error_changing_update_interval">خطأ في تغيير فترة التحديث: %1$s</string>
+    <string name="language_change_error">خطأ في تغيير اللغة: %1$s</string>
+    <string name="an_error_occurred_while_loading_settings">حدث خطأ أثناء تحميل الإعدادات: %1$s</string>
 </resources>

@@ -36,7 +36,7 @@
     <string name="select">Seçiniz</string>
     <string name="select_month">Ay Seçiniz</string>
     <string name="select_year">Yıl Seçiniz</string>
-    <string name="participants_count">Katlımcı Sayısı</string>
+    <string name="participants_count">Katılımcı Sayısı</string>
     <string name="participant_name">Katılımcı Adı</string>
     <string name="add_button_description">Ekle</string>
     <string name="no_participants_have_been_added_yet">Henüz katılımcı eklenmedi</string>
