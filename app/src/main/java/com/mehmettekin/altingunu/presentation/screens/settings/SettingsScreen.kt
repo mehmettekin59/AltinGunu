@@ -8,7 +8,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -23,12 +22,12 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
-import com.mehmettekin.altingunu.presentation.navigation.Screen
 import com.mehmettekin.altingunu.presentation.screens.common.CommonTopAppBar
 import com.mehmettekin.altingunu.ui.theme.Gold
 import com.mehmettekin.altingunu.ui.theme.NavyBlue
 import com.mehmettekin.altingunu.ui.theme.White
-
+import com.mehmettekin.altingunu.utils.UiText
+import com.mehmettekin.altingunu.R
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -67,7 +66,7 @@ fun SettingsScreen(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
             CommonTopAppBar(
-                title = "Ayarlar",
+                title = UiText.stringResource(R.string.title_settings).asString(),
                 navController = navController,
                 isSettingsScreen = true,
                 onBackPressed = { navController.navigateUp() },
@@ -75,7 +74,7 @@ fun SettingsScreen(
                     IconButton(onClick = { viewModel.onEvent(SettingsEvent.OnDefaultsReset) }) {
                         Icon(
                             imageVector = Icons.Default.Refresh,
-                            contentDescription = "Varsayılan Ayarlar",
+                            contentDescription = UiText.stringResource(R.string.title_default_settings).asString(),
                             tint = White
                         )
                     }
@@ -129,12 +128,15 @@ fun LanguageSettingsCard(
     val currentLanguage = languages.find { it.first == selectedLanguage }?.second ?: "Türkçe"
 
     Card(
-        modifier = Modifier.fillMaxWidth().background(Gold),
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(Gold),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
         Column(
             modifier = Modifier
-                .fillMaxWidth().background(Gold)
+                .fillMaxWidth()
+                .background(Gold)
                 .padding(16.dp)
         ) {
             Row(
@@ -150,7 +152,7 @@ fun LanguageSettingsCard(
                 Spacer(modifier = Modifier.width(8.dp))
 
                 Text(
-                    text = "Dil Seçimi",
+                    text = UiText.stringResource(R.string.language_selection).asString(),
                     style = MaterialTheme.typography.titleMedium,
                     color = MaterialTheme.colorScheme.surface
                 )
@@ -237,7 +239,9 @@ fun UpdateIntervalSettingsCard(
     )
 
     Card(
-        modifier = Modifier.fillMaxWidth().background(NavyBlue),
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(NavyBlue),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
         Column(
@@ -259,7 +263,7 @@ fun UpdateIntervalSettingsCard(
                 Spacer(modifier = Modifier.width(8.dp))
 
                 Text(
-                    text = "Veri Güncelleme Sıklığı",
+                    text = UiText.stringResource(R.string.data_update_frequency).asString(),
                     style = MaterialTheme.typography.titleMedium,
                     color = White,
                 )
@@ -268,7 +272,7 @@ fun UpdateIntervalSettingsCard(
             Spacer(modifier = Modifier.height(16.dp))
 
             Text(
-                text = "Altın ve Döviz verilerinin güncellenme sıklığını seçin",
+                text = UiText.stringResource(R.string.choose_data_update_fruquency).asString(),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.background
             )
@@ -310,7 +314,7 @@ fun UpdateIntervalSettingsCard(
 
                             if (index == 2 && seconds == 60) { // Normal için etiket göster
                                 Text(
-                                    text = "(Normal)",
+                                    text = UiText.stringResource(R.string.normal).asString(),
                                     fontSize = 10.sp,
                                     color = if (isSelected) White.copy(alpha = 0.8f) else Color.Gray,
                                     modifier = Modifier.padding(top = 2.dp)
@@ -337,7 +341,9 @@ fun UpdateIntervalSettingsCard(
 @Composable
 fun AppInfoCard(appVersion: String) {
     Card(
-        modifier = Modifier.fillMaxWidth().background(Gold),
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(Gold),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
         Column(
@@ -359,7 +365,7 @@ fun AppInfoCard(appVersion: String) {
                 Spacer(modifier = Modifier.width(8.dp))
 
                 Text(
-                    text = "Uygulama Bilgileri",
+                    text = UiText.stringResource(R.string.app_information).asString(),
                     style = MaterialTheme.typography.titleMedium,
                     color = MaterialTheme.colorScheme.surface
                 )
@@ -372,13 +378,13 @@ fun AppInfoCard(appVersion: String) {
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Text(
-                    text = "Uygulama Adı",
+                    text = UiText.stringResource(R.string.what_is_the_app_name).asString(),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.surface
                 )
 
                 Text(
-                    text = "Altın Günü",
+                    text = UiText.stringResource(R.string.app_name).asString(),
                     style = MaterialTheme.typography.bodyMedium,
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.surface
@@ -392,7 +398,7 @@ fun AppInfoCard(appVersion: String) {
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Text(
-                    text = "Versiyon",
+                    text = UiText.stringResource(R.string.app_version).asString(),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.surface
                 )

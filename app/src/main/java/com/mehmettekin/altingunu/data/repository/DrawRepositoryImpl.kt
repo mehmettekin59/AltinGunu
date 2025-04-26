@@ -1,6 +1,7 @@
 package com.mehmettekin.altingunu.data.repository
 
 
+import com.mehmettekin.altingunu.R
 import com.mehmettekin.altingunu.data.local.DrawResultsDataStore
 import com.mehmettekin.altingunu.domain.model.DrawResult
 import com.mehmettekin.altingunu.domain.model.Participant
@@ -23,7 +24,12 @@ class DrawRepositoryImpl @Inject constructor(
             drawResultsDataStore.saveParticipants(participants)
             ResultState.Success(Unit)
         } catch (e: Exception) {
-            ResultState.Error(UiText.dynamicString("Error saving participants: ${e.message}"))
+            ResultState.Error(
+                UiText.stringResource(
+                    R.string.error_saving_participants,
+                    e.message ?: ""
+                )
+            )
         }
     }
 
@@ -34,7 +40,12 @@ class DrawRepositoryImpl @Inject constructor(
             val participants = drawResultsDataStore.getParticipants()
             ResultState.Success(participants)
         } catch (e: Exception) {
-            ResultState.Error(UiText.dynamicString("Error retrieving participants: ${e.message}"))
+            ResultState.Error(
+                UiText.stringResource(
+                    R.string.error_retrieving_participants,
+                    e.message ?: ""
+                )
+            )
         }
     }
 
@@ -45,7 +56,11 @@ class DrawRepositoryImpl @Inject constructor(
             drawResultsDataStore.saveDrawSettings(settings)
             ResultState.Success(Unit)
         } catch (e: Exception) {
-            ResultState.Error(UiText.dynamicString("Error saving draw settings: ${e.message}"))
+            ResultState.Error(UiText.stringResource(
+                    R.string.error_saving_draw_settings,
+                    e.message ?: ""
+                )
+            )
         }
     }
 
@@ -54,7 +69,12 @@ class DrawRepositoryImpl @Inject constructor(
             val settings = drawResultsDataStore.getDrawSettings()
             ResultState.Success(settings)
         } catch (e: Exception) {
-            ResultState.Error(UiText.dynamicString("Error retrieving draw settings: ${e.message}"))
+            ResultState.Error(
+                UiText.stringResource(
+                    R.string.error_retrieving_draw_settings,
+                    e.message ?: ""
+                )
+            )
         }
     }
 
@@ -63,7 +83,12 @@ class DrawRepositoryImpl @Inject constructor(
             drawResultsDataStore.saveDrawResults(results)
             ResultState.Success(Unit)
         } catch (e: Exception) {
-            ResultState.Error(UiText.dynamicString("Error saving draw results: ${e.message}"))
+            ResultState.Error(
+                UiText.stringResource(
+                    R.string.error_saving_draw_results,
+                    e.message ?: ""
+                )
+            )
         }
     }
 
@@ -74,7 +99,12 @@ class DrawRepositoryImpl @Inject constructor(
                 val results = drawResultsDataStore.getDrawResults()
                 emit(ResultState.Success(results))
             } catch (e: Exception) {
-                emit(ResultState.Error(UiText.dynamicString("Error retrieving draw results: ${e.message}")))
+                emit(
+                    ResultState.Error(UiText.stringResource(
+                        R.string.error_retrieving_draw_results,
+                        e.message ?: ""
+                    ))
+                )
             }
         }
     }
@@ -84,7 +114,12 @@ class DrawRepositoryImpl @Inject constructor(
             drawResultsDataStore.clearDrawResults()
             ResultState.Success(Unit)
         } catch (e: Exception) {
-            ResultState.Error(UiText.dynamicString("Error clearing draw results: ${e.message}"))
+            ResultState.Error(
+                UiText.stringResource(
+                    R.string.error_clearing_draw_results,
+                    e.message ?: ""
+                )
+            )
         }
     }
 }

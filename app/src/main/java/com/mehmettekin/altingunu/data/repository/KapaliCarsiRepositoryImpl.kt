@@ -2,6 +2,7 @@ package com.mehmettekin.altingunu.data.repository
 
 import android.content.Context
 import android.util.Log
+import com.mehmettekin.altingunu.R
 import com.mehmettekin.altingunu.data.local.SettingsDataStore
 import com.mehmettekin.altingunu.data.remote.KapaliCarsiApi
 import com.mehmettekin.altingunu.domain.repository.KapaliCarsiRepository
@@ -64,17 +65,24 @@ class KapaliCarsiRepositoryImpl @Inject constructor(
                     try {
                         emit(ResultState.Loading)
                         if (!NetworkUtils.isNetworkAvailable(context)) {
-                            emit(ResultState.Error(UiText.dynamicString("İnternet bağlantınızı kontrol edin. Cihazınız internete bağlı değil.")))
+                            emit(ResultState.Error(UiText.stringResource(R.string.error_no_internet)))
                             return@flow
                         }
                         val rates = api.getExchangeRates()
                         emit(ResultState.Success(rates))
                     } catch (e: HttpException) {
-                        emit(ResultState.Error(UiText.dynamicString(e.response()?.errorBody()?.string() ?: "Unexpected error occurred")))
+                        emit(ResultState.Error(
+                            e.response()?.errorBody()?.string()?.let { errorBody ->
+                                UiText.dynamicString(errorBody)
+                            } ?: UiText.stringResource(R.string.unexpected_error_occurred)
+                        ))
                     } catch (e: IOException) {
-                        emit(ResultState.Error(UiText.dynamicString("Couldn't reach server. Check your internet connection.")))
+                        emit(ResultState.Error(UiText.stringResource(R.string.couldnt_reach_server_no_internet_connection)))
                     } catch (e: Exception) {
-                        emit(ResultState.Error(UiText.dynamicString(e.localizedMessage ?: "Unknown error occurred")))
+                        emit(ResultState.Error(
+                            e.localizedMessage?.let { UiText.dynamicString(it) }
+                                ?: UiText.stringResource(R.string.error_unknown_error_occurred)
+                        ))
                     }
                 }
             }

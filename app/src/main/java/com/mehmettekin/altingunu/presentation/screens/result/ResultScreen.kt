@@ -347,22 +347,23 @@ private fun ResultsSettingsSummary(
                 )
 
                 val itemTypeText = when (settings.itemType) {
-                    ItemType.TL -> "TL"
+                    ItemType.TL -> UiText.dynamicString("TL")
+
                     ItemType.CURRENCY -> {
                         val currencyName = Constraints.currencyCodeToName[settings.specificItem]
                             ?: settings.specificItem
-                        "Döviz ($currencyName)"
+                        UiText.stringResource(R.string.currency_with_type, currencyName)
                     }
 
                     ItemType.GOLD -> {
                         val goldName = Constraints.goldCodeToName[settings.specificItem]
                             ?: settings.specificItem
-                        "Altın ($goldName)"
+                        UiText.stringResource(R.string.gold_with_type, goldName)
                     }
                 }
 
                 Text(
-                    text = itemTypeText,
+                    text = itemTypeText.asString(),
                     style = MaterialTheme.typography.bodyMedium,
                     fontWeight = FontWeight.SemiBold,
                     color = NavyBlue
@@ -410,7 +411,7 @@ private fun ResultsSettingsSummary(
                 )
 
                 Text(
-                    text = "${settings.durationMonths} ay",
+                    text =UiText.stringResource(R.string.duration_months,settings.durationMonths).asString(),
                     style = MaterialTheme.typography.bodyMedium,
                     fontWeight = FontWeight.SemiBold,
                     color = NavyBlue
@@ -479,7 +480,7 @@ private fun ResultsSettingsSummary(
                                 )
                             } else {
                                 Text(
-                                    text = "Fiyat bulunamadı",
+                                    text = UiText.stringResource(R.string.price_not_found).asString(),
                                     style = MaterialTheme.typography.bodyMedium,
                                     color = Color.Gray
                                 )
@@ -496,7 +497,7 @@ private fun ResultsSettingsSummary(
 
                         is ResultState.Error -> {
                             Text(
-                                text = "Fiyat alınamadı",
+                                text = UiText.stringResource(R.string.could_not_get_price).asString(),
                                 style = MaterialTheme.typography.bodyMedium,
                                 color = Color.Red
                             )
@@ -504,7 +505,7 @@ private fun ResultsSettingsSummary(
 
                         is ResultState.Idle -> {
                             Text(
-                                text = "Veri bekleniyor",
+                                text = UiText.stringResource(R.string.waiting_for_data).asString(),
                                 style = MaterialTheme.typography.bodyMedium,
                                 color = Color.Gray
                             )
@@ -542,7 +543,7 @@ private fun ResultsTable(
                     .padding(8.dp)
             ) {
                 Text(
-                    text = "Sıra",
+                    text = UiText.stringResource(R.string.line_or_queue).asString(),
                     style = MaterialTheme.typography.bodyMedium,
                     fontWeight = FontWeight.Bold,
                     color = Gold,
@@ -550,7 +551,7 @@ private fun ResultsTable(
                 )
 
                 Text(
-                    text = "İsim",
+                    text = UiText.stringResource(R.string.name).asString(),
                     style = MaterialTheme.typography.bodyMedium,
                     fontWeight = FontWeight.Bold,
                     color = Gold,
@@ -558,7 +559,7 @@ private fun ResultsTable(
                 )
 
                 Text(
-                    text = "Ay",
+                    text = UiText.stringResource(R.string.month).asString(),
                     style = MaterialTheme.typography.bodyMedium,
                     fontWeight = FontWeight.Bold,
                     color = Gold,
@@ -566,7 +567,7 @@ private fun ResultsTable(
                 )
 
                 Text(
-                    text = "Miktar",
+                    text = UiText.stringResource(R.string.amount).asString(),
                     style = MaterialTheme.typography.bodyMedium,
                     fontWeight = FontWeight.Bold,
                     color = Gold,

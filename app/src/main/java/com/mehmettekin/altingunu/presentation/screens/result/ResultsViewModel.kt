@@ -15,6 +15,7 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.core.content.FileProvider
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.mehmettekin.altingunu.R
 import com.mehmettekin.altingunu.domain.model.ExchangeRate
 import com.mehmettekin.altingunu.domain.model.ItemType
 import com.mehmettekin.altingunu.domain.model.ParticipantsScreenWholeInformation
@@ -126,16 +127,16 @@ class ResultsViewModel @Inject constructor(
     }
 
 
-    private fun getItemTypeText(settings: ParticipantsScreenWholeInformation): String {
+    private fun getItemTypeText(settings: ParticipantsScreenWholeInformation): UiText {
         return when (settings.itemType) {
-            ItemType.TL -> "TL"
+            ItemType.TL -> UiText.dynamicString("TL")
             ItemType.CURRENCY -> {
                 val currencyName = Constraints.currencyCodeToName[settings.specificItem] ?: settings.specificItem
-                "Döviz ($currencyName)"
+                UiText.stringResource(R.string.currency_with_type, currencyName)
             }
             ItemType.GOLD -> {
                 val goldName = Constraints.goldCodeToName[settings.specificItem] ?: settings.specificItem
-                "Altın ($goldName)"
+                UiText.stringResource(R.string.gold_with_type, goldName)
             }
         }
     }
@@ -148,7 +149,7 @@ class ResultsViewModel @Inject constructor(
 
         if (results.isEmpty() || settings == null) {
             _state.value = _state.value.copy(
-                error = UiText.dynamicString("Sonuçlar veya ayarlar bulunamadı")
+                error = UiText.stringResource(R.string.result_and_settings_are_not_found)
             )
             return null
         }
@@ -181,7 +182,7 @@ class ResultsViewModel @Inject constructor(
             typeface = Typeface.create(Typeface.DEFAULT, Typeface.BOLD) // Kalın yapmak isterseniz
         }
         // Draw title
-        canvas.drawText("Altın Günü Çekilişi Sonuçları", 50f, 50f, titlePaint)
+        canvas.drawText(UiText.stringResource(R.string.gold_day_raffle_results).asString(context), 50f, 50f, titlePaint)
 
         // Draw settings info
         var currentY = 80f // Start Y position for settings
@@ -189,8 +190,8 @@ class ResultsViewModel @Inject constructor(
         paint.typeface = Typeface.create(Typeface.DEFAULT, Typeface.NORMAL)
 
         // Draw fixed settings
-        val itemTypeText = getItemTypeText(settings) // Use the helper function
-        canvas.drawText("Değer Türü:", 50f, currentY, paint)
+        val itemTypeText = getItemTypeText(settings).asString(context) // Use the helper function
+        canvas.drawText(UiText.stringResource(R.string.value_type).asString(context), 50f, currentY, paint)
         canvas.drawText(itemTypeText, 250f, currentY, paint) // Adjust X position for value
         currentY += 20
 
@@ -199,15 +200,20 @@ class ResultsViewModel @Inject constructor(
             settings.itemType,
             settings.specificItem
         )
-        canvas.drawText("Aylık Miktar:", 50f, currentY, paint)
+        canvas.drawText(UiText.stringResource(R.string.monthly_amount).asString(context), 50f, currentY, paint)
         canvas.drawText(formattedMonthlyAmount, 250f, currentY, paint) // Adjust X position
         currentY += 20
 
-        canvas.drawText("Toplam Süre:", 50f, currentY, paint)
-        canvas.drawText("${settings.durationMonths} ay", 250f, currentY, paint) // Adjust X position
+        canvas.drawText(UiText.stringResource(R.string.total_duration).asString(context), 50f, currentY, paint)
+        canvas.drawText(
+            UiText.stringResource(R.string.duration_months, settings.durationMonths).asString(context),
+            250f,
+            currentY,
+            paint
+        ) // Adjust X position
         currentY += 20
 
-        canvas.drawText("Katılımcı Sayısı:", 50f, currentY, paint)
+        canvas.drawText(UiText.stringResource(R.string.participant_count).asString(context), 50f, currentY, paint)
         canvas.drawText("${settings.participantCount}", 250f, currentY, paint) // Adjust X position
         currentY += 20
 
@@ -216,7 +222,7 @@ class ResultsViewModel @Inject constructor(
         if ((settings.itemType == ItemType.CURRENCY || settings.itemType == ItemType.GOLD)
             && specificItemCode.isNotBlank()
         ) {
-            canvas.drawText("Güncel Birim Fiyat:", 50f, currentY, paint)
+            canvas.drawText(UiText.stringResource(R.string.current_unit_price).asString(context), 50f, currentY, paint)
 
             val currentUnitValueText = when (exchangeRatesState) {
                 is ResultState.Success -> {
@@ -226,12 +232,12 @@ class ResultsViewModel @Inject constructor(
                         val formattedValue = ValueFormatter.formatWithSymbol(rate.satis, settings.itemType, specificItemCode)
                         "$formattedValue TL"
                     } else {
-                        "Fiyat bulunamadı"
+                        UiText.stringResource(R.string.price_not_found).asString(context)
                     }
                 }
-                is ResultState.Loading -> "Yükleniyor..."
-                is ResultState.Error -> "Alınamadı"
-                is ResultState.Idle -> "Bekleniyor..."
+                is ResultState.Loading -> UiText.stringResource(R.string.data_is_loading).asString(context)
+                is ResultState.Error ->  UiText.stringResource(R.string.could_not_get_price).asString(context)
+                is ResultState.Idle -> UiText.stringResource(R.string.waiting_for_data).asString(context)
             }
             canvas.drawText(currentUnitValueText, 250f, currentY, paint) // Adjust X position for value
             currentY += 20 // Move down for the next item
@@ -239,7 +245,7 @@ class ResultsViewModel @Inject constructor(
 
         // Format current date
         val currentDate = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(Date())
-        canvas.drawText("Oluşturulma Tarihi:", 50f, currentY, paint)
+        canvas.drawText(UiText.stringResource(R.string.creation_date).asString(context), 50f, currentY, paint)
         canvas.drawText(currentDate, 250f, currentY, paint) // Adjust X position
         currentY += 40 // Add extra space before the table
 
@@ -253,10 +259,10 @@ class ResultsViewModel @Inject constructor(
         }
 
         // Adjusted X positions for table headers to align with columns
-        canvas.drawText("Sıra", 50f, headerY, tableHeaderPaint)
-        canvas.drawText("İsim", 120f, headerY, tableHeaderPaint) // Shifted right slightly
-        canvas.drawText("Ay", 350f, headerY, tableHeaderPaint) // Shifted right
-        canvas.drawText("Miktar", 500f, headerY, tableHeaderPaint) // Shifted right
+        canvas.drawText(UiText.stringResource(R.string.line_or_queue).asString(context), 50f, headerY, tableHeaderPaint)
+        canvas.drawText(UiText.stringResource(R.string.name).asString(context), 120f, headerY, tableHeaderPaint) // Shifted right slightly
+        canvas.drawText(UiText.stringResource(R.string.month).asString(context), 375f, headerY, tableHeaderPaint) // Shifted right
+        canvas.drawText(UiText.stringResource(R.string.amount).asString(context), 500f, headerY, tableHeaderPaint) // Shifted right
 
         // Draw horizontal line
         val linePaint = Paint().apply {
@@ -286,7 +292,7 @@ class ResultsViewModel @Inject constructor(
 
             // Adjusted X positions for table content
             canvas.drawText("${index + 1}", 50f, y, paint)
-            canvas.drawText(result.participantName, 120f, y, paint)
+            canvas.drawText(result.participantName, 100f, y, paint)
             canvas.drawText(result.month, 350f, y, paint)
             // Use result.amount which is the stored monthly value
             canvas.drawText(result.amount, 500f, y, amountPaint)
@@ -319,7 +325,7 @@ class ResultsViewModel @Inject constructor(
             return uri // Return the URI for viewing/sharing
         } catch (e: Exception) {
             _state.value = _state.value.copy(
-                error = UiText.dynamicString("PDF oluşturulurken hata: ${e.message}")
+                error = UiText.stringResource(R.string.error_when_create_pdf, e.message ?: "")
             )
             document.close()
             return null
@@ -378,7 +384,7 @@ class ResultsViewModel @Inject constructor(
 
                             _state.value = _state.value.copy(
                                 isLoading = false,
-                                message = UiText.dynamicString("PDF indirilenler klasörüne kaydedildi: $destFileName")
+                                message = UiText.stringResource(R.string.pdf_was_saved_to_the_downloads_older, destFileName)
                             )
                         } else {
                             // Kaydetme başarısız olursa geçici dosyayı silmeye çalış
@@ -386,7 +392,7 @@ class ResultsViewModel @Inject constructor(
 
                             _state.value = _state.value.copy(
                                 isLoading = false,
-                                error = UiText.dynamicString("Dosya oluşturulamadı (Android 10+)")
+                                error = UiText.StringResource(R.string.pdf_file_could_not_be_created)
                             )
                         }
                     } else {
@@ -416,7 +422,7 @@ class ResultsViewModel @Inject constructor(
 
                         _state.value = _state.value.copy(
                             isLoading = false,
-                            message = UiText.dynamicString("PDF indirilenler klasörüne kaydedildi: $destFileName")
+                            message = UiText.stringResource(R.string.pdf_was_saved_to_the_downloads_older, destFileName)
                         )
                     }
                 } else {
@@ -426,7 +432,7 @@ class ResultsViewModel @Inject constructor(
             } catch (e: Exception) {
                 _state.value = _state.value.copy(
                     isLoading = false,
-                    error = UiText.dynamicString("PDF kaydedilirken hata: ${e.message}")
+                    error = UiText.stringResource(R.string.error_when_create_pdf, e.message ?: "")
                 )
             }
         }

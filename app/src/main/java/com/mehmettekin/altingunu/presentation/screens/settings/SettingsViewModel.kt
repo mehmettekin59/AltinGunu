@@ -2,6 +2,7 @@ package com.mehmettekin.altingunu.presentation.screens.settings
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.mehmettekin.altingunu.R
 import com.mehmettekin.altingunu.data.local.SettingsDataStore
 import com.mehmettekin.altingunu.domain.repository.UserPreferencesRepository
 import com.mehmettekin.altingunu.utils.Constraints
@@ -43,7 +44,7 @@ class SettingsViewModel @Inject constructor(
                 )
             } catch (e: Exception) {
                 _state.value = _state.value.copy(
-                    error = UiText.dynamicString("Ayarları yüklerken hata oluştu: ${e.message}"),
+                    error = UiText.stringResource(R.string.an_error_occurred_while_loading_settings, e.message ?: ""),
                     isLoading = false
                 )
             }
@@ -65,7 +66,7 @@ class SettingsViewModel @Inject constructor(
                         )
                     } catch (e: Exception) {
                         _state.value = _state.value.copy(
-                            error = UiText.dynamicString("Dil değiştirme hatası: ${e.message}"),
+                            error = UiText.stringResource(R.string.language_change_error, e.message ?: ""),
                             isLoading = false
                         )
                     }
@@ -85,7 +86,7 @@ class SettingsViewModel @Inject constructor(
                         )
                     } catch (e: Exception) {
                         _state.value = _state.value.copy(
-                            error = UiText.dynamicString("Güncelleme aralığı değiştirme hatası: ${e.message}"),
+                            error = UiText.stringResource(R.string.error_changing_update_interval, e.message ?: ""),
                             isLoading = false
                         )
                     }
@@ -109,7 +110,7 @@ class SettingsViewModel @Inject constructor(
                         )
                     } catch (e: Exception) {
                         _state.value = _state.value.copy(
-                            error = UiText.dynamicString("Varsayılan ayarlara dönüş hatası: ${e.message}"),
+                            error = UiText.stringResource(R.string.error_returning_to_default_settings, e.message ?: ""),
                             isLoading = false
                         )
                     }
