@@ -1,5 +1,6 @@
 package com.mehmettekin.altingunu.data.repository
 
+import android.content.Context
 import com.mehmettekin.altingunu.data.local.SettingsDataStore
 import com.mehmettekin.altingunu.data.remote.KapaliCarsiApi
 import com.mehmettekin.altingunu.domain.repository.KapaliCarsiRepository
@@ -22,13 +23,16 @@ import java.io.IOException
 import javax.inject.Inject
 import javax.inject.Singleton
 import com.mehmettekin.altingunu.domain.model.ExchangeRate
+import com.mehmettekin.altingunu.utils.NetworkUtils
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.map
 
 @Singleton
 class KapaliCarsiRepositoryImpl @Inject constructor(
     private val api: KapaliCarsiApi,
     private val settingsDataStore: SettingsDataStore,
-    private val externalScope: CoroutineScope
+    private val externalScope: CoroutineScope,
+    @ApplicationContext private val context: Context
 ) : KapaliCarsiRepository {
 
     private val _refreshTrigger = MutableSharedFlow<Unit>(replay = 0)
@@ -58,6 +62,10 @@ class KapaliCarsiRepositoryImpl @Inject constructor(
                 flow {
                     try {
                         emit(ResultState.Loading)
+                        if (!NetworkUtils.isNetworkAvailable(context)) {
+                            emit(ResultState.Error(UiText.dynamicString("İnternet bağlantınızı kontrol edin. Cihazınız internete bağlı değil.")))
+                            return@flow
+                        }
                         val rates = api.getExchangeRates()
                         emit(ResultState.Success(rates))
                     } catch (e: HttpException) {

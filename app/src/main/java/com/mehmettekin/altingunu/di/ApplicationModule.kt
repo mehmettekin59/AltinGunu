@@ -17,6 +17,8 @@ import dagger.hilt.components.SingletonComponent
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import okhttp3.OkHttpClient
+import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
 import javax.inject.Singleton
@@ -43,11 +45,34 @@ abstract class ApplicationModule {
                 .build()
         }
 
+        /*
         @Provides
+
         @Singleton
         fun provideKapaliCarsiApi(moshi: Moshi): KapaliCarsiApi {
             return Retrofit.Builder()
                 .baseUrl("https://kapalicarsi.apiluna.org")
+                .addConverterFactory(MoshiConverterFactory.create(moshi))
+                .build()
+                .create(KapaliCarsiApi::class.java)
+        }
+
+
+         */
+        @Provides
+        @Singleton
+        fun provideKapaliCarsiApi(moshi: Moshi): KapaliCarsiApi {
+            val loggingInterceptor = HttpLoggingInterceptor().apply {
+                level = HttpLoggingInterceptor.Level.BODY
+            }
+
+            val client = OkHttpClient.Builder()
+                .addInterceptor(loggingInterceptor)
+                .build()
+
+            return Retrofit.Builder()
+                .baseUrl("https://kapalicarsi.apiluna.org")
+                .client(client)
                 .addConverterFactory(MoshiConverterFactory.create(moshi))
                 .build()
                 .create(KapaliCarsiApi::class.java)
