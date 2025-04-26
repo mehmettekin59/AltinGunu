@@ -1,6 +1,7 @@
 package com.mehmettekin.altingunu.data.repository
 
 import android.content.Context
+import android.util.Log
 import com.mehmettekin.altingunu.data.local.SettingsDataStore
 import com.mehmettekin.altingunu.data.remote.KapaliCarsiApi
 import com.mehmettekin.altingunu.domain.repository.KapaliCarsiRepository

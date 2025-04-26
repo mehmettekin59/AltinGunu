@@ -1,7 +1,6 @@
 package com.mehmettekin.altingunu.data.local
 
 import android.content.Context
-import android.util.Log
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import com.mehmettekin.altingunu.di.drawResultsDataStore

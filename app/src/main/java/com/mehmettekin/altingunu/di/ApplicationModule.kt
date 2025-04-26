@@ -17,6 +17,7 @@ import dagger.hilt.components.SingletonComponent
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import okhttp3.Dns
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
@@ -65,8 +66,9 @@ abstract class ApplicationModule {
             val loggingInterceptor = HttpLoggingInterceptor().apply {
                 level = HttpLoggingInterceptor.Level.BODY
             }
-
+            val dns = Dns.SYSTEM
             val client = OkHttpClient.Builder()
+                .dns(dns)
                 .addInterceptor(loggingInterceptor)
                 .build()
 
