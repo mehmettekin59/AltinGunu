@@ -135,6 +135,6 @@
     <string name="error_changing_update_interval">خطأ في تغيير فترة التحديث: %1$s</string>
     <string name="language_change_error">خطأ في تغيير اللغة: %1$s</string>
     <string name="an_error_occurred_while_loading_settings">حدث خطأ أثناء تحميل الإعدادات: %1$s</string>
-    <string name="currency_value">%1$s TL</string>
+    <string name="currency_value">&#x200E;%1$s&#x200E; TL</string>
     <string name="currency_unit">TL</string>
 </resources>
