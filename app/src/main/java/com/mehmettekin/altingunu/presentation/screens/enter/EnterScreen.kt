@@ -220,8 +220,8 @@ private fun ItemTypeSelector(
 ) {
     val itemTypes = remember {
         listOf(
-            ItemType.CURRENCY to "Döviz ($, €, £)",
-            ItemType.GOLD to "Altın (🥇, 🪙, 💰)"
+            ItemType.CURRENCY to ItemType.CURRENCY.displayName,
+            ItemType.GOLD to ItemType.GOLD.displayName
         )
     }
 
@@ -233,7 +233,7 @@ private fun ItemTypeSelector(
         ) {
             itemTypes.forEach { (type, label) ->
                 SelectableChip(
-                    text = label,
+                    text = label.asString(),
                     selected = type == selectedItemType,
                     onClick = { onItemTypeSelect(type) },
                     modifier = Modifier.weight(1f),

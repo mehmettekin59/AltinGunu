@@ -302,7 +302,7 @@ fun ItemTypeSelector(
         ) {
             ItemType.entries.forEach { itemType ->
                 ItemSelectableChip(
-                    text = itemType.displayName,
+                    text = itemType.displayName.asString(),
                     selected = itemType == selectedItemType,
                     onClick = { onItemTypeSelect(itemType) },
                     modifier = Modifier.weight(1f),
@@ -789,10 +789,11 @@ fun ConfirmationDialog(
                     value = UiText.stringResource(R.string.participant_count_special,state.participants.size).asString()
                 )
                 val valueTypeAndItem = when(state.selectedItemType) {
-                    ItemType.TL -> state.selectedItemType.displayName
+                    ItemType.TL -> state.selectedItemType.displayName.asString()
                     ItemType.CURRENCY -> UiText.stringResource(R.string.currency_with_type, Constraints.currencyCodeToName[state.selectedSpecificItem] ?: state.selectedSpecificItem).asString()
                     ItemType.GOLD -> UiText.stringResource(R.string.gold_with_type, Constraints.goldCodeToName[state.selectedSpecificItem] ?: state.selectedSpecificItem).asString()
                 }
+
 
                 ConfirmationItem(
                     label = UiText.stringResource(R.string.type_of_value_to_be_collected).asString(),

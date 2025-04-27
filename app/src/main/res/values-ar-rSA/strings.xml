@@ -41,6 +41,8 @@
     <string name="participant_count_special">%1$d شخص</string>
     <string name="gold_with_type">ذهب (%1$s)</string>
     <string name="currency_with_type">عملة (%1$s)</string>
+    <string name="item_type_currency">عملة ($, €, £)</string>
+    <string name="item_type_gold">ذهب (🥇, 🪙, 💰)</string>
     <string name="duration_months">(%1$s) شهر</string>
 
     <string name="spin_wheel">تدوير العجلة</string>

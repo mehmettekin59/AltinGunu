@@ -43,6 +43,8 @@
     <string name="participant_count_special">%1$d kişi</string>
     <string name="gold_with_type">Altın (%1$s)</string>
     <string name="currency_with_type">Döviz (%1$s)</string>
+    <string name="item_type_currency">Döviz ($, €, £)</string>
+    <string name="item_type_gold">Altın (🥇, 🪙, 💰)</string>
     <string name="duration_months">(%1$s) ay</string>
 
 

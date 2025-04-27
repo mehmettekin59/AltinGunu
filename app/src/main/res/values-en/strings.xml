@@ -42,6 +42,8 @@
     <string name="participant_count_special">%1$d participants</string>
     <string name="gold_with_type">Gold (%1$s)</string>
     <string name="currency_with_type">Currency (%1$s)</string>
+    <string name="item_type_currency">Currency ($, €, £)</string>
+    <string name="item_type_gold">Gold (🥇, 🪙, 💰)</string>
     <string name="duration_months">%1$s months</string>
 
     <string name="spin_wheel">Spin the Wheel</string>
