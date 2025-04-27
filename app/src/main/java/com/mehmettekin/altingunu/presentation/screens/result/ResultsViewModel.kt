@@ -230,7 +230,7 @@ class ResultsViewModel @Inject constructor(
                     if (rate != null) {
                         // Use the rate's sales price for display
                         val formattedValue = ValueFormatter.formatWithSymbol(rate.satis, settings.itemType, specificItemCode)
-                        "$formattedValue TL"
+                        UiText.stringResource(R.string.currency_value, formattedValue).asString(context)
                     } else {
                         UiText.stringResource(R.string.price_not_found).asString(context)
                     }

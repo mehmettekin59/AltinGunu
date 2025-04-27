@@ -1,5 +1,8 @@
 package com.mehmettekin.altingunu.domain.model
 
+import androidx.compose.runtime.Immutable
+
+@Immutable
 data class ParticipantsScreenWholeInformation(
     val participantCount: Int,
     val participants: List<Participant>,

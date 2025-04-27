@@ -473,7 +473,7 @@ private fun ResultsSettingsSummary(
                                 }
 
                                 Text(
-                                    text = "$formattedValue TL",
+                                    text = UiText.stringResource(R.string.currency_value, formattedValue).asString(),
                                     style = MaterialTheme.typography.bodyMedium,
                                     fontWeight = FontWeight.SemiBold,
                                     color = NavyBlue

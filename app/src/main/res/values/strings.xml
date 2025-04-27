@@ -140,6 +140,7 @@
     <string name="error_changing_update_interval">Güncelleme aralığı değiştirme hatası: %1$s</string>
     <string name="language_change_error">Dil değiştirme hatası: %1$s</string>
     <string name="an_error_occurred_while_loading_settings">Ayarları yüklerken hata oluştu: %1$s</string>
-
+    <string name="currency_value">%1$s TL</string>
+    <string name="currency_unit">TL</string>
 
 </resources>

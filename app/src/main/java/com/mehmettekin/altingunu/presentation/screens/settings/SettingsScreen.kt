@@ -1,5 +1,7 @@
 package com.mehmettekin.altingunu.presentation.screens.settings
 
+import android.app.Activity
+import android.content.Intent
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -22,6 +24,7 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
+import com.mehmettekin.altingunu.MainActivity
 import com.mehmettekin.altingunu.presentation.screens.common.CommonTopAppBar
 import com.mehmettekin.altingunu.ui.theme.Gold
 import com.mehmettekin.altingunu.ui.theme.NavyBlue
@@ -30,6 +33,106 @@ import com.mehmettekin.altingunu.utils.UiText
 import com.mehmettekin.altingunu.R
 
 
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun SettingsScreen(
+    navController: NavController,
+    viewModel: SettingsViewModel = hiltViewModel()
+) {
+    val state by viewModel.state.collectAsStateWithLifecycle()
+    val context = LocalContext.current
+    val snackbarHostState = remember { SnackbarHostState() }
+
+    // ScrollBehavior için gerekli
+    val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
+
+    // Uygulama versiyon bilgisini al
+    val appVersion = remember {
+        try {
+            val pInfo = context.packageManager.getPackageInfo(context.packageName, 0)
+            pInfo.versionName
+        } catch (e: Exception) {
+            "1.0.0" // Hata durumunda varsayılan değer
+        }
+    }
+
+    // Dil değişikliği için LaunchedEffect
+    LaunchedEffect(state.languageChanged) {
+        if (state.languageChanged) {
+            // Mevcut aktiviteyi yeniden başlat
+            val intent = Intent(context, MainActivity::class.java).apply {
+                addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK)
+            }
+            context.startActivity(intent)
+
+            // Eğer bir Activity context'i ise, mevcut Activity'yi sonlandır
+            if (context is Activity) {
+                context.finish()
+            }
+            // Bayrağı sıfırla
+            viewModel.resetLanguageChanged()
+        }
+    }
+
+    // Handle error messages
+    LaunchedEffect(state.error) {
+        state.error?.let { error ->
+            snackbarHostState.showSnackbar(error.asString(context))
+            viewModel.onEvent(SettingsEvent.OnErrorDismiss)
+        }
+    }
+
+    Scaffold(
+        modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
+        topBar = {
+            CommonTopAppBar(
+                title = UiText.stringResource(R.string.title_settings).asString(),
+                navController = navController,
+                isSettingsScreen = true,
+                onBackPressed = { navController.navigateUp() },
+                actions = {
+                    IconButton(onClick = { viewModel.onEvent(SettingsEvent.OnDefaultsReset) }) {
+                        Icon(
+                            imageVector = Icons.Default.Refresh,
+                            contentDescription = UiText.stringResource(R.string.title_default_settings).asString(),
+                            tint = White
+                        )
+                    }
+                }
+            )
+        },
+        snackbarHost = { SnackbarHost(snackbarHostState) }
+    ) { paddingValues ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues)
+                .padding(16.dp)
+                .verticalScroll(rememberScrollState()),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            // Language settings
+            LanguageSettingsCard(
+                selectedLanguage = state.selectedLanguage,
+                onLanguageChange = { viewModel.onEvent(SettingsEvent.OnLanguageChange(it)) }
+            )
+
+            // API Update Interval Settings
+            UpdateIntervalSettingsCard(
+                currentInterval = state.apiUpdateInterval,
+                onIntervalChange = { viewModel.onEvent(SettingsEvent.OnApiUpdateIntervalChange(it)) }
+            )
+
+            // App version info
+            AppInfoCard(appVersion = appVersion.toString())
+
+            // Reset to defaults button - Toolbar'a taşındığı için kaldırıldı
+            Spacer(modifier = Modifier.height(16.dp))
+        }
+    }
+}
+/*
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsScreen(
@@ -111,6 +214,7 @@ fun SettingsScreen(
         }
     }
 }
+*/
 
 @Composable
 fun LanguageSettingsCard(
@@ -312,7 +416,7 @@ fun UpdateIntervalSettingsCard(
                                 fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal
                             )
 
-                            if (index == 2 && seconds == 60) { // Normal için etiket göster
+                            if (index == 3 && seconds == 120) { // Normal için etiket göster
                                 Text(
                                     text = UiText.stringResource(R.string.normal).asString(),
                                     fontSize = 10.sp,

@@ -4,7 +4,9 @@ import com.mehmettekin.altingunu.utils.UiText
 
 data class SettingsState(
     val selectedLanguage: String = "tr",
-    val apiUpdateInterval: Int = 60,
+    val apiUpdateInterval: Int = 120,
     val isLoading: Boolean = false,
-    val error: UiText? = null
+    val error: UiText? = null,
+    val needsRestart: Boolean = false,
+    val languageChanged: Boolean = false
 )

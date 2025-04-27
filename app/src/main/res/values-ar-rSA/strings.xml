@@ -84,8 +84,8 @@
     <string name="data_load_failed">فشل تحميل البيانات: %1$s</string>
     <string name="data_load_failed_retry">فشل تحميل البيانات. حاول مرة أخرى.</string>
     <string name="last_update">آخر تحديث</string>
-    <string name="buy">شراء &#160; :&#9;</string>
-    <string name="sell">بيع :</string>
+    <string name="buy">شراء &#160; : &#9;</string>
+    <string name="sell">بيع  &#160;&#160;&#160;&#160; : &#9;</string>
     <string name="set_up_raffle_for_thegold_day">إعداد سحب ليوم الذهب</string>
     <string name="raffle_for_thegold_day">سحب يوم الذهب</string>
     <string name="gold_day">يوم الذهب</string>
@@ -135,4 +135,6 @@
     <string name="error_changing_update_interval">خطأ في تغيير فترة التحديث: %1$s</string>
     <string name="language_change_error">خطأ في تغيير اللغة: %1$s</string>
     <string name="an_error_occurred_while_loading_settings">حدث خطأ أثناء تحميل الإعدادات: %1$s</string>
+    <string name="currency_value">%1$s TL</string>
+    <string name="currency_unit">TL</string>
 </resources>

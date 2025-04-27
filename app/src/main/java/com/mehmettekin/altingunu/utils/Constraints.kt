@@ -47,7 +47,7 @@ object Constraints {
 
     // Default settings
     object DefaultSettings {
-        const val DEFAULT_API_UPDATE_INTERVAL = 60 // seconds
+        const val DEFAULT_API_UPDATE_INTERVAL = 120 // seconds
         const val DEFAULT_LANGUAGE = "tr" // Turkish
     }
 }

@@ -1,5 +1,6 @@
 package com.mehmettekin.altingunu
 
+import android.content.Context
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -15,11 +16,23 @@ import androidx.navigation.compose.rememberNavController
 import com.mehmettekin.altingunu.presentation.navigation.SetupNavGraph
 import com.mehmettekin.altingunu.presentation.screens.splash.SplashScreen
 import com.mehmettekin.altingunu.ui.theme.AltinGunuTheme
+import com.mehmettekin.altingunu.utils.LocaleHelper
 import dagger.hilt.android.AndroidEntryPoint
 
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
+
+    override fun attachBaseContext(newBase: Context?) {
+        if (newBase != null) {
+            val app = newBase.applicationContext as AltinGunuApplication
+            val languageCode = app.currentLanguage
+            super.attachBaseContext(LocaleHelper.updateLocale(newBase, languageCode))
+        } else {
+            super.attachBaseContext(newBase)
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 

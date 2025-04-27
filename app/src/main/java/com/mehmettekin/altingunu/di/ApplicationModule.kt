@@ -1,5 +1,7 @@
 package com.mehmettekin.altingunu.di
 
+import android.content.Context
+import com.mehmettekin.altingunu.AltinGunuApplication
 import com.mehmettekin.altingunu.data.remote.KapaliCarsiApi
 import com.mehmettekin.altingunu.data.repository.DrawRepositoryImpl
 import com.mehmettekin.altingunu.data.repository.KapaliCarsiRepositoryImpl
@@ -13,6 +15,7 @@ import dagger.Binds
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
+import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -59,6 +62,14 @@ abstract class ApplicationModule {
         fun provideApplicationCoroutineScope(): CoroutineScope {
             return CoroutineScope(SupervisorJob() + Dispatchers.IO)
         }
+
+        // AltinGunuApplication için provider ekleyin
+        @Provides
+        @Singleton
+        fun provideApplication(@ApplicationContext context: Context): AltinGunuApplication {
+            return context.applicationContext as AltinGunuApplication
+        }
+
     }
 }
 

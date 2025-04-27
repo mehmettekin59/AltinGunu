@@ -136,4 +136,6 @@
     <string name="error_changing_update_interval">Error changing update interval: %1$s</string>
     <string name="language_change_error">Language change error: %1$s</string>
     <string name="an_error_occurred_while_loading_settings">An error occurred while loading settings: %1$s</string>
+    <string name="currency_value">%1$s TL</string>
+    <string name="currency_unit">TL</string>
 </resources>
