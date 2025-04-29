@@ -45,6 +45,9 @@ hilt-compiler = { module = "com.google.dagger:hilt-android-compiler", version.re
 hilt-navigation = { module = "androidx.hilt:hilt-navigation-compose", version.ref = "hiltNavigation" }
 androidx-navigation-compose = { module = "androidx.navigation:navigation-compose", version.ref = "navigationCompose" }
 data-store = { module = "androidx.datastore:datastore-preferences", version.ref = "datastore" }
+# DataStore'un temel bileşenleri
+data-store-core = { module = "androidx.datastore:datastore-core", version.ref = "datastore" }
+data-store-preferences-core = { module = "androidx.datastore:datastore-preferences-core", version.ref = "datastore" }
 
 retrofit-core = { module = "com.squareup.retrofit2:retrofit", version.ref = "retrofit" }
 retrofit-rxjava3 = { module = "com.squareup.retrofit2:adapter-rxjava3", version.ref = "retrofit" }

@@ -1,9 +1,9 @@
 package com.mehmettekin.altingunu.data.local
 
-import android.content.Context
+import androidx.datastore.core.DataStore
+import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
-import com.mehmettekin.altingunu.di.drawResultsDataStore
 import com.mehmettekin.altingunu.domain.model.DrawResult
 import com.mehmettekin.altingunu.domain.model.Participant
 import com.mehmettekin.altingunu.domain.model.ParticipantsScreenWholeInformation
@@ -17,7 +17,7 @@ import javax.inject.Singleton
 
 @Singleton
 class DrawResultsDataStore @Inject constructor(
-    private val context: Context,
+    private val dataStore: DataStore<Preferences>,
     moshi: Moshi
 ) {
     private val drawResultsKey = stringPreferencesKey("draw_results")
@@ -40,34 +40,33 @@ class DrawResultsDataStore @Inject constructor(
 
     // Draw Results operations
     suspend fun saveDrawResults(results: List<DrawResult>) {
-        context.drawResultsDataStore.edit { preferences ->
+        dataStore.edit { preferences ->
             preferences[drawResultsKey] = drawResultsAdapter.toJson(results)
         }
     }
 
     suspend fun getDrawResults(): List<DrawResult> {
-        return context.drawResultsDataStore.data.map { preferences ->
+        return dataStore.data.map { preferences ->
             val json = preferences[drawResultsKey] ?: "[]"
             drawResultsAdapter.fromJson(json) ?: emptyList()
         }.first()
     }
 
     suspend fun clearDrawResults() {
-        context.drawResultsDataStore.edit { preferences ->
+        dataStore.edit { preferences ->
             preferences[drawResultsKey] = "[]"
         }
     }
 
     // Participants operations
     suspend fun saveParticipants(participants: List<Participant>) {
-
-        context.drawResultsDataStore.edit { preferences ->
+        dataStore.edit { preferences ->
             preferences[participantsKey] = participantsAdapter.toJson(participants)
         }
     }
 
     suspend fun getParticipants(): List<Participant> {
-        return context.drawResultsDataStore.data.map { preferences ->
+        return dataStore.data.map { preferences ->
             val json = preferences[participantsKey] ?: "[]"
             participantsAdapter.fromJson(json) ?: emptyList()
         }.first()
@@ -75,16 +74,15 @@ class DrawResultsDataStore @Inject constructor(
 
     // Draw Settings operations
     suspend fun saveDrawSettings(settings: ParticipantsScreenWholeInformation) {
-        context.drawResultsDataStore.edit { preferences ->
+        dataStore.edit { preferences ->
             preferences[drawSettingsKey] = drawSettingsAdapter.toJson(settings)
         }
     }
 
     suspend fun getDrawSettings(): ParticipantsScreenWholeInformation? {
-        return context.drawResultsDataStore.data.map { preferences ->
+        return dataStore.data.map { preferences ->
             val json = preferences[drawSettingsKey] ?: return@map null
-           drawSettingsAdapter.fromJson(json)
-
+            drawSettingsAdapter.fromJson(json)
         }.first()
     }
 }

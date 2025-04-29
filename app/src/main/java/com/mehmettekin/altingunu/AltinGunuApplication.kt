@@ -7,9 +7,8 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import javax.inject.Inject
 
-
 @HiltAndroidApp
-class AltinGunuApplication: Application(){
+class AltinGunuApplication: Application() {
 
     @Inject
     lateinit var settingsDataStore: SettingsDataStore
@@ -21,10 +20,9 @@ class AltinGunuApplication: Application(){
         super.onCreate()
 
         // Dil tercihini senkron olarak yükle
-        val settingsDataStoreImpl = SettingsDataStore(this)
         currentLanguage = runBlocking {
             try {
-                settingsDataStoreImpl.getLanguage().first()
+                settingsDataStore.getLanguage().first()
             } catch (e: Exception) {
                 "tr" // Varsayılan dil
             }

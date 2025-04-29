@@ -60,8 +60,10 @@ dependencies {
     //navigation compose
     implementation(libs.androidx.navigation.compose)
 
-    //Data store
+
     implementation(libs.data.store)
+    implementation(libs.data.store.core)
+    implementation(libs.data.store.preferences.core)
 
     //Retrofit
     implementation(libs.retrofit.core)

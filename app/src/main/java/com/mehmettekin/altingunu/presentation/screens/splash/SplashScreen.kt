@@ -1,12 +1,8 @@
 package com.mehmettekin.altingunu.presentation.screens.splash
 
-import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -17,9 +13,9 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.rounded.ChevronRight
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -29,14 +25,12 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -51,7 +45,6 @@ import com.mehmettekin.altingunu.ui.theme.Gold
 import com.mehmettekin.altingunu.ui.theme.NavyBlue
 import com.mehmettekin.altingunu.ui.theme.White
 import com.mehmettekin.altingunu.utils.UiText
-import kotlinx.coroutines.delay
 
 @Composable
 fun SplashScreen(navController: NavController) {
@@ -64,7 +57,7 @@ fun SplashScreen(navController: NavController) {
         WelcomeText(
             modifier = Modifier
                 .align(Alignment.TopCenter)
-                .padding(top = 48.dp)
+                .padding(top = 64.dp)
         )
 
 
@@ -76,13 +69,14 @@ fun SplashScreen(navController: NavController) {
                 .padding(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            val isChecked = remember { mutableStateOf(false) }
+            var isChecked = remember { mutableStateOf(false) }
             DisclaimerBox(
                 modifier = Modifier
 
             )
             Spacer(modifier = Modifier.height(14.dp))
             Row(
+                modifier = Modifier.clickable{isChecked.value = !isChecked.value},
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Checkbox(
@@ -94,8 +88,7 @@ fun SplashScreen(navController: NavController) {
                         checkedColor = Gold,
                         checkmarkColor = White,
                         disabledUncheckedColor = White
-                    ),
-                    modifier = Modifier.clickable{ isChecked.value = !isChecked.value}
+                    )
                 )
 
                 Text(
@@ -106,7 +99,7 @@ fun SplashScreen(navController: NavController) {
                 )
             }
 
-            Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(48.dp))
 
             Button(
                 onClick = {
@@ -180,10 +173,10 @@ private fun WelcomeText(modifier: Modifier = Modifier) {
         )
         Spacer(modifier = Modifier.height(8.dp))
         Icon(
-            painter = painterResource(R.drawable.gold_bar),
+            painter = painterResource(R.drawable.image1),
             contentDescription = null,
-            modifier = Modifier.size(64.dp),
-            tint = Color.Unspecified
+            modifier = Modifier.size(160.dp),
+            tint = Color.Unspecified,
         )
     }
 }
