@@ -112,7 +112,7 @@ fun ResultScreen(
                 navController = navController,
                 backgroundColor = NavyBlue,
                 isSettingsScreen = true,
-                onBackPressed = { navController.navigateUp() },
+
                 actions = {
                     // PDF görüntüleme butonu
                     IconButton(onClick = {
