@@ -34,9 +34,9 @@ object ValueFormatter {
                     isGroupingUsed = true
                 } else {
                     // Special case for currencies like JPY (no decimals)
-                    val minimumDecimals = if (specificItem == "JPYTRY") 0 else 2
-                    minimumFractionDigits = minimumDecimals
-                    maximumFractionDigits = minimumDecimals
+                    //val minimumDecimals = if (specificItem == "JPYTRY") 0 else 2
+                    minimumFractionDigits = 0// minimumDecimals
+                    maximumFractionDigits = 2//minimumDecimals
                     isGroupingUsed = true
                 }
             }

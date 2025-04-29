@@ -160,7 +160,7 @@ class WheelViewModel @Inject constructor(
         // State'i de güncelleyin
         _state.value = _state.value.copy(
             winners = winners,  // State'deki winners listesini güncelle
-            participants = _state.value.participants.filter { it != winnerName },// Bu da eklendi silebilirsin
+            participants = _state.value.participants.filter { it != winnerName },
             currentWinner = winnerName
         )
     }
@@ -219,6 +219,57 @@ class WheelViewModel @Inject constructor(
 
         val amountPerPerson = settings.calculateAmountPerPerson()
 
+        val formattedAmount = settings.currentFormattedPrice ?:
+        ValueFormatter.formatWithSymbol(
+            amountPerPerson.toString(),
+            settings.itemType,
+            settings.specificItem
+        )
+
+        // Starting month and year
+        val calendar = Calendar.getInstance()
+        calendar.set(Calendar.YEAR, settings.startYear)
+        calendar.set(Calendar.MONTH, settings.startMonth - 1) // 0-based month
+
+        val dateFormat = SimpleDateFormat("MMMM yyyy", Locale.getDefault())
+
+        // Katılımcı sayısının ay sayısına bölümünden her aya kaç kişi düştüğünü hesaplıyoruz
+        val peoplePerMonth = settings.participantCount / settings.durationMonths
+
+        // Generate results for each winner
+        winners.forEachIndexed { index, participant ->
+            // Katılımcının hangi aya düştüğünü hesaplıyoruz
+            val monthIndex = index / peoplePerMonth
+
+            // Ayı ayarlıyoruz
+            calendar.set(Calendar.YEAR, settings.startYear)
+            calendar.set(Calendar.MONTH, settings.startMonth - 1)
+            calendar.add(Calendar.MONTH, monthIndex)
+
+            val monthName = dateFormat.format(calendar.time)
+
+            results.add(
+                DrawResult(
+                    participantId = participant.id,
+                    participantName = participant.name,
+                    month = monthName,
+                    amount = formattedAmount
+                )
+            )
+        }
+
+        return results
+    }
+
+    /*
+    private fun createDrawResults(
+        winners: List<Participant>,
+        settings: ParticipantsScreenWholeInformation
+    ): List<DrawResult> {
+        val results = mutableListOf<DrawResult>()
+
+        val amountPerPerson = settings.calculateAmountPerPerson()
+
 
         val formattedAmount = settings.currentFormattedPrice ?:
         ValueFormatter.formatWithSymbol(
@@ -255,6 +306,8 @@ class WheelViewModel @Inject constructor(
 
         return results
     }
+
+     */
 }
 
 

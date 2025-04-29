@@ -10,7 +10,7 @@ import javax.inject.Inject
 class ValidateDrawSettingsUseCase @Inject constructor() {
     operator fun invoke(settings: ParticipantsScreenWholeInformation): ResultState<ParticipantsScreenWholeInformation> {
         // Check if participant count is valid
-        if (settings.participantCount <= 0) {
+        if (settings.participantCount <= 2) {
             return ResultState.Error(UiText.stringResource(R.string.error_invalid_participant_count))
         }
 
@@ -27,6 +27,15 @@ class ValidateDrawSettingsUseCase @Inject constructor() {
         // Check if duration is valid
         if (settings.durationMonths <= 0) {
             return ResultState.Error(UiText.stringResource(R.string.error_invalid_duration))
+        }
+        // Kural a: durationMonths, participantCount'tan büyük olamaz
+        if (settings.durationMonths > settings.participantCount) {
+            return ResultState.Error(UiText.stringResource(R.string.error_duration_greater_than_participants))
+        }
+
+        // Kural b: participantCount değeri durationMonths'a tam bölünebilir olmalı
+        if (settings.participantCount % settings.durationMonths != 0) {
+            return ResultState.Error(UiText.stringResource(R.string.error_participants_not_divisible_by_duration))
         }
 
         // For currency and gold, check if specific item is selected

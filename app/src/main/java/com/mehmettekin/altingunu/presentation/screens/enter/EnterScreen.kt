@@ -11,8 +11,8 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.rounded.ChevronRight
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -22,11 +22,12 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -45,7 +46,6 @@ import com.mehmettekin.altingunu.utils.ResultState
 import com.mehmettekin.altingunu.utils.UiText
 import com.mehmettekin.altingunu.utils.ValueFormatter
 import kotlin.math.absoluteValue
-
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -523,6 +523,9 @@ fun <T> CoverFlowCarousel(
     pageSpacing: Dp = (-50).dp,
     itemContent: @Composable (item: T, modifier: Modifier, elevation: Dp) -> Unit
 ) {
+
+    val layoutDirection = LocalLayoutDirection.current
+    val isRtl = layoutDirection == LayoutDirection.Rtl
     // Make sure initial page is within bounds
     val safeInitialPage = remember(items.size, initialPageIndex) {
         if (items.isNotEmpty()) initialPageIndex.coerceIn(0, items.size - 1) else 0
@@ -553,11 +556,8 @@ fun <T> CoverFlowCarousel(
 
         // Interpolate values for animations
         val scale = lerp(start = minScale, stop = centerScale, fraction = 1f - absOffset)
-        val rotationY =
-            lerp(start = maxRotationY, stop = 0f, fraction = 1f - absOffset) * -pageOffset.coerceIn(
-                -1f,
-                1f
-            )
+        val rotationDirection = if (isRtl) 1f else -1f
+        val rotationY = lerp(start = maxRotationY, stop = 0f, fraction = 1f - absOffset) * rotationDirection * pageOffset.coerceIn(-1f, 1f)
         val alpha = lerp(start = minAlpha, stop = 1f, fraction = 1f - absOffset)
         val elevation = lerp(
             start = minElevation,
@@ -629,18 +629,19 @@ fun GoldDayLotteryCard(
             )
 
             Spacer(modifier = Modifier.height(16.dp))
-
             Button(
                 onClick = onClick,
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = NavyBlue,
-                    contentColor = White
+                    containerColor = White,
+                    contentColor = NavyBlue
                 ),
+                border = BorderStroke(width = 1.dp, color = NavyBlue),
                 shape = RoundedCornerShape(8.dp),
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Icon(
-                    imageVector = Icons.AutoMirrored.Filled.ArrowForward,
+                    imageVector = Icons.Rounded.ChevronRight,
+                    tint = NavyBlue,
                     contentDescription = null
                 )
 
@@ -651,6 +652,7 @@ fun GoldDayLotteryCard(
                     style = MaterialTheme.typography.labelLarge
                 )
             }
+
         }
     }
 }

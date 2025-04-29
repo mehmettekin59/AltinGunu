@@ -15,8 +15,8 @@ object Constraints {
         "YARIM_YENI" to "Yarım (Yeni)",
         "AYAR22" to "22 Ayar Altın",
         "AYAR14" to "14 Ayar Altın",
-        "ATA5_ESKI" to "5'li Ata (Eski)",
-        "ATA5_YENI" to "5'li Ata (Yeni)",
+        "ATA5_ESKI" to "5li Ata (Eski)",
+        "ATA5_YENI" to "5li Ata (Yeni)",
         "GREMESE_ESKI" to "Gremse (Eski)",
         "GREMESE_YENI" to "Gremse (Yeni)"
     )

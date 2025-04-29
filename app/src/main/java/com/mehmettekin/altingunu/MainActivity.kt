@@ -13,11 +13,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.compose.rememberNavController
+import com.mehmettekin.altingunu.data.local.SettingsDataStore
 import com.mehmettekin.altingunu.presentation.navigation.SetupNavGraph
 import com.mehmettekin.altingunu.presentation.screens.splash.SplashScreen
 import com.mehmettekin.altingunu.ui.theme.AltinGunuTheme
 import com.mehmettekin.altingunu.utils.LocaleHelper
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.runBlocking
 
 
 @AndroidEntryPoint
@@ -35,7 +38,6 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
         enableEdgeToEdge()
         setContent {
             AltinGunuTheme {

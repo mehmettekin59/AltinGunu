@@ -17,7 +17,6 @@
     <string name="title_default_settings">Default Settings</string>
     <string name="error_returning_to_default_settings">Default Settings</string>
 
-    <string name="error_no_participants">Please add at least one participant</string>
     <string name="error_min_participants">At least 2 participants are required for the raffle</string>
     <string name="error_duplicate_names">There cannot be multiple participants with the same name</string>
     <string name="error_empty_names">Participant names cannot be empty</string>
@@ -138,4 +137,12 @@
     <string name="an_error_occurred_while_loading_settings">An error occurred while loading settings: %1$s</string>
     <string name="currency_value">%1$s TL</string>
     <string name="currency_unit">TL</string>
+    <string name="error_duration_greater_than_participants">Duration (Months) cannot be greater than the number of participants</string>
+    <string name="error_participants_not_divisible_by_duration">The number of participants must be evenly divisible by the Duration (Months)</string>
+    <string name="confirm_understanding">I have read and understood.</string>
+    <string name="welcome_title_message">Welcome to the Gold Day Application!</string>
+    <string name="information_about_rules">The currency and gold rate information provided by this application is for informational purposes only.
+    The data may be outdated and is not recommended to be used as a reference in buying and selling transactions.
+    All financial decisions are the user\'s own responsibility. Data is obtained from an API and its accuracy cannot be guaranteed.
+    For accurate and up-to-date information, please refer to authorized financial institutions.</string>
 </resources>

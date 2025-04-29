@@ -15,10 +15,14 @@ data class ParticipantsScreenWholeInformation(
     val currentFormattedPrice: String? = null
 ){
     fun calculateAmountPerPerson(): Double {
-        return if (participantCount <= durationMonths) {
+
+        val numberOfPeopleToDistributeInOneMonth = participantCount /durationMonths
+
+        return if (participantCount == durationMonths) {
             monthlyAmount
         } else {
-            monthlyAmount * durationMonths / participantCount
+            participantCount*monthlyAmount/numberOfPeopleToDistributeInOneMonth
         }
     }
 }
+

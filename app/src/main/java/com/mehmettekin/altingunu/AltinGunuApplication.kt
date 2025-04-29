@@ -2,12 +2,9 @@ package com.mehmettekin.altingunu
 
 import android.app.Application
 import com.mehmettekin.altingunu.data.local.SettingsDataStore
-import com.mehmettekin.altingunu.data.repository.UserPreferencesRepositoryImpl
 import dagger.hilt.android.HiltAndroidApp
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import javax.inject.Inject
 
 
@@ -22,19 +19,14 @@ class AltinGunuApplication: Application(){
 
     override fun onCreate() {
         super.onCreate()
-        // Uygulama başlatıldığında dil tercihini yükle
-        loadLanguagePreference()
-    }
 
-    private fun loadLanguagePreference() {
-        // Arka planda yükle, UI thread'i bloke etmeden
-        CoroutineScope(Dispatchers.IO).launch {
+        // Dil tercihini senkron olarak yükle
+        val settingsDataStoreImpl = SettingsDataStore(this)
+        currentLanguage = runBlocking {
             try {
-                val userPrefsRepo = UserPreferencesRepositoryImpl(settingsDataStore)
-                currentLanguage = userPrefsRepo.getLanguage().first()
+                settingsDataStoreImpl.getLanguage().first()
             } catch (e: Exception) {
-                // Hata durumunda varsayılan dili kullan
-                currentLanguage = "tr"
+                "tr" // Varsayılan dil
             }
         }
     }

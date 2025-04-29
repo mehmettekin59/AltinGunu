@@ -2,14 +2,29 @@ package com.mehmettekin.altingunu.presentation.screens.splash
 
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowForward
+import androidx.compose.material.icons.rounded.ChevronRight
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Checkbox
+import androidx.compose.material3.CheckboxDefaults
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -21,70 +36,145 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.mehmettekin.altingunu.R
 import com.mehmettekin.altingunu.presentation.navigation.Screen
 import com.mehmettekin.altingunu.ui.theme.Gold
 import com.mehmettekin.altingunu.ui.theme.NavyBlue
+import com.mehmettekin.altingunu.ui.theme.White
+import com.mehmettekin.altingunu.utils.UiText
 import kotlinx.coroutines.delay
 
 @Composable
 fun SplashScreen(navController: NavController) {
-    var startAnimation by remember { mutableStateOf(false) }
-    val alphaAnim = animateFloatAsState(
-        targetValue = if (startAnimation) 1f else 0f,
-        animationSpec = tween(durationMillis = 1000),
-        label = "SplashAlpha"
-    )
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(NavyBlue)
+    ) {
+        // WelcomeText en üstte
+        WelcomeText(
+            modifier = Modifier
+                .align(Alignment.TopCenter)
+                .padding(top = 48.dp)
+        )
 
-    LaunchedEffect(key1 = true) {
-        startAnimation = true
-        delay(1500)
-        navController.navigate(Screen.Enter.route) {
-            popUpTo(Screen.Splash.route) { inclusive = true }
+
+
+        // En altta Checkbox ve Button
+        Column(
+            modifier = Modifier
+                .align(Alignment.Center)
+                .padding(16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            DisclaimerBox(
+                modifier = Modifier
+
+            )
+            Spacer(modifier = Modifier.height(14.dp))
+            Row(
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Checkbox(
+                    checked = true,
+                    onCheckedChange = null,
+                    enabled = false,
+                    colors = CheckboxDefaults.colors(
+                        disabledCheckedColor = Gold,
+                        checkedColor = Gold,
+                        checkmarkColor = White
+                    )
+                )
+
+                Text(
+                    text = UiText.stringResource(R.string.confirm_understanding).asString(),
+                    color = White,
+                    fontWeight = FontWeight.Medium,
+                    modifier = Modifier.padding(start = 8.dp)
+                )
+            }
+
+            Spacer(modifier = Modifier.height(24.dp))
+
+            Button(
+                onClick = {
+                    navController.navigate(Screen.Enter.route) {
+                        popUpTo(Screen.Splash.route) { inclusive = true }
+                    }
+                },
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = NavyBlue,
+                    contentColor = White
+                ),
+                border = BorderStroke(width = 1.dp, color = Gold),
+                shape = RoundedCornerShape(8.dp),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Icon(
+                    imageVector = Icons.Rounded.ChevronRight,
+                    tint = Gold,
+                    contentDescription = null
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(
+                    text = UiText.stringResource(R.string.continue_button).asString(),
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 18.sp,
+                    color = Gold
+                )
+            }
         }
     }
-
-    Splash(alpha = alphaAnim.value)
 }
 
 @Composable
-fun Splash(alpha: Float) {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(NavyBlue),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
+private fun DisclaimerBox(modifier: Modifier = Modifier) {
+    Box(
+        modifier = modifier
+            .background(
+                color = Gold,
+                shape = RoundedCornerShape(8.dp)
+            )
+            .padding(8.dp)
     ) {
-        Image(
-            modifier = Modifier
-                .size(120.dp)
-                .alpha(alpha),
-            painter = painterResource(id = R.drawable.gold_bar),
-            contentDescription = "Logo"
-        )
-
-        Spacer(modifier = Modifier.height(16.dp))
-
         Text(
-            text = "Altın Günü",
-            color = Gold,
-            style = MaterialTheme.typography.headlineLarge,
-            fontWeight = FontWeight.Bold,
-            modifier = Modifier.alpha(alpha)
+            text = UiText.stringResource(R.string.information_about_rules).asString(),
+            style = MaterialTheme.typography.bodyMedium,
+            textAlign = TextAlign.Justify,
+            fontSize = 16.sp,
+            color = White,
+            modifier = Modifier.fillMaxWidth()
         )
+    }
+}
 
+@Composable
+private fun WelcomeText(modifier: Modifier = Modifier) {
+    Column(
+        modifier = modifier,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text(
+            text = stringResource(R.string.welcome_title_message),
+            style = MaterialTheme.typography.titleLarge,
+            textAlign = TextAlign.Center,
+            fontSize = 20.sp,
+            color = White
+        )
         Spacer(modifier = Modifier.height(8.dp))
-
-        Text(
-            text = "Çekiliş Uygulaması",
-            color = Gold,
-            style = MaterialTheme.typography.titleMedium,
-            modifier = Modifier.alpha(alpha)
+        Icon(
+            painter = painterResource(R.drawable.gold_bar),
+            contentDescription = null,
+            modifier = Modifier.size(64.dp),
+            tint = Color.Unspecified
         )
     }
 }

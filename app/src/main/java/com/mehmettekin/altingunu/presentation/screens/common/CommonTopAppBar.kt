@@ -3,7 +3,7 @@ package com.mehmettekin.altingunu.presentation.screens.common
 
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.ArrowBackIosNew
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -50,7 +50,7 @@ fun CommonTopAppBar(
             if (onBackPressed != null) {
                 IconButton(onClick = onBackPressed) {
                     Icon(
-                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                        imageVector = Icons.Default.ArrowBackIosNew,
                         contentDescription = "Geri Dön",
                         tint = iconColor
                     )

@@ -9,12 +9,8 @@ import javax.inject.Inject
 class ValidateParticipantsUseCase @Inject constructor() {
     operator fun invoke(participants: List<Participant>): ResultState<List<Participant>> {
         // Check if there are any participants
-        if (participants.isEmpty()) {
-            return ResultState.Error(UiText.stringResource(R.string.error_no_participants))
-        }
-
         // Check if there are enough participants (at least 2)
-        if (participants.size < 2) {
+        if (participants.isEmpty() || participants.size < 2) {
             return ResultState.Error(UiText.stringResource(R.string.error_min_participants))
         }
 
