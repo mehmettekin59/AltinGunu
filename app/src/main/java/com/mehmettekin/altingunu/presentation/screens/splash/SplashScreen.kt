@@ -5,6 +5,7 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -75,6 +76,7 @@ fun SplashScreen(navController: NavController) {
                 .padding(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
+            val isChecked = remember { mutableStateOf(false) }
             DisclaimerBox(
                 modifier = Modifier
 
@@ -84,14 +86,16 @@ fun SplashScreen(navController: NavController) {
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Checkbox(
-                    checked = true,
+                    checked = isChecked.value,
                     onCheckedChange = null,
                     enabled = false,
                     colors = CheckboxDefaults.colors(
                         disabledCheckedColor = Gold,
                         checkedColor = Gold,
-                        checkmarkColor = White
-                    )
+                        checkmarkColor = White,
+                        disabledUncheckedColor = White
+                    ),
+                    modifier = Modifier.clickable{ isChecked.value = !isChecked.value}
                 )
 
                 Text(
@@ -106,9 +110,14 @@ fun SplashScreen(navController: NavController) {
 
             Button(
                 onClick = {
-                    navController.navigate(Screen.Enter.route) {
-                        popUpTo(Screen.Splash.route) { inclusive = true }
+                    if (isChecked.value){
+                        navController.navigate(Screen.Enter.route) {
+                            popUpTo(Screen.Splash.route) { inclusive = true }
+                        }
+                    } else {
+                        //do nothing
                     }
+
                 },
                 colors = ButtonDefaults.buttonColors(
                     containerColor = NavyBlue,
