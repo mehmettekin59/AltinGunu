@@ -261,53 +261,7 @@ class WheelViewModel @Inject constructor(
         return results
     }
 
-    /*
-    private fun createDrawResults(
-        winners: List<Participant>,
-        settings: ParticipantsScreenWholeInformation
-    ): List<DrawResult> {
-        val results = mutableListOf<DrawResult>()
 
-        val amountPerPerson = settings.calculateAmountPerPerson()
-
-
-        val formattedAmount = settings.currentFormattedPrice ?:
-        ValueFormatter.formatWithSymbol(
-            amountPerPerson.toString(),
-            settings.itemType,
-            settings.specificItem
-        )
-
-        // Starting month and year
-        val calendar = Calendar.getInstance()
-        calendar.set(Calendar.YEAR, settings.startYear)
-        calendar.set(Calendar.MONTH, settings.startMonth - 1) // 0-based month
-
-        val dateFormat = SimpleDateFormat("MMMM yyyy", Locale.getDefault())
-
-        // Generate results for each winner
-        winners.forEachIndexed { index, participant ->
-            // Move calendar to the correct month for this participant
-            if (index > 0) {
-                calendar.add(Calendar.MONTH, 1)
-            }
-
-            val monthName = dateFormat.format(calendar.time)
-
-            results.add(
-                DrawResult(
-                    participantId = participant.id,
-                    participantName = participant.name,
-                    month = monthName,
-                    amount = formattedAmount
-                )
-            )
-        }
-
-        return results
-    }
-
-     */
 }
 
 

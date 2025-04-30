@@ -22,7 +22,8 @@ android {
 
     buildTypes {
         release {
-            isMinifyEnabled = false
+            isMinifyEnabled = true
+            isShrinkResources = true  // Kullanılmayan kaynakları kaldır
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
@@ -82,6 +83,8 @@ dependencies {
 
     //Extanded Icons
     implementation(libs.extended.icons)
+
+    implementation(libs.androidx.lifecycle.process)
 
 
     testImplementation(libs.junit)

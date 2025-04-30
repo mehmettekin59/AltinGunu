@@ -66,7 +66,7 @@ fun SplashScreen(navController: NavController) {
                 .padding(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            var isChecked = remember { mutableStateOf(false) }
+            var isChecked = remember { mutableStateOf(true) }
             DisclaimerBox(
                 modifier = Modifier
 

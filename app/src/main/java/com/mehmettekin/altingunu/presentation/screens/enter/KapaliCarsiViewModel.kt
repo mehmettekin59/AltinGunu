@@ -23,6 +23,7 @@ class KapaliCarsiViewModel @Inject constructor(
 
     // Saklanan tüm verilerin bir kopyası (Success durumunda güncellenir)
     // findExchangeRateByCode bunun üzerinden çalışacak
+
     private var currentDataList: List<ExchangeRate> = emptyList()
 
     init {

@@ -55,7 +55,6 @@
     <string name="remaining_participants_special">Kalan Katılımcılar: (%1$d)</string>
     <string name="winners">Kazananlar</string>
     <string name="winners_special">Kazananlar: (%1$d) </string>
-    <string name="all_participants_selected">Tüm katılımcılar seçildi!</string>
     <string name="no_winners_yet">Henüz kazanan yok</string>
     <string name="save_results">Sonuçları Kaydet</string>
     <string name="there_is_no_winner_yet">Henüz kazanan yok</string>

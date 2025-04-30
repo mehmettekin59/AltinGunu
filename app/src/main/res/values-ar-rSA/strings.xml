@@ -52,7 +52,6 @@
     <string name="remaining_participants_special">المشاركون المتبقون: (%1$d)</string>
     <string name="winners">الفائزون</string>
     <string name="winners_special">الفائزون: (%1$d) </string>
-    <string name="all_participants_selected">تم اختيار جميع المشاركين!</string>
     <string name="no_winners_yet">لا يوجد فائزون بعد</string>
     <string name="save_results">حفظ النتائج</string>
     <string name="there_is_no_winner_yet">لا يوجد فائز بعد</string>

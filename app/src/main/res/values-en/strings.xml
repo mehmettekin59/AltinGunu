@@ -53,7 +53,7 @@
     <string name="remaining_participants_special">Remaining: (%1$d)</string>
     <string name="winners">Winners</string>
     <string name="winners_special">Winners: (%1$d)</string>
-    <string name="all_participants_selected">All participants have been selected!</string>
+
     <string name="no_winners_yet">No winners yet</string>
     <string name="save_results">Save Results</string>
     <string name="there_is_no_winner_yet">There is no winner yet</string>

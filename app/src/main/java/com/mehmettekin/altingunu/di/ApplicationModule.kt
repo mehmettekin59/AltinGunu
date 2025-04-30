@@ -18,11 +18,11 @@ import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
 import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
 import javax.inject.Singleton
+import androidx.lifecycle.ProcessLifecycleOwner
+import androidx.lifecycle.lifecycleScope
 
 @Module
 @InstallIn(SingletonComponent::class)
@@ -57,10 +57,11 @@ abstract class ApplicationModule {
                 .create(KapaliCarsiApi::class.java)
         }
 
+
         @Provides
         @Singleton
         fun provideApplicationCoroutineScope(): CoroutineScope {
-            return CoroutineScope(SupervisorJob() + Dispatchers.IO)
+            return ProcessLifecycleOwner.get().lifecycleScope
         }
 
         // AltinGunuApplication için provider ekleyin

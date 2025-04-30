@@ -35,7 +35,7 @@ object Constraints {
     )
 
     // Listeleri de burada oluşturabiliriz (opsiyonel, UI'da da yapılabilir)
-    val goldCodeList = goldCodeToName.keys.toList()
+        val goldCodeList = goldCodeToName.keys.toList()
     val currencyCodeList = currencyCodeToName.keys.toList()
 
 

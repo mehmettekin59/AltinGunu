@@ -33,7 +33,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import java.io.File
-import java.io.FileInputStream
 import java.io.FileOutputStream
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -327,8 +326,9 @@ class ResultsViewModel @Inject constructor(
             _state.value = _state.value.copy(
                 error = UiText.stringResource(R.string.error_when_create_pdf, e.message ?: "")
             )
-            document.close()
             return null
+        }finally {
+            document.close()
         }
     }
 
