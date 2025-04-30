@@ -137,10 +137,6 @@
     <string name="currency_unit">TL</string>
     <string name="error_duration_greater_than_participants">لا يمكن أن تكون المدة (بالأشهر) أكبر من عدد المشاركين</string>
     <string name="error_participants_not_divisible_by_duration">يجب أن يكون عدد المشاركين قابلاً للقسمة بالتساوي على مدة الدورة (بالأشهر)</string>
-    <string name="confirm_understanding">قرأت وفهمت.</string>
     <string name="welcome_title_message">مرحبًا بك في تطبيق يوم الذهب!</string>
-    <string name="information_about_rules">المعلومات المتعلقة بأسعار العملات والذهب التي يوفرها هذا التطبيق هي للأغراض الإعلامية فقط.
-    قد تكون البيانات قديمة ولا يُنصح باستخدامها كمرجع في عمليات البيع والشراء.
-    جميع القرارات المالية هي مسؤولية المستخدم الشخصية. يتم الحصول على البيانات من واجهة برمجة تطبيقات ولا يمكن ضمان دقتها.
-    للحصول على معلومات دقيقة ومحدثة، يرجى الرجوع إلى المؤسسات المالية المعتمدة.</string>
+
 </resources>

@@ -45,7 +45,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.mehmettekin.altingunu.R
 import com.mehmettekin.altingunu.presentation.navigation.Screen
@@ -123,36 +122,6 @@ fun SplashScreen(navController: NavController) {
                 )
             }
 
-            Spacer(modifier = Modifier.height(8.dp))
-
-            // Tagline with different fade-in animation
-            AnimatedVisibility(
-                visible = showContent,
-                enter = fadeIn(
-                    animationSpec = tween(
-                        durationMillis = 1000,
-                        delayMillis = 300,
-                        easing = FastOutSlowInEasing
-                    )
-                ) + slideInVertically(
-                    animationSpec = tween(
-                        durationMillis = 1000,
-                        delayMillis = 300,
-                        easing = FastOutSlowInEasing
-                    ),
-                    initialOffsetY = { it / 2 }
-                )
-            ) {
-                Text(
-                    text = stringResource(R.string.app_name),
-                    style = MaterialTheme.typography.bodyLarge,
-                    textAlign = TextAlign.Center,
-                    color = Gold,
-                    fontSize = 24.sp,
-                    fontWeight = FontWeight.Medium,
-                    modifier = Modifier.fillMaxWidth()
-                )
-            }
         }
 
         // Optional disclaimer text at the bottom

@@ -142,11 +142,7 @@
     <string name="currency_unit">TL</string>
     <string name="error_duration_greater_than_participants">Süre (Ay), katılımcı sayısından büyük olamaz</string>
     <string name="error_participants_not_divisible_by_duration">Katılımcı sayısı, Süre (Ay) değerine tam bölünebilir olmalıdır</string>
-    <string name="confirm_understanding">Okudum ve anladım.</string>
     <string name="welcome_title_message">Altın Günü Uygulamasına Hoş Geldiniz!</string>
-    <string name="information_about_rules">Bu uygulama tarafından sağlanan döviz ve altın kurları bilgileri sadece bilgilendirme amaçlıdır.
-        Veriler güncelliğini yitirmiş olabilir ve alım-satım işlemlerinde referans olarak kullanılması tavsiye edilmez.
-        Tüm finansal kararlar kullanıcının kendi sorumluluğundadır. Veriler bir API\'sinden temin edilmektedir ve doğruluğu garanti edilemez.
-        Güncel ve kesin bilgiler için lütfen yetkili finans kuruluşlarına başvurunuz.</string>
+
 
 </resources>
