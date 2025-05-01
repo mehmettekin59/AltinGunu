@@ -153,7 +153,7 @@ fun WheelScreen(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(paddingValues)
-                    .padding(vertical = 8.dp, horizontal = 16.dp),
+                    .padding(vertical = 4.dp, horizontal = 8.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 // Layout based on screen width
@@ -161,7 +161,7 @@ fun WheelScreen(
                     // Wide screen layout - Side by side
                     Row(
                         modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(24.dp),
+                        horizontalArrangement = Arrangement.spacedBy(12.dp),
                         verticalAlignment = Alignment.Top
                     ) {
                         WheelSection(
@@ -171,7 +171,7 @@ fun WheelScreen(
                             participants = state.participants
                         )
 
-                        Spacer(modifier = Modifier.width(16.dp))
+                        Spacer(modifier = Modifier.width(8.dp))
 
                         ParticipantsSection(
                             modifier = Modifier.weight(1f),
@@ -189,7 +189,7 @@ fun WheelScreen(
                         participants = state.participants
                     )
 
-                    Spacer(modifier = Modifier.height(24.dp))
+                    Spacer(modifier = Modifier.height(4.dp))
 
                     ParticipantsSection(
                         modifier = Modifier.fillMaxWidth(),
@@ -197,7 +197,7 @@ fun WheelScreen(
                         winners = viewModel.winners,
                         onSaveResults = { viewModel.saveResults() }
                     )
-                    Spacer(modifier = Modifier.height(12.dp))
+                    Spacer(modifier = Modifier.height(6.dp))
                     // Only show save button when all participants have been selected
                     if (state.participants.isEmpty() && viewModel.winners.isNotEmpty()) {
                         Button(
@@ -243,7 +243,6 @@ private fun WheelSection(
         Text(
             UiText.stringResource(R.string.wheel).asString(),
             style = MaterialTheme.typography.titleLarge,
-            modifier = Modifier.padding(bottom = 2.dp)
         )
 
         Box(
@@ -255,7 +254,7 @@ private fun WheelSection(
             Canvas(
                 modifier = Modifier
                     .size(320.dp)
-                    .padding(8.dp)
+                    .padding(4.dp)
             ) {
                 if (participants.isNotEmpty()) {
                     drawWheel(
@@ -293,7 +292,7 @@ private fun ControlButtons(
     canSpin: Boolean
 ) {
     Row(
-        modifier = Modifier.padding(8.dp),
+        modifier = Modifier.padding(4.dp),
         horizontalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         Button(

@@ -108,9 +108,9 @@ fun EnterScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
-                .padding(16.dp)
+                .padding(8.dp)
                 .verticalScroll(rememberScrollState()),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+            verticalArrangement = Arrangement.spacedBy(4.dp)
         ) {
             // Item type selector
             ItemTypeSelector(
@@ -118,7 +118,7 @@ fun EnterScreen(
                 onItemTypeSelect = { selectedItemType = it }
             )
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(2.dp))
 
             // Display content based on loading state
             when (exchangeRatesState) {
@@ -147,23 +147,23 @@ fun EnterScreen(
                             iconTint = if (selectedItemType == ItemType.GOLD) Gold else NavyBlue
                         )
 
-                        Spacer(modifier = Modifier.height(8.dp))
+                        Spacer(modifier = Modifier.height(4.dp))
 
                         Box(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .height(if (isLandscape) 240.dp else 200.dp)
-                                .padding(vertical = 8.dp)
+                                .height(if (isLandscape) 220.dp else 200.dp)
+                                .padding(vertical = 4.dp)
                         ) {
                             // Aynı karüseli kullanıyoruz ancak landscape için farklı açı değeri
                             CoverFlowCarousel(
                                 items = filteredRates,
                                 initialPageIndex = minOf(3, filteredRates.size - 1),
-                                itemWidth = if (isLandscape) 220.dp else 200.dp,
-                                itemHeight = if (isLandscape) 200.dp else 190.dp,
+                                itemWidth = if (isLandscape) 210.dp else 190.dp,
+                                itemHeight = if (isLandscape) 190.dp else 190.dp,
                                 minScale = 0.7f,
                                 centerScale = 1.05f,
-                                maxRotationY = if (isLandscape) 40f else 40f, // Landscape için daha az açı
+                                maxRotationY = if (isLandscape) 45f else 45f, // Landscape için daha az açı
                                 minAlpha = 0.7f,
                                 maxElevation = 0.dp,
                                 minElevation = 0.dp,
@@ -190,7 +190,7 @@ fun EnterScreen(
                         Text(
                             text = UiText.stringResource(R.string.data_not_found, dataType.asString()).asString(),
                             modifier = Modifier
-                                .padding(vertical = 8.dp)
+                                .padding(vertical = 4.dp)
                                 .fillMaxWidth(),
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -200,7 +200,7 @@ fun EnterScreen(
                 }
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(32.dp))
 
             GoldDayLotteryCard(
                 onClick = { navController.navigate(Screen.Participants.route) }
