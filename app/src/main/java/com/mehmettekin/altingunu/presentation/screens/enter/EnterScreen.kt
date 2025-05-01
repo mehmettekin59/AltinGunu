@@ -1,5 +1,6 @@
 package com.mehmettekin.altingunu.presentation.screens.enter
 
+import android.R.attr.elevation
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
@@ -19,6 +20,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
@@ -55,7 +57,6 @@ fun EnterScreen(
     viewModel: KapaliCarsiViewModel = hiltViewModel()
 ) {
     val exchangeRatesState by viewModel.exchangeRates.collectAsStateWithLifecycle()
-
     var selectedItemType by remember { mutableStateOf(ItemType.GOLD) }
 
     val goldCodeToName = remember { Constraints.goldCodeToName }
@@ -64,6 +65,10 @@ fun EnterScreen(
     val currencyCodeList = remember { Constraints.currencyCodeList }
 
     val codeToNameMap = remember { goldCodeToName + currencyCodeToName }
+
+    // Ekran yapılandırmasını al
+    val configuration = LocalConfiguration.current
+    val isLandscape = configuration.orientation == android.content.res.Configuration.ORIENTATION_LANDSCAPE
 
     // Filtrelenmiş verileri bir derivedStateOf ile daha verimli hale getiriyoruz
     val filteredRates by remember(exchangeRatesState, selectedItemType) {
@@ -77,7 +82,6 @@ fun EnterScreen(
                         else -> emptyList()
                     }
                 }
-
                 else -> emptyList()
             }
         }
@@ -87,7 +91,7 @@ fun EnterScreen(
         modifier = Modifier.fillMaxSize(),
         topBar = {
             CommonTopAppBar(
-               title = UiText.stringResource(R.string.gold_and_currency).asString(),
+                title = UiText.stringResource(R.string.gold_and_currency).asString(),
                 navController = navController,
                 actions = {
                     IconButton(onClick = { viewModel.refreshExchangeRates() }) {
@@ -149,21 +153,22 @@ fun EnterScreen(
                         Box(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .height(220.dp)
+                                .height(if (isLandscape) 240.dp else 200.dp)
                                 .padding(vertical = 8.dp)
                         ) {
+                            // Aynı karüseli kullanıyoruz ancak landscape için farklı açı değeri
                             CoverFlowCarousel(
                                 items = filteredRates,
                                 initialPageIndex = minOf(3, filteredRates.size - 1),
-                                itemWidth = 200.dp,
-                                itemHeight = 210.dp,
+                                itemWidth = if (isLandscape) 220.dp else 200.dp,
+                                itemHeight = if (isLandscape) 200.dp else 190.dp,
                                 minScale = 0.7f,
                                 centerScale = 1.05f,
-                                maxRotationY = 40f,
+                                maxRotationY = if (isLandscape) 40f else 40f, // Landscape için daha az açı
                                 minAlpha = 0.7f,
                                 maxElevation = 0.dp,
                                 minElevation = 0.dp,
-                                pageSpacing = (-20).dp
+                                pageSpacing = if (isLandscape) (-30).dp else (-30).dp // Landscape için daha az boşluk
                             ) { rate, modifier, elevation ->
                                 AnimatedRateCard(
                                     rate = rate,
@@ -171,12 +176,12 @@ fun EnterScreen(
                                     backgroundColor = if (selectedItemType == ItemType.GOLD) Gold else NavyBlue,
                                     textColor = White,
                                     modifier = modifier,
-                                    elevation = elevation
+                                    elevation = elevation,
+                                    isLandscape = isLandscape
                                 )
                             }
                         }
                     } else {
-
                         val dataType = if (selectedItemType == ItemType.GOLD) {
                             UiText.stringResource(R.string.gold)
                         } else {
@@ -195,7 +200,9 @@ fun EnterScreen(
                     }
                 }
             }
+
             Spacer(modifier = Modifier.height(16.dp))
+
             GoldDayLotteryCard(
                 onClick = { navController.navigate(Screen.Participants.route) }
             )
@@ -381,7 +388,8 @@ private fun AnimatedRateCard(
     backgroundColor: Color = Gold,
     textColor: Color = MaterialTheme.colorScheme.onSurface,
     modifier: Modifier = Modifier,
-    elevation: Dp = 12.dp
+    elevation: Dp = 12.dp,
+    isLandscape: Boolean = false
 ) {
     // Get item name from the map, or use code if not found
     val itemName = codeToNameMap[rate.code] ?: rate.code
@@ -405,9 +413,8 @@ private fun AnimatedRateCard(
                 .padding(6.dp)
                 .fillMaxWidth(),
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(8.dp)
+            verticalArrangement = Arrangement.spacedBy(if (isLandscape) 4.dp else 8.dp)
         ) {
-
             Text(
                 text = itemName,
                 style = MaterialTheme.typography.titleMedium,
@@ -415,7 +422,7 @@ private fun AnimatedRateCard(
                 textAlign = TextAlign.Center,
                 maxLines = 2,
                 color = textColor,
-                fontSize = 18.sp
+                fontSize = if (isLandscape) 16.sp else 18.sp
             )
 
             // Last updated timestamp (if available)
@@ -423,44 +430,44 @@ private fun AnimatedRateCard(
                 Text(
                     text = UiText.stringResource(R.string.last_update).asString(),
                     style = MaterialTheme.typography.bodyMedium,
-                    color = textColor.copy(alpha = 0.7f)
+                    color = textColor.copy(alpha = 0.7f),
+                    fontSize = if (isLandscape) 12.sp else 14.sp
                 )
                 Text(
                     text = it,
                     style = MaterialTheme.typography.bodyMedium,
-                    color = textColor.copy(alpha = 0.7f)
+                    color = textColor.copy(alpha = 0.7f),
+                    fontSize = if (isLandscape) 12.sp else 14.sp
                 )
             }
 
             HorizontalDivider(
-                modifier = Modifier.padding(vertical = 4.dp),
+                modifier = Modifier.padding(vertical = if (isLandscape) 2.dp else 4.dp),
                 thickness = 1.dp,
                 color = textColor.copy(alpha = 0.2f)
             )
-
 
             Column(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.SpaceEvenly
             ) {
-
-
                 InfoColumn(
                     label = UiText.stringResource(R.string.buy).asString(),
                     value = rate.alis,
                     textColor = textColor,
                     itemType = itemType,
-                    specificItem = rate.code
+                    specificItem = rate.code,
+                    fontSize = if (isLandscape) 12.sp else 14.sp
                 )
                 InfoColumn(
                     label = UiText.stringResource(R.string.sell).asString(),
                     value = rate.satis,
                     textColor = textColor,
                     itemType = itemType,
-                    specificItem = rate.code
+                    specificItem = rate.code,
+                    fontSize = if (isLandscape) 12.sp else 14.sp
                 )
-
             }
         }
     }
@@ -473,7 +480,8 @@ private fun InfoColumn(
     itemType: ItemType = ItemType.CURRENCY,
     specificItem: String = "",
     textColor: Color = MaterialTheme.colorScheme.onSurface,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    fontSize: androidx.compose.ui.unit.TextUnit = 14.sp
 ) {
     val formattedValue = remember(value, itemType, specificItem) {
         ValueFormatter.formatWithSymbol(value, itemType, specificItem)
@@ -491,109 +499,18 @@ private fun InfoColumn(
             style = MaterialTheme.typography.bodyMedium,
             fontWeight = FontWeight.Bold,
             color = textColor.copy(alpha = 0.8f),
-            fontSize = 14.sp
+            fontSize = fontSize
         )
         Text(
             text = UiText.stringResource(R.string.currency_value, formattedValue).asString(),
             style = MaterialTheme.typography.bodySmall,
             fontWeight = FontWeight.SemiBold,
             color = textColor,
-            fontSize = 14.sp,
+            fontSize = fontSize,
             maxLines = 1
         )
     }
 }
-
-// Orijinal CoverFlowCarousel implementasyonu
-@OptIn(ExperimentalFoundationApi::class)
-@Composable
-fun <T> CoverFlowCarousel(
-    items: List<T>,
-    modifier: Modifier = Modifier,
-    initialPageIndex: Int = 0,
-    itemWidth: Dp = 220.dp,
-    itemHeight: Dp = 220.dp,
-    minScale: Float = 0.7f,
-    centerScale: Float = 1.05f,
-    maxRotationY: Float = 45f,
-    minAlpha: Float = 0.6f,
-    maxElevation: Dp = 12.dp,
-    minElevation: Dp = 4.dp,
-    cameraDistance: Dp = 12.dp,
-    pageSpacing: Dp = (-50).dp,
-    itemContent: @Composable (item: T, modifier: Modifier, elevation: Dp) -> Unit
-) {
-
-    val layoutDirection = LocalLayoutDirection.current
-    val isRtl = layoutDirection == LayoutDirection.Rtl
-    // Make sure initial page is within bounds
-    val safeInitialPage = remember(items.size, initialPageIndex) {
-        if (items.isNotEmpty()) initialPageIndex.coerceIn(0, items.size - 1) else 0
-    }
-
-    val pagerState = rememberPagerState(initialPage = safeInitialPage) { items.size }
-    val flingBehavior = PagerDefaults.flingBehavior(state = pagerState)
-    val density = LocalDensity.current
-
-    // Calculate padding based on screen width
-    val configuration = LocalConfiguration.current
-    val screenWidth = configuration.screenWidthDp.dp
-    val horizontalPadding = remember(screenWidth, itemWidth) {
-        ((screenWidth - itemWidth) / 2).coerceAtLeast(0.dp)
-    }
-
-    HorizontalPager(
-        state = pagerState,
-        modifier = modifier,
-        contentPadding = PaddingValues(horizontal = horizontalPadding),
-        pageSpacing = pageSpacing,
-        beyondViewportPageCount = 2,
-        flingBehavior = flingBehavior
-    ) { page ->
-        // Calculate transformation values based on page offset
-        val pageOffset = (pagerState.currentPage - page) + pagerState.currentPageOffsetFraction
-        val absOffset = pageOffset.absoluteValue.coerceIn(0f, 1f)
-
-        // Interpolate values for animations
-        val scale = lerp(start = minScale, stop = centerScale, fraction = 1f - absOffset)
-        val rotationDirection = if (isRtl) 1f else -1f
-        val rotationY = lerp(start = maxRotationY, stop = 0f, fraction = 1f - absOffset) * rotationDirection * pageOffset.coerceIn(-1f, 1f)
-        val alpha = lerp(start = minAlpha, stop = 1f, fraction = 1f - absOffset)
-        val elevation = lerp(
-            start = minElevation,
-            stop = maxElevation,
-            fraction = 1f - absOffset
-        )
-
-        // Item content with transformations
-        itemContent(
-            items[page],
-            Modifier
-                .width(itemWidth)
-                .height(itemHeight)
-                .graphicsLayer {
-                    this.cameraDistance = cameraDistance.value * density.density
-                    this.scaleX = scale
-                    this.scaleY = scale
-                    this.rotationY = rotationY
-                    this.alpha = alpha
-                },
-            elevation
-        )
-    }
-}
-
-// Linear interpolation helper
-private fun lerp(start: Float, stop: Float, fraction: Float): Float {
-    return start + (stop - start) * fraction
-}
-
-private fun lerp(start: Dp, stop: Dp, fraction: Float): Dp {
-    return Dp(
-        start.value + (stop.value - start.value) * fraction
-    )
-}
-
 
 @Composable
 fun GoldDayLotteryCard(
@@ -652,10 +569,159 @@ fun GoldDayLotteryCard(
                     style = MaterialTheme.typography.labelLarge
                 )
             }
-
         }
     }
 }
 
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+fun <T> CoverFlowCarousel(
+    items: List<T>,
+    modifier: Modifier = Modifier,
+    initialPageIndex: Int = 0,
+    itemWidth: Dp = 220.dp,
+    itemHeight: Dp = 220.dp,
+    minScale: Float = 0.7f,
+    centerScale: Float = 1.05f,
+    maxRotationY: Float = 45f,
+    minAlpha: Float = 0.6f,
+    maxElevation: Dp = 12.dp,
+    minElevation: Dp = 4.dp,
+    cameraDistance: Dp = 12.dp,
+    pageSpacing: Dp = (-50).dp,
+    itemContent: @Composable (item: T, modifier: Modifier, elevation: Dp) -> Unit
+) {
+    val layoutDirection = LocalLayoutDirection.current
+    val isRtl = layoutDirection == LayoutDirection.Rtl
+
+    // Make sure initial page is within bounds
+    val safeInitialPage = remember(items.size, initialPageIndex) {
+        if (items.isNotEmpty()) initialPageIndex.coerceIn(0, items.size - 1) else 0
+    }
+
+    val pagerState = rememberPagerState(initialPage = safeInitialPage) { items.size }
+    val flingBehavior = PagerDefaults.flingBehavior(state = pagerState)
+    val density = LocalDensity.current
+
+    // Calculate padding based on screen width
+    val configuration = LocalConfiguration.current
+    val screenWidth = configuration.screenWidthDp.dp
+    val horizontalPadding = remember(screenWidth, itemWidth) {
+        ((screenWidth - itemWidth) / 2).coerceAtLeast(0.dp)
+    }
+
+    val isLandscape = configuration.orientation == android.content.res.Configuration.ORIENTATION_LANDSCAPE
+
+    HorizontalPager(
+        state = pagerState,
+        modifier = modifier,
+        contentPadding = PaddingValues(horizontal = horizontalPadding),
+        pageSpacing = pageSpacing,
+        beyondViewportPageCount = 3, // Show more items for a smooth effect
+        flingBehavior = flingBehavior
+    ) { page ->
+        // Calculate transformation values based on page offset
+        val pageOffset = (pagerState.currentPage - page) + pagerState.currentPageOffsetFraction
+        val absOffset = pageOffset.absoluteValue.coerceIn(0f, 2f) // Allow values up to 2 for depth effect
+
+        // offsetSign determines if we're to the left (-1) or right (1) of the center
+        val offsetSign = if (pageOffset > 0) 1f else -1f
+
+        // Enhanced scale effect - diminishes faster as we move away from center
+        val scaleExp = if (absOffset <= 1f) {
+            // Linear for first adjacent items
+            absOffset
+        } else {
+            // Exponential for items beyond adjacent ones
+            1f + (absOffset - 1f) * 1.5f
+        }
+
+        val scale = lerp(
+            start = minScale * 0.8f, // Make far-away items even smaller
+            stop = centerScale,
+            fraction = (1f - scaleExp.coerceIn(0f, 1f))
+        )
+
+        // Calculate rotation with equator-like effect - ensure symmetry
+        // FIX: Invert offsetSign to get correct rotation direction
+        val rotationDirection = if (isRtl) -1f else 1f
+        val baseRotation = lerp(
+            start = maxRotationY,
+            stop = 0f,
+            fraction = 1f - absOffset.coerceIn(0f, 1f)
+        )
+        // Correct rotation for proper 3D effect
+        // Multiply by -offsetSign to fix the rotation direction
+        val rotationY = baseRotation * rotationDirection * -offsetSign
+
+        // Alpha effect - fade out as items move further from center
+        val alpha = lerp(
+            start = if (absOffset > 1f) minAlpha * 0.6f else minAlpha, // Items beyond adjacent fade more
+            stop = 1f,
+            fraction = 1f - absOffset.coerceIn(0f, 1f)
+        )
+
+        // Elevation effect - center items popping out more
+        val elevation = lerp(
+            start = minElevation,
+            stop = maxElevation,
+            fraction = 1f - absOffset.coerceIn(0f, 1f)
+        )
+
+        // Apply z-offset through perspective transform
+        // For items away from center, increase Z offset to move them "back" (ensure symmetry)
+        val zOffset = if (absOffset <= 1f) {
+            // First neighbors move back
+            absOffset * 0.15f
+        } else {
+            // Further items move even more back (parabolic effect)
+            0.15f + (absOffset - 1f) * 0.4f
+        }
+
+        // Calculate adjusted camera distance
+        val adjustedCameraDistance = (if (isLandscape) cameraDistance.value * 1.5f else cameraDistance.value) * density.density
+
+        // Item content with transformations
+        itemContent(
+            items[page],
+            Modifier
+                .width(itemWidth)
+                .height(itemHeight)
+                .graphicsLayer {
+                    this.cameraDistance = adjustedCameraDistance
+
+                    // Apply perspective transformation for depth effect - ensure symmetry
+                    transformOrigin = TransformOrigin(0.5f, 0.5f)
+
+                    // Base scale effect
+                    val depthScale = if (absOffset > 0) {
+                        val depthPenalty = zOffset * 0.8f // Increase penalty for depth
+                        scale * (1f - depthPenalty)
+                    } else scale
+
+                    this.scaleX = depthScale
+                    this.scaleY = depthScale
+
+                    // Apply rotation with depth enhancement
+                    this.rotationY = rotationY
+
+                    // Apply alpha
+                    this.alpha = alpha
+                },
+            elevation
+        )
+    }
+}
+
+// Linear interpolation helper
+private fun lerp(start: Float, stop: Float, fraction: Float): Float {
+    return start + (stop - start) * fraction
+}
+
+private fun lerp(start: Dp, stop: Dp, fraction: Float): Dp {
+    return Dp(
+        start.value + (stop.value - start.value) * fraction
+    )
+}
 
 
