@@ -21,7 +21,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.AttachMoney
@@ -669,7 +668,7 @@ fun ParticipantsSection(
 
     Column {
         Text(
-            text = UiText.stringResource(R.string.participants_count, participants.size).asString(),
+            text = UiText.stringResource(R.string.participants_count_special, participants.size).asString(),
             style = MaterialTheme.typography.titleMedium,
             color = NavyBlue,
             fontWeight = FontWeight.Medium

@@ -40,6 +40,7 @@
     <string name="add_button_description">Ekle</string>
     <string name="no_participants_have_been_added_yet">Henüz katılımcı eklenmedi</string>
     <string name="participant_count_special">%1$d kişi</string>
+    <string name="participants_count_special">Kişi Sayısı: %1$d kişi</string>
     <string name="gold_with_type">Altın (%1$s)</string>
     <string name="currency_with_type">Döviz (%1$s)</string>
     <string name="item_type_currency">Döviz ($, €, £)</string>

@@ -89,6 +89,9 @@ dependencies {
     //splashscreen
     implementation(libs.androidx.core.splashscreen)
 
+    implementation("org.slf4j:slf4j-api:1.7.36")
+    implementation("org.slf4j:slf4j-simple:1.7.36")
+
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

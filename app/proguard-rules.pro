@@ -41,6 +41,8 @@
 }
 -keepattributes RuntimeVisibleAnnotations
 
+
+
 #################################
 # OkHttp
 #################################
