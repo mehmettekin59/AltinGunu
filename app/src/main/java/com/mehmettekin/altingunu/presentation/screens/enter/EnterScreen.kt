@@ -1,6 +1,5 @@
 package com.mehmettekin.altingunu.presentation.screens.enter
 
-import android.R.attr.elevation
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
