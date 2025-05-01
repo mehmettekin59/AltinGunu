@@ -12,7 +12,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.rounded.ChevronRight
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -269,19 +268,21 @@ private fun WheelSection(
             }
         }
 
+        WinnerAnnouncement(winner = if (participants.isEmpty() && viewModel.winners.size > 1)
+            viewModel.winners[viewModel.winners.size - 2]
+        else
+            viewModel.winner)
+        Spacer(modifier = Modifier.height(8.dp))
         ControlButtons(
             viewModel = viewModel,
             canSpin = participants.size > 1 && !viewModel.isSpinning
         )
 
-        Spacer(modifier = Modifier.height(8.dp))
 
-       // WinnerAnnouncement(winner = viewModel.winner)
 
-        WinnerAnnouncement(winner = if (participants.isEmpty() && viewModel.winners.size > 1)
-            viewModel.winners[viewModel.winners.size - 2]
-        else
-            viewModel.winner)
+
+
+
 
     }
 }
@@ -408,7 +409,7 @@ private fun ParticipantList(
                 style = MaterialTheme.typography.titleSmall,
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier.padding(bottom = 8.dp),
-                color = NavyBlue
+                color = White
             )
 
             HorizontalDivider(

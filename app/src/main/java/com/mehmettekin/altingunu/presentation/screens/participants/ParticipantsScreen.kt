@@ -186,7 +186,7 @@ fun ParticipantsContent(
             }
         )
 
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(6.dp))
 
         // Duration in months
         ModernTextField(
@@ -222,7 +222,7 @@ fun ParticipantsContent(
             onYearSelected = { onEvent(ParticipantsEvent.OnStartYearSelect(it)) }
         )
 
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(modifier = Modifier.height(18.dp))
 
         // Participants section
         ParticipantsSection(
@@ -231,7 +231,7 @@ fun ParticipantsContent(
             onRemoveParticipant = { onEvent(ParticipantsEvent.OnRemoveParticipant(it)) }
         )
 
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(modifier = Modifier.height(18.dp))
 
         // Continue button
         Button(
