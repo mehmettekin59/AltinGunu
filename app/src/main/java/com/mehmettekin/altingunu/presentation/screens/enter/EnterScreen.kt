@@ -152,7 +152,7 @@ fun EnterScreen(
                         Box(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .height(if (isLandscape) 220.dp else 200.dp)
+                                .height(if (isLandscape) 210.dp else 200.dp)
                                 .padding(vertical = 4.dp)
                         ) {
                             // Aynı karüseli kullanıyoruz ancak landscape için farklı açı değeri
@@ -160,7 +160,7 @@ fun EnterScreen(
                                 items = filteredRates,
                                 initialPageIndex = minOf(3, filteredRates.size - 1),
                                 itemWidth = if (isLandscape) 210.dp else 190.dp,
-                                itemHeight = if (isLandscape) 190.dp else 190.dp,
+                                itemHeight = if (isLandscape) 220.dp else 200.dp,
                                 minScale = 0.7f,
                                 centerScale = 1.05f,
                                 maxRotationY = if (isLandscape) 45f else 45f, // Landscape için daha az açı
@@ -636,7 +636,7 @@ fun <T> CoverFlowCarousel(
         }
 
         val scale = lerp(
-            start = minScale * 0.8f, // Make far-away items even smaller
+            start = minScale * 0.9f, // Make far-away items even smaller
             stop = centerScale,
             fraction = (1f - scaleExp.coerceIn(0f, 1f))
         )
@@ -671,10 +671,10 @@ fun <T> CoverFlowCarousel(
         // For items away from center, increase Z offset to move them "back" (ensure symmetry)
         val zOffset = if (absOffset <= 1f) {
             // First neighbors move back
-            absOffset * 0.15f
+            absOffset * 0.02f
         } else {
             // Further items move even more back (parabolic effect)
-            0.15f + (absOffset - 1f) * 0.4f
+            0.15f + (absOffset - 1f) * 0.2f
         }
 
         // Calculate adjusted camera distance
@@ -690,7 +690,7 @@ fun <T> CoverFlowCarousel(
                     this.cameraDistance = adjustedCameraDistance
 
                     // Apply perspective transformation for depth effect - ensure symmetry
-                    transformOrigin = TransformOrigin(0.5f, 0.5f)
+                    transformOrigin = TransformOrigin(0.5f, 0.7f)
 
                     // Base scale effect
                     val depthScale = if (absOffset > 0) {

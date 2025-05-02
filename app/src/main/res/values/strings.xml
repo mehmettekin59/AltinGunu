@@ -29,7 +29,7 @@
     <string name="enter_the_participants">Katılımcıları Gir</string>
     <string name="add_participant">Katılımcı Ekleme</string>
     <string name="number_of_gold">Altın Sayısı (Adet)</string>
-    <string name="how_many_months_will_it_last">Altın Günü, kaç ay sürecek?</string>
+    <string name="how_many_months_will_it_last">Gün, kaç ay sürecek?</string>
     <string name="starting_date">Başlangıç Tarihi</string>
     <string name="continue_button">Devam et</string>
     <string name="select">Seçiniz</string>

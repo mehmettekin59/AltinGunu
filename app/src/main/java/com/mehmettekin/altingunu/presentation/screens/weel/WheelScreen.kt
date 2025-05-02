@@ -74,6 +74,7 @@ fun WheelScreen(
     val state by viewModel.state.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
     val context = LocalContext.current
+    val scrollState = rememberScrollState()
 
     val textMeasurer = rememberTextMeasurer()
     val rotationAnimatable = remember { Animatable(viewModel.rotation) }
@@ -149,10 +150,12 @@ fun WheelScreen(
                 CircularProgressIndicator()
             }
         } else {
+            // Main content with scroll capability for the entire screen
             Column(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(paddingValues)
+                    .verticalScroll(scrollState) // Apply vertical scroll to the whole screen
                     .padding(vertical = 4.dp, horizontal = 8.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
@@ -173,12 +176,44 @@ fun WheelScreen(
 
                         Spacer(modifier = Modifier.width(8.dp))
 
-                        ParticipantsSection(
+                        Column(
                             modifier = Modifier.weight(1f),
-                            remainingParticipants = state.participants,
-                            winners = state.winners,// burdaki viewmodel.winners yerine state yaptık
-                            onSaveResults = { viewModel.saveResults() }
-                        )
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            ParticipantsSection(
+                                modifier = Modifier.fillMaxWidth(),
+                                remainingParticipants = state.participants,
+                                winners = state.winners,
+                                onSaveResults = { viewModel.saveResults() }
+                            )
+
+                            Spacer(modifier = Modifier.height(8.dp))
+
+                            // Continue button for wide layout
+                            if (state.participants.isEmpty() && viewModel.winners.isNotEmpty()) {
+                                Button(
+                                    onClick = { viewModel.saveResults() },
+                                    colors = ButtonDefaults.buttonColors(
+                                        containerColor = NavyBlue,
+                                        contentColor = White
+                                    ),
+                                    shape = RoundedCornerShape(8.dp),
+                                    modifier = Modifier.fillMaxWidth()
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Rounded.ChevronRight,
+                                        contentDescription = null,
+                                        tint = White
+                                    )
+                                    Spacer(modifier = Modifier.width(8.dp))
+                                    Text(
+                                        text = UiText.stringResource(R.string.continue_button).asString(),
+                                        fontWeight = FontWeight.Bold,
+                                        color = White
+                                    )
+                                }
+                            }
+                        }
                     }
                 } else {
                     // Narrow screen layout - Stacked
@@ -197,7 +232,9 @@ fun WheelScreen(
                         winners = viewModel.winners,
                         onSaveResults = { viewModel.saveResults() }
                     )
-                    Spacer(modifier = Modifier.height(6.dp))
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
                     // Only show save button when all participants have been selected
                     if (state.participants.isEmpty() && viewModel.winners.isNotEmpty()) {
                         Button(
@@ -222,6 +259,9 @@ fun WheelScreen(
                             )
                         }
                     }
+
+                    // Add extra space at the bottom to ensure content is scrollable past the end
+                    Spacer(modifier = Modifier.height(24.dp))
                 }
             }
         }
@@ -276,13 +316,6 @@ private fun WheelSection(
             viewModel = viewModel,
             canSpin = participants.size > 1 && !viewModel.isSpinning
         )
-
-
-
-
-
-
-
     }
 }
 
@@ -356,8 +389,7 @@ private fun ParticipantsSection(
     onSaveResults: () -> Unit
 ) {
     Column(
-        modifier = modifier
-            .verticalScroll(rememberScrollState()),
+        modifier = modifier,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Row(
@@ -380,7 +412,6 @@ private fun ParticipantsSection(
                 showIndex = true
             )
         }
-
     }
 }
 
@@ -402,7 +433,7 @@ private fun ParticipantList(
                 .fillMaxWidth()
                 .padding(12.dp)
                 .height(160.dp)
-        ) { 
+        ) {
             Text(
                 text = title,
                 style = MaterialTheme.typography.titleSmall,
@@ -464,7 +495,6 @@ private fun ParticipantList(
         }
     }
 }
-
 
 @OptIn(ExperimentalTextApi::class)
 private fun DrawScope.drawWheel(
@@ -567,7 +597,6 @@ private fun DrawScope.drawWheel(
         style = Stroke(width = 3.dp.toPx())
     )
 }
-
 
 private fun DrawScope.drawPointer() {
     val center = Offset(size.width / 2, size.height / 2)

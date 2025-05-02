@@ -3,17 +3,23 @@ package com.mehmettekin.altingunu.presentation.screens.participants
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.snapping.SnapPosition
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.defaultMinSize
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
@@ -296,17 +302,20 @@ fun ItemTypeSelector(
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        Row(
+        FlowRow(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalArrangement = Arrangement.spacedBy(4.dp)
         ) {
             ItemType.entries.forEach { itemType ->
                 ItemSelectableChip(
                     text = itemType.displayName.asString(),
                     selected = itemType == selectedItemType,
                     onClick = { onItemTypeSelect(itemType) },
-                    modifier = Modifier.weight(1f),
-                    itemType = itemType  // ItemType parametresini geçtik
+                    modifier = Modifier
+                        .defaultMinSize(minWidth = 120.dp), // Min genişlik belirle
+
+                    itemType = itemType
                 )
             }
         }
@@ -349,7 +358,7 @@ fun ItemSelectableChip(
     ) {
         Box(
             modifier = Modifier
-                .padding(vertical = 12.dp, horizontal = 8.dp),
+                .padding(vertical = 12.dp, horizontal = 6.dp),
             contentAlignment = Alignment.Center
         ) {
             Text(
@@ -397,7 +406,7 @@ fun SpecificItemSelector(
             fontWeight = FontWeight.Medium
         )
 
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(4.dp))
 
         Surface(
             modifier = Modifier
@@ -409,7 +418,7 @@ fun SpecificItemSelector(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(16.dp),
+                    .padding(12.dp),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {

@@ -114,7 +114,7 @@ fun SplashScreen(navController: NavController) {
             ) {
                 Text(
                     text = stringResource(R.string.welcome_title_message),
-                    style = MaterialTheme.typography.headlineMedium,
+                    style = MaterialTheme.typography.headlineSmall,
                     textAlign = TextAlign.Center,
                     fontWeight = FontWeight.Bold,
                     color = Color.White,

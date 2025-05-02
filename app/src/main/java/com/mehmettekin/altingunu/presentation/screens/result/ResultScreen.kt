@@ -112,7 +112,6 @@ fun ResultScreen(
                 navController = navController,
                 backgroundColor = NavyBlue,
                 isSettingsScreen = true,
-
                 actions = {
                     // PDF görüntüleme butonu
                     IconButton(onClick = {
@@ -191,7 +190,7 @@ fun ResultScreen(
                     .padding(paddingValues)
             )
         } else {
-            // Display results
+            // Display results - Burada içeriği scrollable yapıyoruz
             ResultsContent(
                 viewModel = viewModel,
                 results = state.results,
@@ -205,7 +204,7 @@ fun ResultScreen(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(paddingValues)
-                    .padding(16.dp)
+                    .padding(8.dp)
             )
         }
     }
@@ -236,7 +235,7 @@ private fun EmptyResultsView(
                 containerColor = NavyBlue
             ),
             shape = RoundedCornerShape(8.dp),
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(0.8f)
         ) {
             Icon(
                 imageVector = Icons.Default.Refresh,
@@ -257,50 +256,54 @@ private fun ResultsContent(
     onRestartClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    Column(
-        modifier = modifier,
+    // Tüm içeriği bir LazyColumn içine alarak scrollable yapıyoruz
+    LazyColumn(
+        modifier = modifier.padding(horizontal = 16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        // Settings summary
-        drawSettings?.let { settings ->
-            ResultsSettingsSummary(settings = settings, resultsViewModel = viewModel)
+        item {
+            // Settings summary
+            drawSettings?.let { settings ->
+                ResultsSettingsSummary(settings = settings, resultsViewModel = viewModel)
+                Spacer(modifier = Modifier.height(24.dp))
+            }
+
+            // Results header
+            Text(
+                text = UiText.stringResource(R.string.the_raffle_results).asString(),
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.Bold,
+                color = NavyBlue,
+                modifier = Modifier.fillMaxWidth()
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Results table
+            ResultsTable(results = results)
 
             Spacer(modifier = Modifier.height(24.dp))
-        }
 
-        // Results header
-        Text(
-            text = UiText.stringResource(R.string.the_raffle_results).asString(),
-            style = MaterialTheme.typography.titleLarge,
-            fontWeight = FontWeight.Bold,
-            color = NavyBlue,
-            modifier = Modifier.fillMaxWidth()
-        )
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        // Results table
-        ResultsTable(results = results)
-
-        Spacer(modifier = Modifier.height(24.dp))
-
-        // Restart button
-        Button(
-            onClick = onRestartClick,
-            colors = ButtonDefaults.buttonColors(
-                containerColor = NavyBlue
-            ),
-            modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(8.dp),
-
+            // Restart button
+            Button(
+                onClick = onRestartClick,
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = NavyBlue
+                ),
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(8.dp),
             ) {
-            Icon(
-                imageVector = Icons.Default.Refresh,
-                contentDescription = null,
-                modifier = Modifier.size(ButtonDefaults.IconSize)
-            )
-            Spacer(modifier = Modifier.width(8.dp))
-            Text(UiText.stringResource(R.string.start_a_new_raffle).asString())
+                Icon(
+                    imageVector = Icons.Default.Refresh,
+                    contentDescription = null,
+                    modifier = Modifier.size(ButtonDefaults.IconSize)
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(UiText.stringResource(R.string.start_a_new_raffle).asString())
+            }
+
+            // Alt boşluk ekleyerek içeriğin sonunda da scroll edilebilirliği artırıyoruz
+            Spacer(modifier = Modifier.height(16.dp))
         }
     }
 }
@@ -411,7 +414,7 @@ private fun ResultsSettingsSummary(
                 )
 
                 Text(
-                    text =UiText.stringResource(R.string.duration_months,settings.durationMonths).asString(),
+                    text = UiText.stringResource(R.string.duration_months, settings.durationMonths).asString(),
                     style = MaterialTheme.typography.bodyMedium,
                     fontWeight = FontWeight.SemiBold,
                     color = NavyBlue
@@ -522,7 +525,6 @@ private fun ResultsTable(
     results: List<DrawResult>,
     modifier: Modifier = Modifier
 ) {
-
     Card(
         modifier = modifier.fillMaxWidth(),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
@@ -576,11 +578,11 @@ private fun ResultsTable(
                 )
             }
 
-            // Table Content - Sabit yükseklik ve scrollable yapın
+            // Table Content - Ekran boyutuna göre esnek yükseklik
             LazyColumn(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(250.dp) // Sabit yükseklik
+                    .heightIn(min = 150.dp, max = 250.dp) // Min ve max değerlerle sınırlama
             ) {
                 itemsIndexed(results) { index, result ->
                     Row(
