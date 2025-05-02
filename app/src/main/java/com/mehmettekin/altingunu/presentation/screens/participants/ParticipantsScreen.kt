@@ -302,7 +302,7 @@ fun ItemTypeSelector(
         FlowRow(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
-            verticalArrangement = Arrangement.spacedBy(4.dp)
+            verticalArrangement = Arrangement.spacedBy(4.dp) // Dikey aralık korundu
         ) {
             ItemType.entries.forEach { itemType ->
                 ItemSelectableChip(
@@ -310,8 +310,8 @@ fun ItemTypeSelector(
                     selected = itemType == selectedItemType,
                     onClick = { onItemTypeSelect(itemType) },
                     modifier = Modifier
-                        .defaultMinSize(minWidth = 120.dp),
-
+                        .padding(end = 8.dp, bottom = 4.dp)
+                        .width(110.dp), // Sabit genişlik kullanın
                     itemType = itemType
                 )
             }
@@ -325,7 +325,7 @@ fun ItemSelectableChip(
     selected: Boolean,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
-    itemType: ItemType  // Yeni parametre ekledik
+    itemType: ItemType
 ) {
     val shape = RoundedCornerShape(8.dp)
 
@@ -349,8 +349,8 @@ fun ItemSelectableChip(
         modifier = modifier
             .clip(shape)
             .clickable(onClick = onClick),
-        color = backgroundColor,  // Yeni değişken kullanıldı
-        border = BorderStroke(1.dp, borderColor),  // Yeni değişken kullanıldı
+        color = backgroundColor,
+        border = BorderStroke(1.dp, borderColor),
         shape = shape
     ) {
         Box(
@@ -369,6 +369,7 @@ fun ItemSelectableChip(
         }
     }
 }
+
 
 @Composable
 fun SpecificItemSelector(
