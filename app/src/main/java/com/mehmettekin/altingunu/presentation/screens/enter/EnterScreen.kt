@@ -159,7 +159,7 @@ fun EnterScreen(
                             CoverFlowCarousel(
                                 items = filteredRates,
                                 initialPageIndex = minOf(3, filteredRates.size - 1),
-                                itemWidth = if (isLandscape) 210.dp else 190.dp,
+                                itemWidth = if (isLandscape) 210.dp else 185.dp,
                                 itemHeight = if (isLandscape) 220.dp else 200.dp,
                                 minScale = 0.7f,
                                 centerScale = 1.05f,
@@ -565,7 +565,7 @@ fun GoldDayLotteryCard(
 
                 Text(
                     text = UiText.stringResource(R.string.enter_the_participants).asString(),
-                    style = MaterialTheme.typography.labelLarge
+                    style = MaterialTheme.typography.titleMedium
                 )
             }
         }

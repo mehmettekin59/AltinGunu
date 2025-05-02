@@ -1,6 +1,6 @@
 <resources>
     <string name="app_name">Altin Günü</string>
-    <string name="ok">Tamam</string>
+    <string name="go_back">Geri dön</string>
     <string name="cancel">İptal</string>
     <string name="error">Hata</string>
     <string name="retry">Tekrar Dene</string>
@@ -26,7 +26,7 @@
     <string name="error_invalid_monthly_amount">Geçersiz aylık miktar</string>
     <string name="error_invalid_duration">Geçersiz süre</string>
     <string name="error_specific_item_not_selected">Lütfen bir tür seçin</string>
-    <string name="enter_the_participants">Katılımcıları Gir</string>
+    <string name="enter_the_participants">Katılımcıları Giriniz</string>
     <string name="add_participant">Katılımcı Ekleme</string>
     <string name="number_of_gold">Altın Sayısı (Adet)</string>
     <string name="how_many_months_will_it_last">Gün, kaç ay sürecek?</string>
@@ -44,7 +44,7 @@
     <string name="gold_with_type">Altın (%1$s)</string>
     <string name="currency_with_type">Döviz (%1$s)</string>
     <string name="item_type_currency">Döviz ($, €, £)</string>
-    <string name="item_type_gold">Altın (🥇, 🪙, 💰)</string>
+    <string name="item_type_gold">Altın (🥇, 🪙)</string>
     <string name="duration_months">(%1$s) ay</string>
 
 
@@ -99,7 +99,6 @@
     <string name="confirm_information">Bilgileri Onaylayın</string>
     <string name="confirm">Onaylıyorum</string>
     <string name="all_participants_have_been_selected">Tüm katılımcılar seçildi!</string>
-    <string name="wheel">Çark</string>
     <string name="storage_permission_required">PDF kaydetmek için depolama izni gerekli</string>
     <string name="share_the_raffle_results">Çekiliş Sonuçlarını Paylaş</string>
     <string name="the_raffle_results">Çekiliş Sonuçları</string>
@@ -143,7 +142,7 @@
     <string name="currency_unit">TL</string>
     <string name="error_duration_greater_than_participants">Süre (Ay), katılımcı sayısından büyük olamaz</string>
     <string name="error_participants_not_divisible_by_duration">Katılımcı sayısı, Süre (Ay) değerine tam bölünebilir olmalıdır</string>
-    <string name="welcome_title_message">Altın Günü Uygulamasına Hoş Geldiniz!</string>
+    <string name="welcome_title_message">Altın Günü Uygulamasına\n Hoş Geldiniz!</string>
 
 
 </resources>

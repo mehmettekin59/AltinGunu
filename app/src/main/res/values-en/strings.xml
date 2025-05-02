@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">AltinGunu</string>
-    <string name="ok">OK</string>
+    <string name="go_back">Geri dön</string>
     <string name="cancel">Cancel</string>
     <string name="error">Error</string>
     <string name="retry">Retry</string>
@@ -43,7 +43,7 @@
     <string name="gold_with_type">Gold (%1$s)</string>
     <string name="currency_with_type">Currency (%1$s)</string>
     <string name="item_type_currency">Currency ($, €, £)</string>
-    <string name="item_type_gold">Gold (🥇, 🪙, 💰)</string>
+    <string name="item_type_gold">Gold (🥇, 🪙)</string>
     <string name="duration_months">%1$s months</string>
 
     <string name="spin_wheel">Spin the Wheel</string>
@@ -96,7 +96,6 @@
     <string name="confirm_information">Confirm Information</string>
     <string name="confirm">Confirm</string>
     <string name="all_participants_have_been_selected">All participants have been selected!</string>
-    <string name="wheel">Wheel</string>
     <string name="storage_permission_required">Storage permission is required to save PDF</string>
     <string name="share_the_raffle_results">Share the Raffle Results</string>
     <string name="the_raffle_results">The Raffle Results</string>
@@ -140,5 +139,5 @@
     <string name="currency_unit">TL</string>
     <string name="error_duration_greater_than_participants">Duration (Months) cannot be greater than the number of participants</string>
     <string name="error_participants_not_divisible_by_duration">The number of participants must be evenly divisible by the Duration (Months)</string>
-    <string name="welcome_title_message">Welcome to the Gold Day Application!</string>
+    <string name="welcome_title_message">Welcome to the Gold Day App</string>
 </resources>

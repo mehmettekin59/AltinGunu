@@ -3,7 +3,6 @@ package com.mehmettekin.altingunu.presentation.screens.participants
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.gestures.snapping.SnapPosition
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -11,15 +10,12 @@ import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.defaultMinSize
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.wrapContentSize
-import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
@@ -69,6 +65,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -313,7 +310,7 @@ fun ItemTypeSelector(
                     selected = itemType == selectedItemType,
                     onClick = { onItemTypeSelect(itemType) },
                     modifier = Modifier
-                        .defaultMinSize(minWidth = 120.dp), // Min genişlik belirle
+                        .defaultMinSize(minWidth = 120.dp),
 
                     itemType = itemType
                 )
@@ -358,14 +355,16 @@ fun ItemSelectableChip(
     ) {
         Box(
             modifier = Modifier
-                .padding(vertical = 12.dp, horizontal = 6.dp),
+                .padding(vertical = 12.dp, horizontal = 4.dp),
             contentAlignment = Alignment.Center
         ) {
             Text(
                 text = text,
                 color = if (selected) White else Color.Gray,
                 fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal,
-                style = MaterialTheme.typography.bodyMedium
+                style = MaterialTheme.typography.bodyMedium,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
             )
         }
     }
@@ -870,7 +869,7 @@ fun ConfirmationItem(
             color = Color.Gray,
             style = MaterialTheme.typography.bodyMedium,
             fontWeight = FontWeight.Medium,
-            modifier = Modifier.width(120.dp)
+            modifier = Modifier.width(110.dp)
         )
 
         Text(

@@ -1,12 +1,10 @@
 package com.mehmettekin.altingunu.presentation.screens.common
 
-
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -31,12 +29,13 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.mehmettekin.altingunu.presentation.navigation.Screen
 import com.mehmettekin.altingunu.ui.theme.NavyBlue
 import com.mehmettekin.altingunu.ui.theme.White
+import com.mehmettekin.altingunu.utils.UiText
+import com.mehmettekin.altingunu.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -70,7 +69,7 @@ fun CommonTopAppBar(
                 ) {
                     Icon(
                         imageVector = Icons.Default.ArrowBackIosNew,
-                        contentDescription = "Geri Dön",
+                        contentDescription = UiText.stringResource(R.string.go_back).asString(),
                         tint = iconColor,
                         modifier = Modifier.size(18.dp) // Daha küçük ikon
                     )
@@ -117,7 +116,7 @@ fun CommonTopAppBar(
                     ) {
                         Icon(
                             imageVector = Icons.Default.Settings,
-                            contentDescription = "Ayarlar",
+                            contentDescription = UiText.stringResource(R.string.title_settings).asString(),
                             tint = iconColor,
                             modifier = Modifier.size(18.dp) // Daha küçük ikon
                         )

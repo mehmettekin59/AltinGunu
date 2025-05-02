@@ -1,6 +1,6 @@
 <resources>
     <string name="app_name">AltinGunu</string>
-    <string name="ok">موافق</string>
+    <string name="go_back">ارجع</string>
     <string name="cancel">إلغاء</string>
     <string name="error">خطأ</string>
     <string name="retry">إعادة المحاولة</string>
@@ -42,7 +42,7 @@
     <string name="gold_with_type">ذهب (%1$s)</string>
     <string name="currency_with_type">عملة (%1$s)</string>
     <string name="item_type_currency">عملة ($, €, £)</string>
-    <string name="item_type_gold">ذهب (🥇, 🪙, 💰)</string>
+    <string name="item_type_gold">ذهب (🪙, 💰)</string>
     <string name="duration_months">(%1$s) شهر</string>
 
     <string name="spin_wheel">تدوير العجلة</string>
@@ -94,7 +94,6 @@
     <string name="confirm_information">تأكيد المعلومات</string>
     <string name="confirm">تأكيد</string>
     <string name="all_participants_have_been_selected">تم اختيار جميع المشاركين!</string>
-    <string name="wheel">العجلة</string>
     <string name="storage_permission_required">مطلوب إذن التخزين لحفظ ملف PDF</string>
     <string name="share_the_raffle_results">مشاركة نتائج السحب</string>
     <string name="the_raffle_results">نتائج السحب</string>

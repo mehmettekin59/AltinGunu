@@ -164,7 +164,7 @@ fun WheelScreen(
                     // Wide screen layout - Side by side
                     Row(
                         modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(12.dp),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
                         verticalAlignment = Alignment.Top
                     ) {
                         WheelSection(
@@ -280,20 +280,15 @@ private fun WheelSection(
         modifier = modifier,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Text(
-            UiText.stringResource(R.string.wheel).asString(),
-            style = MaterialTheme.typography.titleLarge,
-        )
-
         Box(
             modifier = Modifier
-                .padding(8.dp)
+                .padding(4.dp)
                 .fillMaxWidth(),
             contentAlignment = Alignment.Center
         ) {
             Canvas(
                 modifier = Modifier
-                    .size(320.dp)
+                    .size(300.dp)
                     .padding(4.dp)
             ) {
                 if (participants.isNotEmpty()) {
@@ -311,7 +306,7 @@ private fun WheelSection(
             viewModel.winners[viewModel.winners.size - 2]
         else
             viewModel.winner)
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(4.dp))
         ControlButtons(
             viewModel = viewModel,
             canSpin = participants.size > 1 && !viewModel.isSpinning
@@ -326,7 +321,7 @@ private fun ControlButtons(
 ) {
     Row(
         modifier = Modifier.padding(4.dp),
-        horizontalArrangement = Arrangement.spacedBy(16.dp)
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         Button(
             onClick = { viewModel.spinWheel() },
