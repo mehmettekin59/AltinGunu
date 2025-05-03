@@ -1,5 +1,6 @@
 package com.mehmettekin.altingunu.presentation.screens.splash
 
+import android.graphics.drawable.shapes.RoundRectShape
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.RepeatMode
@@ -22,6 +23,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.CutCornerShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -38,6 +41,7 @@ import androidx.compose.ui.draw.scale
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
@@ -249,12 +253,12 @@ private fun AnimatedLogo(visible: Boolean) {
 
         // The image logo
         Image(
-            painter = painterResource(R.drawable.image1),
+            painter = painterResource(R.drawable.appiconcircle),
             contentDescription = null,
             modifier = Modifier
-                .size(140.dp)
+                .size(120.dp)
                 .clip(CircleShape),
-            contentScale = ContentScale.Fit
+            contentScale = ContentScale.Crop
         )
     }
 }

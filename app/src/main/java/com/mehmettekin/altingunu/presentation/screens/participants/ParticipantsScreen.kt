@@ -284,10 +284,11 @@ fun ModernTextField(
     )
 }
 
+
 @Composable
 fun ItemTypeSelector(
-    selectedItemType: ItemType,
-    onItemTypeSelect: (ItemType) -> Unit
+    selectedItemType: ItemType, // ItemType tanımınızın mevcut olduğunu varsayar
+    onItemTypeSelect: (ItemType) -> Unit // ItemType tanımınızın mevcut olduğunu varsayar
 ) {
     Column {
         Text(
@@ -299,23 +300,28 @@ fun ItemTypeSelector(
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        FlowRow(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalArrangement = Arrangement.spacedBy(4.dp) // Dikey aralık korundu
+        Row(
+            modifier = Modifier
+                .fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(4.dp),
+            verticalAlignment = Alignment.CenterVertically
         ) {
+
             ItemType.entries.forEach { itemType ->
                 ItemSelectableChip(
+
                     text = itemType.displayName.asString(),
                     selected = itemType == selectedItemType,
                     onClick = { onItemTypeSelect(itemType) },
                     modifier = Modifier
-                        .padding(end = 8.dp, bottom = 4.dp)
-                        .width(110.dp), // Sabit genişlik kullanın
+                        .weight(1f),
                     itemType = itemType
                 )
             }
         }
+        // Eğer FlowRow'daki verticalArrangement.spacedBy(4.dp) gibi bir boşluk gerekiyorsa
+        // onu bu Row'un altına veya üst konteynere ekleyebilirsiniz.
+        // Örneğin: Spacer(modifier = Modifier.height(4.dp))
     }
 }
 
@@ -324,12 +330,12 @@ fun ItemSelectableChip(
     text: String,
     selected: Boolean,
     onClick: () -> Unit,
-    modifier: Modifier = Modifier,
-    itemType: ItemType
+    modifier: Modifier = Modifier, // Dışarıdan gelen modifier'ı kabul etmeli (weight burada gelecek)
+    itemType: ItemType // ItemType tanımınızın mevcut olduğunu varsayar
 ) {
     val shape = RoundedCornerShape(8.dp)
 
-    // İtemType'a göre arka plan rengini belirleme
+    // İtemType'a göre arka plan rengini belirleme (Gold, NavyBlue renk tanımlarınızın mevcut olduğunu varsayar)
     val backgroundColor = when {
         selected && itemType == ItemType.GOLD -> Gold
         selected && itemType == ItemType.CURRENCY -> NavyBlue
@@ -337,7 +343,7 @@ fun ItemSelectableChip(
         else -> Color.Transparent
     }
 
-    // İtemType'a göre kenarlık rengini belirleme
+    // İtemType'a göre kenarlık rengini belirleme (Gold, NavyBlue renk tanımlarınızın mevcut olduğunu varsayar)
     val borderColor = when {
         selected && itemType == ItemType.GOLD -> Gold
         selected && itemType == ItemType.CURRENCY -> NavyBlue
@@ -346,21 +352,22 @@ fun ItemSelectableChip(
     }
 
     Surface(
-        modifier = modifier
-            .clip(shape)
-            .clickable(onClick = onClick),
+        modifier = modifier // Buraya ItemTypeSelector'dan gelen .weight(1f) gelecek
+            .clip(shape) // Sonra kırpma uygulanır
+            .clickable(onClick = onClick), // Sonra tıklama özelliği eklenir
         color = backgroundColor,
         border = BorderStroke(1.dp, borderColor),
         shape = shape
     ) {
         Box(
             modifier = Modifier
+                // Chippin içindeki padding'i koruyun
                 .padding(vertical = 12.dp, horizontal = 4.dp),
             contentAlignment = Alignment.Center
         ) {
             Text(
                 text = text,
-                color = if (selected) White else Color.Gray,
+                color = if (selected) White else Color.Gray, // White renk tanımınızın mevcut olduğunu varsayar
                 fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal,
                 style = MaterialTheme.typography.bodyMedium,
                 maxLines = 1,

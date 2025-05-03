@@ -47,6 +47,9 @@ import com.mehmettekin.altingunu.utils.ResultState
 import com.mehmettekin.altingunu.utils.UiText
 import com.mehmettekin.altingunu.utils.ValueFormatter
 import kotlin.math.absoluteValue
+import kotlin.math.abs
+import kotlin.math.pow
+import kotlin.math.sign
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -167,7 +170,7 @@ fun EnterScreen(
                                 minAlpha = 0.7f,
                                 maxElevation = 0.dp,
                                 minElevation = 0.dp,
-                                pageSpacing = if (isLandscape) (-30).dp else (-30).dp // Landscape için daha az boşluk
+                                pageSpacing = if (isLandscape) (-35).dp else (-35).dp // Landscape için daha az boşluk
                             ) { rate, modifier, elevation ->
                                 AnimatedRateCard(
                                     rate = rate,
@@ -572,6 +575,7 @@ fun GoldDayLotteryCard(
     }
 }
 
+
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun <T> CoverFlowCarousel(
@@ -722,5 +726,3 @@ private fun lerp(start: Dp, stop: Dp, fraction: Float): Dp {
         start.value + (stop.value - start.value) * fraction
     )
 }
-
-
