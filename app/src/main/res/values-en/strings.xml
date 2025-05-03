@@ -47,6 +47,7 @@
     <string name="duration_months">%1$s months</string>
 
     <string name="spin_wheel">Spin the Wheel</string>
+    <string name="raffle_completed">RAFFLE COMPLETED</string>
     <string name="restart">Restart</string>
     <string name="winner">Winner</string>
     <string name="winner_celebration">Winner:🎉✨ %1$s ✨🎉</string>

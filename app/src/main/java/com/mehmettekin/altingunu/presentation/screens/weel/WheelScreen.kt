@@ -183,7 +183,7 @@ fun WheelScreen(
                             ParticipantsSection(
                                 modifier = Modifier.fillMaxWidth(),
                                 remainingParticipants = state.participants,
-                                winners = state.winners,
+                                winners = viewModel.winners,
                                 onSaveResults = { viewModel.saveResults() }
                             )
 
@@ -216,13 +216,64 @@ fun WheelScreen(
                         }
                     }
                 } else {
-                    // Narrow screen layout - Stacked
-                    WheelSection(
-                        modifier = Modifier.fillMaxWidth(),
-                        viewModel = viewModel,
-                        textMeasurer = textMeasurer,
-                        participants = state.participants
-                    )
+                    // Narrow screen layout - Stacked with optimized space
+                    // For empty participants list, use a more compact layout
+                    if (state.participants.isEmpty()) {
+                        // Optimize layout when no participants left
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.Center
+                        ) {
+                            // Last winner announcement in a larger card
+                            if (viewModel.winners.isNotEmpty()) {
+                                Card(
+                                    modifier = Modifier
+                                        .padding(2.dp)
+                                        .fillMaxWidth(),
+                                    elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+                                    colors = CardDefaults.cardColors(containerColor = NavyBlue)
+                                ) {
+                                    Column(
+                                        modifier = Modifier.padding(16.dp),
+                                        horizontalAlignment = Alignment.CenterHorizontally
+                                    ) {
+                                        Text(
+                                            text = UiText.stringResource(R.string.raffle_completed).asString(),
+                                            style = MaterialTheme.typography.titleMedium,
+                                            color = White,
+                                            fontWeight = FontWeight.Bold,
+                                            textAlign = TextAlign.Center
+                                        )
+
+                                        Spacer(modifier = Modifier.height(8.dp))
+
+                                        Text(
+                                            text = UiText.stringResource(
+                                                R.string.winner_celebration,
+                                                //viewModel.winners.last()
+                                                viewModel.winners[viewModel.winners.size - 2]
+                                            ).asString(),
+                                            modifier = Modifier.padding(8.dp),
+                                            color = Gold,
+                                            fontWeight = FontWeight.ExtraBold,
+                                            fontSize = 20.sp,
+                                            textAlign = TextAlign.Center,
+                                            maxLines = 1,
+                                            overflow = TextOverflow.Ellipsis
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                    } else {
+                        // Normal layout when there are participants
+                        WheelSection(
+                            modifier = Modifier.fillMaxWidth(),
+                            viewModel = viewModel,
+                            textMeasurer = textMeasurer,
+                            participants = state.participants
+                        )
+                    }
 
                     Spacer(modifier = Modifier.height(4.dp))
 
@@ -233,10 +284,10 @@ fun WheelScreen(
                         onSaveResults = { viewModel.saveResults() }
                     )
 
-                    Spacer(modifier = Modifier.height(16.dp))
-
                     // Only show save button when all participants have been selected
                     if (state.participants.isEmpty() && viewModel.winners.isNotEmpty()) {
+                        Spacer(modifier = Modifier.height(16.dp))
+
                         Button(
                             onClick = { viewModel.saveResults() },
                             colors = ButtonDefaults.buttonColors(
@@ -291,9 +342,19 @@ private fun WheelSection(
                     .size(300.dp)
                     .padding(4.dp)
             ) {
-                if (participants.isNotEmpty()) {
+                // Always draw wheel, using a default list if participants is empty
+                val displayParticipants = if (participants.isNotEmpty()) {
+                    participants
+                } else if (viewModel.winners.isNotEmpty()) {
+                    // Show the winners on the wheel when participants list is empty
+                    viewModel.winners
+                } else {
+                    emptyList()
+                }
+
+                if (displayParticipants.isNotEmpty()) {
                     drawWheel(
-                        participants = participants,
+                        participants = displayParticipants,
                         rotation = viewModel.rotation,
                         textMeasurer = textMeasurer
                     )
@@ -375,7 +436,7 @@ private fun WinnerAnnouncement(winner: String?) {
         }
     }
 }
-
+///----------------------
 @Composable
 private fun ParticipantsSection(
     modifier: Modifier,

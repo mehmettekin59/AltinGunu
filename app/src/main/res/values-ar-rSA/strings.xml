@@ -46,6 +46,7 @@
     <string name="duration_months">(%1$s) شهر</string>
 
     <string name="spin_wheel">تدوير العجلة</string>
+    <string name="raffle_completed">انتهت السحب</string>
     <string name="restart">إعادة البدء</string>
     <string name="winner">الفائز</string>
     <string name="winner_celebration">الفائز:🎉✨ %1$s ✨🎉</string>

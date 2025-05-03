@@ -49,6 +49,7 @@
 
 
     <string name="spin_wheel">Çarkı Çevir</string>
+    <string name="raffle_completed">ÇEKİLİŞ BİTTİ</string>
     <string name="restart">Yeniden Başlat</string>
     <string name="winner">Kazanan</string>
     <string name="winner_celebration">Kazanan:🎉✨ %1$s ✨🎉</string>

@@ -1,7 +1,6 @@
 package com.mehmettekin.altingunu.data.repository
 
 import android.content.Context
-import android.util.Log
 import com.mehmettekin.altingunu.R
 import com.mehmettekin.altingunu.data.local.SettingsDataStore
 import com.mehmettekin.altingunu.data.remote.KapaliCarsiApi
@@ -9,9 +8,7 @@ import com.mehmettekin.altingunu.domain.repository.KapaliCarsiRepository
 import com.mehmettekin.altingunu.utils.ResultState
 import com.mehmettekin.altingunu.utils.UiText
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -28,6 +25,7 @@ import com.mehmettekin.altingunu.domain.model.ExchangeRate
 import com.mehmettekin.altingunu.utils.NetworkUtils
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.launch
 
 @Singleton
 class KapaliCarsiRepositoryImpl @Inject constructor(
@@ -38,9 +36,11 @@ class KapaliCarsiRepositoryImpl @Inject constructor(
 ) : KapaliCarsiRepository {
 
     private val _refreshTrigger = MutableSharedFlow<Unit>(replay = 0)
-
     override fun manualRefresh() {
-        _refreshTrigger.tryEmit(Unit)
+        externalScope.launch{
+            _refreshTrigger.emit(Unit)
+        }
+
     }
 
     @OptIn(ExperimentalCoroutinesApi::class)
