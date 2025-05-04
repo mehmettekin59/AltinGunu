@@ -28,7 +28,7 @@
     <string name="error_specific_item_not_selected">Lütfen bir tür seçin</string>
     <string name="enter_the_participants">Katılımcıları Giriniz</string>
     <string name="add_participant">Katılımcı Ekleme</string>
-    <string name="number_of_gold">Altın Sayısı (Adet)</string>
+    <string name="number_of_gold">Kişi Başı Altın Sayısı (Adet)</string>
     <string name="how_many_months_will_it_last">Gün, kaç ay sürecek?</string>
     <string name="starting_date">Başlangıç Tarihi</string>
     <string name="continue_button">Devam et</string>
@@ -66,7 +66,7 @@
     <string name="start_new_draw">Yeni Çekiliş Başlat</string>
     <string name="raffle_info">Çekiliş Bilgileri</string>
     <string name="value_type">Değer Türü</string>
-    <string name="monthly_amount">Aylık Miktar</string>
+    <string name="monthly_amount">Kişi Başı Aylık Miktar</string>
     <string name="duration">Süre(Ay)</string>
     <string name="participant_count">Katılımcı Sayısı</string>
     <string name="name">İsim</string>
@@ -144,6 +144,7 @@
     <string name="error_duration_greater_than_participants">Süre (Ay), katılımcı sayısından büyük olamaz</string>
     <string name="error_participants_not_divisible_by_duration">Katılımcı sayısı, Süre (Ay) değerine tam bölünebilir olmalıdır</string>
     <string name="welcome_title_message">Altın Günü Uygulamasına\n Hoş Geldiniz!</string>
+
 
 
 </resources>

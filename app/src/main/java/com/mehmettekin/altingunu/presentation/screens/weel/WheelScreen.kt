@@ -3,6 +3,7 @@ package com.mehmettekin.altingunu.presentation.screens.weel
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -161,11 +162,11 @@ fun WheelScreen(
             ) {
                 // Layout based on screen width
                 if (isWideScreen) {
-                    // Wide screen layout - Side by side
+                    // Wide screen layout - Side by side with vertical alignment
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
-                        verticalAlignment = Alignment.Top
+                        verticalAlignment = Alignment.CenterVertically // Changed to CenterVertically to align wheel and participants
                     ) {
                         WheelSection(
                             modifier = Modifier.weight(1f),
@@ -197,6 +198,7 @@ fun WheelScreen(
                                         containerColor = NavyBlue,
                                         contentColor = White
                                     ),
+                                    border = BorderStroke(width = 1.dp, color = Gold),
                                     shape = RoundedCornerShape(8.dp),
                                     modifier = Modifier.fillMaxWidth()
                                 ) {
@@ -250,7 +252,6 @@ fun WheelScreen(
                                         Text(
                                             text = UiText.stringResource(
                                                 R.string.winner_celebration,
-                                                //viewModel.winners.last()
                                                 viewModel.winners[viewModel.winners.size - 2]
                                             ).asString(),
                                             modifier = Modifier.padding(8.dp),
@@ -294,6 +295,7 @@ fun WheelScreen(
                                 containerColor = NavyBlue,
                                 contentColor = White
                             ),
+                            border = BorderStroke(width = 1.dp, color = Gold),
                             shape = RoundedCornerShape(8.dp),
                             modifier = Modifier.fillMaxWidth()
                         ) {
@@ -426,7 +428,7 @@ private fun WinnerAnnouncement(winner: String?) {
             Text(
                 text = UiText.stringResource(R.string.winner_celebration, it).asString(),
                 modifier = Modifier.padding(8.dp),
-                color = MaterialTheme.colorScheme.surface,
+                color = Gold,
                 fontWeight = FontWeight.ExtraBold,
                 fontSize = 16.sp,
                 textAlign = TextAlign.Center,

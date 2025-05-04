@@ -27,7 +27,7 @@
     <string name="error_specific_item_not_selected">Please select a type</string>
     <string name="enter_the_participants">Enter Participants</string>
     <string name="add_participant">Add Participant</string>
-    <string name="number_of_gold">Number of Gold (pieces)</string>
+    <string name="number_of_gold">Number of Gold per Person (Piece)</string>
     <string name="how_many_months_will_it_last">How many months will the Gold Day last?</string>
     <string name="starting_date">Starting Date</string>
     <string name="continue_button">Continue</string>
@@ -55,7 +55,6 @@
     <string name="remaining_participants_special">Remaining: (%1$d)</string>
     <string name="winners">Winners</string>
     <string name="winners_special">Winners: (%1$d)</string>
-
     <string name="no_winners_yet">No winners yet</string>
     <string name="save_results">Save Results</string>
     <string name="there_is_no_winner_yet">There is no winner yet</string>
@@ -64,7 +63,7 @@
     <string name="start_new_draw">Start New Raffle</string>
     <string name="raffle_info">Raffle Information</string>
     <string name="value_type">Value Type</string>
-    <string name="monthly_amount">Monthly Amount</string>
+    <string name="monthly_amount">Monthly Amount Per Person</string>
     <string name="duration">Duration (Months)</string>
     <string name="participant_count">Participant Count</string>
     <string name="name">Name</string>
@@ -141,4 +140,5 @@
     <string name="error_duration_greater_than_participants">Duration (Months) cannot be greater than the number of participants</string>
     <string name="error_participants_not_divisible_by_duration">The number of participants must be evenly divisible by the Duration (Months)</string>
     <string name="welcome_title_message">Welcome to the Gold Day App</string>
+
 </resources>

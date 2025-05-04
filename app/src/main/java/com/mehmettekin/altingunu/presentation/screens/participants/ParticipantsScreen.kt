@@ -6,10 +6,8 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -120,13 +118,14 @@ fun ParticipantsScreen(
         }
 
     ) { paddingValues ->
-        ParticipantsContent(
-            state = state,
-            onEvent = viewModel::onEvent,
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues)
-        )
+
+            ParticipantsContent(
+                state = state,
+                onEvent = viewModel::onEvent,
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(paddingValues)
+            )
 
         // Show confirmation dialog
         if (state.isShowingConfirmDialog) {
@@ -212,7 +211,7 @@ fun ParticipantsContent(
         Text(
             text = UiText.stringResource(R.string.starting_date).asString(),
             style = MaterialTheme.typography.titleMedium,
-            color = NavyBlue,
+            color = Gold,
             fontWeight = FontWeight.Medium
         )
 
@@ -244,6 +243,7 @@ fun ParticipantsContent(
                 contentColor = White
             ),
             shape = RoundedCornerShape(8.dp),
+            border = BorderStroke(width = 1.dp, color = Gold),
             modifier = Modifier.fillMaxWidth()
         ) {
             Icon(
@@ -271,14 +271,15 @@ fun ModernTextField(
     OutlinedTextField(
         value = value,
         onValueChange = onValueChange,
-        label = { Text(label) },
+        label = { Text(text = label, color = Gold) },
         modifier = Modifier.fillMaxWidth(),
         keyboardOptions = KeyboardOptions(keyboardType = keyboardType),
         leadingIcon = leadingIcon,
         colors = OutlinedTextFieldDefaults.colors(
             focusedBorderColor = Gold,
             focusedLabelColor = Gold,
-            cursorColor = Gold
+            cursorColor = Gold,
+            unfocusedBorderColor = Gold,
         ),
         shape = RoundedCornerShape(8.dp)
     )
@@ -294,7 +295,7 @@ fun ItemTypeSelector(
         Text(
             text = UiText.stringResource(R.string.type_of_value_to_be_collected).asString(),
             style = MaterialTheme.typography.titleMedium,
-            color = NavyBlue,
+            color = Gold,
             fontWeight = FontWeight.Medium
         )
 
@@ -367,7 +368,7 @@ fun ItemSelectableChip(
         ) {
             Text(
                 text = text,
-                color = if (selected) White else Color.Gray, // White renk tanımınızın mevcut olduğunu varsayar
+                color = if (selected) White else Gold, // White renk tanımınızın mevcut olduğunu varsayar
                 fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal,
                 style = MaterialTheme.typography.bodyMedium,
                 maxLines = 1,
@@ -409,7 +410,7 @@ fun SpecificItemSelector(
         Text(
             text = title,
             style = MaterialTheme.typography.titleMedium,
-            color = NavyBlue,
+            color = Gold,
             fontWeight = FontWeight.Medium
         )
 
@@ -420,7 +421,7 @@ fun SpecificItemSelector(
                 .fillMaxWidth()
                 .clip(RoundedCornerShape(8.dp))
                 .clickable { expanded = true },
-            border = BorderStroke(1.dp, Color.Gray.copy(alpha = 0.5f))
+            border = BorderStroke(1.dp, Gold.copy(alpha = 0.5f))
         ) {
             Row(
                 modifier = Modifier
@@ -431,7 +432,7 @@ fun SpecificItemSelector(
             ) {
                 Text(
                     text = selectedValue.ifEmpty { UiText.stringResource(R.string.select).asString() },
-                    color = if (selectedValue.isEmpty()) Color.Gray.copy(alpha = 0.5f) else Color.DarkGray
+                    color = if (selectedValue.isEmpty()) Gold.copy(alpha = 0.5f) else Color.DarkGray
                 )
 
                 Icon(
@@ -500,7 +501,7 @@ fun ModernDateSelector(
                 .weight(1f)
                 .clip(RoundedCornerShape(8.dp))
                 .clickable { showMonthDialog = true },
-            border = BorderStroke(1.dp, Color.Gray.copy(alpha = 0.5f))
+            border = BorderStroke(1.dp, Gold)
         ) {
             Row(
                 modifier = Modifier
@@ -511,7 +512,7 @@ fun ModernDateSelector(
             ) {
                 Text(
                     text = monthFormat.format(calendar.time),
-                    color = Color.DarkGray
+                    color = Gold
                 )
 
                 Icon(
@@ -539,7 +540,7 @@ fun ModernDateSelector(
             ) {
                 Text(
                     text = selectedYear.toString(),
-                    color = Color.DarkGray
+                    color = Gold
                 )
 
                 Icon(
@@ -686,7 +687,7 @@ fun ParticipantsSection(
         Text(
             text = UiText.stringResource(R.string.participants_count_special, participants.size).asString(),
             style = MaterialTheme.typography.titleMedium,
-            color = NavyBlue,
+            color = Gold,
             fontWeight = FontWeight.Medium
         )
 
@@ -696,12 +697,13 @@ fun ParticipantsSection(
         OutlinedTextField(
             value = name,
             onValueChange = { name = it },
-            label = { Text(UiText.stringResource(R.string.participant_name).asString()) },
+            label = { Text(text = UiText.stringResource(R.string.participant_name).asString(), color = Gold) },
             modifier = Modifier.fillMaxWidth(),
             colors = OutlinedTextFieldDefaults.colors(
                 focusedBorderColor = Gold,
                 focusedLabelColor = Gold,
-                cursorColor = Gold
+                cursorColor = Gold,
+                unfocusedBorderColor = Gold
             ),
             shape = RoundedCornerShape(8.dp),
             singleLine = true,
@@ -740,7 +742,7 @@ fun ParticipantsSection(
                 ) {
                     Text(
                         UiText.stringResource(R.string.no_participants_have_been_added_yet).asString(),
-                        color = Color.Gray
+                        color = Gold
                     )
                 }
             } else {
@@ -755,7 +757,7 @@ fun ParticipantsSection(
                         ) {
                             Text(
                                 text = participant.name,
-                                color = NavyBlue
+                                color = NavyBlue,
                             )
 
                             IconButton(
@@ -874,7 +876,7 @@ fun ConfirmationItem(
     ) {
         Text(
             text = "$label:",
-            color = Color.Gray,
+            color = Gold,
             style = MaterialTheme.typography.bodyMedium,
             fontWeight = FontWeight.Medium,
             modifier = Modifier.width(110.dp)

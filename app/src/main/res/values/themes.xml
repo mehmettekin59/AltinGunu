@@ -6,7 +6,7 @@
     <!-- Splash screen tema tanımı -->
     <style name="Theme.AltinGunu.SplashScreen" parent="Theme.SplashScreen">
         <item name="windowSplashScreenBackground">@color/navy_blue</item>
-        <item name="windowSplashScreenAnimatedIcon">@drawable/appiconcircle</item>
+        <item name="windowSplashScreenAnimatedIcon">@drawable/splash</item>
         <item name="windowSplashScreenAnimationDuration">300</item>
         <item name="postSplashScreenTheme">@style/Theme.AltinGunu</item>
     </style>

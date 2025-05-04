@@ -1,6 +1,5 @@
 package com.mehmettekin.altingunu.presentation.screens.participants
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.mehmettekin.altingunu.R

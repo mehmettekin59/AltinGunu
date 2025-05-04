@@ -6,6 +6,7 @@ import android.content.Intent
 import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -235,6 +236,7 @@ private fun EmptyResultsView(
                 containerColor = NavyBlue
             ),
             shape = RoundedCornerShape(8.dp),
+            border = BorderStroke(width = 1.dp, color = Gold),
             modifier = Modifier.fillMaxWidth(0.8f)
         ) {
             Icon(
@@ -292,6 +294,7 @@ private fun ResultsContent(
                 ),
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(8.dp),
+                border = BorderStroke(width = 1.dp, color = Gold),
             ) {
                 Icon(
                     imageVector = Icons.Default.Refresh,

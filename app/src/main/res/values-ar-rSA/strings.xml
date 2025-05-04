@@ -27,7 +27,7 @@
     <string name="error_specific_item_not_selected">الرجاء اختيار نوع</string>
     <string name="enter_the_participants">أدخل المشاركين</string>
     <string name="add_participant">إضافة المشاركين</string>
-    <string name="number_of_gold">عدد قطع الذهب (بالوحدات)</string>
+    <string name="number_of_gold">عدد الذهب لكل شخص (قطعة)</string>
     <string name="how_many_months_will_it_last">كم شهر سيستمر يوم الذهب؟</string>
     <string name="starting_date">تاريخ البدء</string>
     <string name="continue_button">متابعة</string>
@@ -62,7 +62,7 @@
     <string name="start_new_draw">بدء سحب جديد</string>
     <string name="raffle_info">معلومات السحب</string>
     <string name="value_type">نوع القيمة</string>
-    <string name="monthly_amount">المبلغ الشهري</string>
+    <string name="monthly_amount">المبلغ الشهري للفرد</string>
     <string name="duration">المدة (أشهر)</string>
     <string name="participant_count">عدد المشاركين</string>
     <string name="name">الاسم</string>
@@ -139,5 +139,6 @@
     <string name="error_duration_greater_than_participants">لا يمكن أن تكون المدة (بالأشهر) أكبر من عدد المشاركين</string>
     <string name="error_participants_not_divisible_by_duration">يجب أن يكون عدد المشاركين قابلاً للقسمة بالتساوي على مدة الدورة (بالأشهر)</string>
     <string name="welcome_title_message">مرحبًا بك في تطبيق يوم الذهب!</string>
+
 
 </resources>

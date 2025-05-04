@@ -1,6 +1,7 @@
 package com.mehmettekin.altingunu.presentation.screens.common
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
@@ -36,6 +37,7 @@ import com.mehmettekin.altingunu.ui.theme.NavyBlue
 import com.mehmettekin.altingunu.ui.theme.White
 import com.mehmettekin.altingunu.utils.UiText
 import com.mehmettekin.altingunu.R
+import com.mehmettekin.altingunu.ui.theme.Gold
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -54,6 +56,7 @@ fun CommonTopAppBar(
             .height(50.dp) // Daha kompakt yükseklik
             .fillMaxWidth()
             .background(backgroundColor)
+            .border(width = 1.dp, color = Gold)
     ) {
         Row(
             modifier = Modifier
