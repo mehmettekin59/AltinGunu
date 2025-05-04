@@ -25,7 +25,7 @@ import javax.inject.Inject
 @HiltViewModel
 class WheelViewModel @Inject constructor(
     private val drawRepository: DrawRepository,
-    private val kapaliCarsiRepository: KapaliCarsiRepository
+    //private val kapaliCarsiRepository: KapaliCarsiRepository
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(WheelState())

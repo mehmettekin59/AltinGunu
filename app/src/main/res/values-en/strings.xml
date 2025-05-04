@@ -28,14 +28,14 @@
     <string name="enter_the_participants">Enter Participants</string>
     <string name="add_participant">Add Participant</string>
     <string name="number_of_gold">Number of Gold per Person (Piece)</string>
-    <string name="how_many_months_will_it_last">How many months will the Gold Day last?</string>
+    <string name="how_many_months_will_it_last">How many months will it take?</string>
     <string name="starting_date">Starting Date</string>
     <string name="continue_button">Continue</string>
     <string name="select">Select</string>
     <string name="select_month">Select Month</string>
     <string name="select_year">Select Year</string>
     <string name="participants_count">Participant Count</string>
-    <string name="participant_name">Participant Name</string>
+    <string name="participant_name">Enter Participant Name</string>
     <string name="add_button_description">Add</string>
     <string name="no_participants_have_been_added_yet">No participants have been added yet</string>
     <string name="participant_count_special">%1$d participants</string>

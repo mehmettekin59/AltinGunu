@@ -35,7 +35,7 @@
     <string name="select_month">اختر الشهر</string>
     <string name="select_year">اختر السنة</string>
     <string name="participants_count">عدد المشاركين</string>
-    <string name="participant_name">اسم المشارك</string>
+    <string name="participant_name">أدخل اسم المشارك</string>
     <string name="add_button_description">إضافة</string>
     <string name="no_participants_have_been_added_yet">لم تتم إضافة مشاركين بعد</string>
     <string name="participant_count_special">%1$d شخص</string>
