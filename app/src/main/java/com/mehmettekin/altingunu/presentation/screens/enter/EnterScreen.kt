@@ -65,6 +65,7 @@ fun EnterScreen(
 
     val codeToNameMap = remember { goldCodeToName + currencyCodeToName }
 
+
     // Ekran yapılandırmasını al
     val configuration = LocalConfiguration.current
     val isLandscape = configuration.orientation == android.content.res.Configuration.ORIENTATION_LANDSCAPE
@@ -129,7 +130,7 @@ fun EnterScreen(
                 is ResultState.Error -> {
                     val errorState = exchangeRatesState as ResultState.Error
                     ErrorState(
-                        message = errorState.message.toString(),
+                        message = errorState.message.asString(),
                         onRetry = { viewModel.refreshExchangeRates() }
                     )
                 }
