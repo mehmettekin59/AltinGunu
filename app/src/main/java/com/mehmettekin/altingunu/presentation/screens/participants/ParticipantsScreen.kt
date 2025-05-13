@@ -848,7 +848,7 @@ fun ConfirmationDialog(
                 ),
                 shape = RoundedCornerShape(8.dp)
             ) {
-                Text(UiText.stringResource(R.string.confirm).asString())
+                Text(UiText.stringResource(R.string.confirm).asString(), color = White)
             }
         },
         dismissButton = {

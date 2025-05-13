@@ -410,7 +410,7 @@ private fun ControlButtons(
                 .weight(1f)
                 .padding(4.dp)
         ) {
-            Text(UiText.stringResource(R.string.restart).asString())
+            Text(UiText.stringResource(R.string.restart).asString(), color = White)
         }
     }
 }

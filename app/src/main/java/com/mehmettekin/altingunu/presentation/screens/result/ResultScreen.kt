@@ -302,7 +302,7 @@ private fun ResultsContent(
                     modifier = Modifier.size(ButtonDefaults.IconSize)
                 )
                 Spacer(modifier = Modifier.width(8.dp))
-                Text(UiText.stringResource(R.string.start_a_new_raffle).asString())
+                Text(UiText.stringResource(R.string.start_a_new_raffle).asString(), color = White)
             }
 
             // Alt boşluk ekleyerek içeriğin sonunda da scroll edilebilirliği artırıyoruz

@@ -1,5 +1,6 @@
 package com.mehmettekin.altingunu.presentation.screens.enter
 
+
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
@@ -68,7 +69,8 @@ fun EnterScreen(
 
     // Ekran yapılandırmasını al
     val configuration = LocalConfiguration.current
-    val isLandscape = configuration.orientation == android.content.res.Configuration.ORIENTATION_LANDSCAPE
+    val isLandscape =
+        configuration.orientation == android.content.res.Configuration.ORIENTATION_LANDSCAPE
 
     // Filtrelenmiş verileri bir derivedStateOf ile daha verimli hale getiriyoruz
     val filteredRates by remember(exchangeRatesState, selectedItemType) {
@@ -82,6 +84,7 @@ fun EnterScreen(
                         else -> emptyList()
                     }
                 }
+
                 else -> emptyList()
             }
         }
@@ -139,7 +142,8 @@ fun EnterScreen(
                     // Rate section
                     if (filteredRates.isNotEmpty()) {
                         RatesSectionTitle(
-                            title = if (selectedItemType == ItemType.GOLD) UiText.stringResource(R.string.gold_price).asString()
+                            title = if (selectedItemType == ItemType.GOLD) UiText.stringResource(R.string.gold_price)
+                                .asString()
                             else UiText.stringResource(R.string.currencies).asString(),
                             icon = if (selectedItemType == ItemType.GOLD)
                                 painterResource(id = R.drawable.gold_bar)
@@ -160,15 +164,15 @@ fun EnterScreen(
                             CoverFlowCarousel(
                                 items = filteredRates,
                                 initialPageIndex = minOf(3, filteredRates.size - 1),
-                                itemWidth = if (isLandscape) 210.dp else 185.dp,
-                                itemHeight = if (isLandscape) 220.dp else 200.dp,
+                                itemWidth = if (isLandscape) 210.dp else 175.dp,
+                                itemHeight = if (isLandscape) 220.dp else 190.dp,
                                 minScale = 0.7f,
                                 centerScale = 1.05f,
                                 maxRotationY = if (isLandscape) 45f else 45f, // Landscape için daha az açı
                                 minAlpha = 0.7f,
                                 maxElevation = 0.dp,
                                 minElevation = 0.dp,
-                                pageSpacing = if (isLandscape) (-35).dp else (-35).dp // Landscape için daha az boşluk
+                                pageSpacing = if (isLandscape) (-10).dp else (-20).dp // Landscape için daha az boşluk
                             ) { rate, modifier, elevation ->
                                 AnimatedRateCard(
                                     rate = rate,
@@ -189,7 +193,10 @@ fun EnterScreen(
                         }
 
                         Text(
-                            text = UiText.stringResource(R.string.data_not_found, dataType.asString()).asString(),
+                            text = UiText.stringResource(
+                                R.string.data_not_found,
+                                dataType.asString()
+                            ).asString(),
                             modifier = Modifier
                                 .padding(vertical = 4.dp)
                                 .fillMaxWidth(),
@@ -588,8 +595,8 @@ fun <T> CoverFlowCarousel(
     minAlpha: Float = 0.6f,
     maxElevation: Dp = 12.dp,
     minElevation: Dp = 4.dp,
-    cameraDistance: Dp = 12.dp,
-    pageSpacing: Dp = (-50).dp,
+    cameraDistance: Dp = 4.dp,
+    pageSpacing: Dp = 1.dp, // Değiştirildi: Pozitif değer ile kartlar arası mesafeyi belirgin hale getirdik
     itemContent: @Composable (item: T, modifier: Modifier, elevation: Dp) -> Unit
 ) {
     val layoutDirection = LocalLayoutDirection.current
@@ -611,56 +618,72 @@ fun <T> CoverFlowCarousel(
         ((screenWidth - itemWidth) / 2).coerceAtLeast(0.dp)
     }
 
-    val isLandscape = configuration.orientation == android.content.res.Configuration.ORIENTATION_LANDSCAPE
+    val isLandscape =
+        configuration.orientation == android.content.res.Configuration.ORIENTATION_LANDSCAPE
 
     HorizontalPager(
         state = pagerState,
         modifier = modifier,
         contentPadding = PaddingValues(horizontal = horizontalPadding),
-        pageSpacing = pageSpacing,
+        pageSpacing = pageSpacing, // Artık pozitif değer kullanıyoruz
         beyondViewportPageCount = 3, // Show more items for a smooth effect
         flingBehavior = flingBehavior
     ) { page ->
         // Calculate transformation values based on page offset
         val pageOffset = (pagerState.currentPage - page) + pagerState.currentPageOffsetFraction
-        val absOffset = pageOffset.absoluteValue.coerceIn(0f, 2f) // Allow values up to 2 for depth effect
+
+        // Düzeltildi: Daha dengeli mesafeler için offset ölçeklendirmesi
+        val absOffset = pageOffset.absoluteValue.coerceIn(0f, 2f)
 
         // offsetSign determines if we're to the left (-1) or right (1) of the center
         val offsetSign = if (pageOffset > 0) 1f else -1f
 
-        // Enhanced scale effect - diminishes faster as we move away from center
-        val scaleExp = if (absOffset <= 1f) {
-            // Linear for first adjacent items
-            absOffset
-        } else {
-            // Exponential for items beyond adjacent ones
-            1f + (absOffset - 1f) * 1.5f
+        // Scale değeri - uzaktaki kartlar için daha fazla küçültme
+        val scale = when {
+            absOffset < 1f -> lerp(
+                start = minScale * 0.95f,
+                stop = centerScale,
+                fraction = (1f - absOffset)
+            )
+
+            else -> lerp(
+                start = minScale * 0.55f,  // Uzaktaki kartlar daha küçük
+                stop = minScale * 0.95f,
+                fraction = (2f - absOffset)
+            )
         }
 
-        val scale = lerp(
-            start = minScale * 0.9f, // Make far-away items even smaller
-            stop = centerScale,
-            fraction = (1f - scaleExp.coerceIn(0f, 1f))
-        )
-
-        // Calculate rotation with equator-like effect - ensure symmetry
-        // FIX: Invert offsetSign to get correct rotation direction
+        // Rotasyon değerini mesafeye göre ayarladık
         val rotationDirection = if (isRtl) -1f else 1f
-        val baseRotation = lerp(
-            start = maxRotationY,
-            stop = 0f,
-            fraction = 1f - absOffset.coerceIn(0f, 1f)
-        )
-        // Correct rotation for proper 3D effect
-        // Multiply by -offsetSign to fix the rotation direction
-        val rotationY = baseRotation * rotationDirection * -offsetSign
+        val rotationY = when {
+            absOffset < 1f -> lerp(
+                start = maxRotationY,
+                stop = 0f,
+                fraction = (1f - absOffset)
+            ) * rotationDirection * -offsetSign
 
-        // Alpha effect - fade out as items move further from center
-        val alpha = lerp(
-            start = if (absOffset > 1f) minAlpha * 0.6f else minAlpha, // Items beyond adjacent fade more
-            stop = 1f,
-            fraction = 1f - absOffset.coerceIn(0f, 1f)
-        )
+            else -> {
+                // Uzaktaki kartların açısını daha az artır
+                val angle =
+                    maxRotationY + (absOffset - 1f) * 5f  // Uzak kartlar için açı artışı daha düşük
+                angle.coerceAtMost(maxRotationY + 10f) * rotationDirection * -offsetSign
+            }
+        }
+
+        // Alfa değeri - uzak kartlarda daha düşük alpha
+        val alpha = when {
+            absOffset < 1f -> lerp(
+                start = minAlpha,
+                stop = 1f,
+                fraction = 1f - absOffset
+            )
+
+            else -> lerp(
+                start = minAlpha * 0.8f,  // Uzak kartlar daha saydamlaşıyor
+                stop = minAlpha,
+                fraction = 2f - absOffset
+            )
+        }
 
         // Elevation effect - center items popping out more
         val elevation = lerp(
@@ -669,48 +692,50 @@ fun <T> CoverFlowCarousel(
             fraction = 1f - absOffset.coerceIn(0f, 1f)
         )
 
-        // Apply z-offset through perspective transform
-        // For items away from center, increase Z offset to move them "back" (ensure symmetry)
-        val zOffset = if (absOffset <= 1f) {
-            // First neighbors move back
-            absOffset * 0.02f
-        } else {
-            // Further items move even more back (parabolic effect)
-            0.15f + (absOffset - 1f) * 0.2f
+        // Perspektif mesafesini ayarla
+        val adjustedCameraDistance =
+            (if (isLandscape) cameraDistance.value * 2f else cameraDistance.value * 1.8f) * density.density
+
+        // Uzak kartların ekstra yana kayması için offset değeri - daha güçlü etki
+        val horizontalOffset = when {
+            absOffset < 1f -> 0f  // Merkeze yakın kartlar normal pozisyonda
+            else -> (absOffset - 1f) * 10f * offsetSign  // Uzak kartlar için daha fazla yatay uzaklaşma
         }
 
-        // Calculate adjusted camera distance
-        val adjustedCameraDistance = (if (isLandscape) cameraDistance.value * 1.5f else cameraDistance.value) * density.density
-
         // Item content with transformations
-        itemContent(
-            items[page],
-            Modifier
-                .width(itemWidth)
-                .height(itemHeight)
-                .graphicsLayer {
-                    this.cameraDistance = adjustedCameraDistance
+        Box(
+            modifier = Modifier.graphicsLayer {
+                // Bu bileşenin çizim sırası için Z sıralaması uyguluyoruz (z-ordering)
+                // Uzak kartlar daha önce çizilir (önce çizilen arkada kalır)
+                // Bu API hatası olmadan çalışmalı
+                translationY = absOffset * 0.01f  // Çok küçük bir değer, sadece çizim sırası için
+            }
+        ) {
+            itemContent(
+                items[page],
+                Modifier
+                    .width(itemWidth)
+                    .height(itemHeight)
+                    .graphicsLayer {
+                        this.cameraDistance = adjustedCameraDistance
+                        transformOrigin = TransformOrigin(0.5f, 0.5f)
 
-                    // Apply perspective transformation for depth effect - ensure symmetry
-                    transformOrigin = TransformOrigin(0.5f, 0.7f)
+                        // Scale kartlara uygula
+                        this.scaleX = scale
+                        this.scaleY = scale
 
-                    // Base scale effect
-                    val depthScale = if (absOffset > 0) {
-                        val depthPenalty = zOffset * 0.8f // Increase penalty for depth
-                        scale * (1f - depthPenalty)
-                    } else scale
+                        // Rotasyon uygula
+                        this.rotationY = rotationY
 
-                    this.scaleX = depthScale
-                    this.scaleY = depthScale
+                        // Alfa uygula
+                        this.alpha = alpha
 
-                    // Apply rotation with depth enhancement
-                    this.rotationY = rotationY
-
-                    // Apply alpha
-                    this.alpha = alpha
-                },
-            elevation
-        )
+                        // Uzak kartlar için ekstra yatay offseti uygula
+                        translationX = horizontalOffset.dp.toPx()
+                    },
+                elevation
+            )
+        }
     }
 }
 
@@ -724,3 +749,15 @@ private fun lerp(start: Dp, stop: Dp, fraction: Float): Dp {
         start.value + (stop.value - start.value) * fraction
     )
 }
+
+
+
+
+
+
+
+
+
+
+
+
