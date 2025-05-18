@@ -6,6 +6,7 @@ import java.text.DecimalFormatSymbols
 import java.util.Locale
 
 
+
 object ValueFormatter {
 
     fun format(value: String?, itemType: ItemType, locale: Locale = Locale.getDefault(), specificItem: String = ""): String {
@@ -55,7 +56,9 @@ object ValueFormatter {
                 }
             }
 
-            ResultState.Success(formatter.format(parsedValue))
+            val formatted = formatter.format(parsedValue).convertNumerals(locale)
+            ResultState.Success(formatted)
+
         } catch (e: Exception) {
             ResultState.Error(UiText.dynamicString(e.message ?: "Formatlama hatası"))
         }
@@ -80,58 +83,5 @@ object ValueFormatter {
     }
 }
 
-/*
-object ValueFormatter {
 
-    fun format(value: String?, itemType: ItemType, locale: Locale = Locale.getDefault(), specificItem: String = ""): String {
-        // Handle null or empty values
-        if (value.isNullOrBlank()) {
-            return if (itemType == ItemType.GOLD) "0" else "0${decimalSeparator(locale)}00"
-        }
-
-        try {
-            // Parse the value to double to clean up extra zeros
-            val parsedValue = value.toDoubleOrNull() ?: 0.0
-
-            // Use DecimalFormat for precise control
-            val formatter = DecimalFormat().apply {
-                // Use Western digits by forcing US locale for symbols, but keep decimal/grouping separators
-                val symbols = DecimalFormatSymbols(Locale.US).apply {
-                    decimalSeparator = DecimalFormatSymbols(locale).decimalSeparator
-                    groupingSeparator = DecimalFormatSymbols(locale).groupingSeparator
-                }
-                decimalFormatSymbols = symbols
-                if (itemType == ItemType.GOLD) {
-                    minimumFractionDigits = 0
-                    maximumFractionDigits = 2
-                    isGroupingUsed = true
-                } else {
-                    // Special case for currencies like JPY (no decimals)
-                    //val minimumDecimals = if (specificItem == "JPYTRY") 0 else 2
-                    minimumFractionDigits = 0// minimumDecimals
-                    maximumFractionDigits = 2//minimumDecimals
-                    isGroupingUsed = true
-                }
-            }
-
-            return formatter.format(parsedValue)
-        } catch (e: Exception) {
-            return if (itemType == ItemType.GOLD) "0" else "0${decimalSeparator(locale)}00"
-            e.message
-        }
-    }
-
-    fun formatWithSymbol(value: String?, itemType: ItemType, specificItem: String = ""): String {
-        val formattedValue = format(value, itemType)
-        return formattedValue
-    }
-    // Helper function to get locale-specific decimal separator
-    private fun decimalSeparator(locale: Locale): String {
-        return DecimalFormatSymbols(locale).decimalSeparator.toString()
-    }
-}
-
-
-
- */
 

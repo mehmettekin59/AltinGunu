@@ -39,7 +39,7 @@
     <string name="add_button_description">Add</string>
     <string name="no_participants_have_been_added_yet">No participants have been added yet</string>
     <string name="participant_count_special">%1$d participants</string>
-    <string name="participants_count_special">Kişi Sayısı: %1$d kişi</string>
+    <string name="participants_count_special">Number of People: %1$d people</string>
     <string name="gold_with_type">Gold (%1$s)</string>
     <string name="currency_with_type">Currency (%1$s)</string>
     <string name="item_type_currency">Currency ($, €, £)</string>
@@ -51,6 +51,7 @@
     <string name="restart">Restart</string>
     <string name="winner">Winner</string>
     <string name="winner_celebration">Winner:🎉✨ %1$s ✨🎉</string>
+    <string name="the_last_winner_celebration">The Last Raffle Winner:\n🎉✨ %1$s ✨🎉</string>
     <string name="remaining_participants">Remaining Participants</string>
     <string name="remaining_participants_special">Remaining: (%1$d)</string>
     <string name="winners">Winners</string>

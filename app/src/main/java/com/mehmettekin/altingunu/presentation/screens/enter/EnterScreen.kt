@@ -1,6 +1,5 @@
 package com.mehmettekin.altingunu.presentation.screens.enter
 
-
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
@@ -47,6 +46,7 @@ import com.mehmettekin.altingunu.utils.Constraints
 import com.mehmettekin.altingunu.utils.ResultState
 import com.mehmettekin.altingunu.utils.UiText
 import com.mehmettekin.altingunu.utils.ValueFormatter
+import com.mehmettekin.altingunu.utils.convertNumerals
 import kotlin.math.absoluteValue
 
 
@@ -145,6 +145,7 @@ fun EnterScreen(
                             title = if (selectedItemType == ItemType.GOLD) UiText.stringResource(R.string.gold_price)
                                 .asString()
                             else UiText.stringResource(R.string.currencies).asString(),
+                            titleColor = if (selectedItemType == ItemType.GOLD) Gold else NavyBlue,
                             icon = if (selectedItemType == ItemType.GOLD)
                                 painterResource(id = R.drawable.gold_bar)
                             else
@@ -177,8 +178,9 @@ fun EnterScreen(
                                 AnimatedRateCard(
                                     rate = rate,
                                     codeToNameMap = codeToNameMap,
-                                    backgroundColor = if (selectedItemType == ItemType.GOLD) Gold else NavyBlue,
-                                    textColor = White,
+                                    backgroundColor =  if (selectedItemType == ItemType.GOLD) Gold else NavyBlue,
+                                    textColor =  White,
+                                    //borderColor = if (selectedItemType == ItemType.GOLD) NavyBlue else Gold,
                                     modifier = modifier,
                                     elevation = elevation,
                                     isLandscape = isLandscape
@@ -299,7 +301,7 @@ fun SelectableChip(
                 color = textColor,
                 fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal,
                 textAlign = TextAlign.Center,
-                style = MaterialTheme.typography.bodyMedium
+                style = MaterialTheme.typography.bodyLarge
             )
         }
     }
@@ -355,6 +357,7 @@ private fun ErrorState(
 @Composable
 fun RatesSectionTitle(
     title: String,
+    titleColor: Color = NavyBlue,
     icon: androidx.compose.ui.graphics.painter.Painter,
     iconTint: Color,
     modifier: Modifier = Modifier
@@ -381,7 +384,7 @@ fun RatesSectionTitle(
                 style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.Bold,
                 fontSize = 24.sp,
-                color = NavyBlue
+                color = titleColor
             )
         }
     }
@@ -394,6 +397,7 @@ private fun AnimatedRateCard(
     codeToNameMap: Map<String, String>,
     backgroundColor: Color = Gold,
     textColor: Color = MaterialTheme.colorScheme.onSurface,
+    //borderColor: Color = Gold,
     modifier: Modifier = Modifier,
     elevation: Dp = 12.dp,
     isLandscape: Boolean = false
@@ -413,14 +417,15 @@ private fun AnimatedRateCard(
         colors = CardDefaults.cardColors(
             containerColor = backgroundColor,
             contentColor = textColor
-        )
+        ),
+       // border = BorderStroke(width = 0.5.dp, color = borderColor)
     ) {
         Column(
             modifier = Modifier
                 .padding(6.dp)
                 .fillMaxWidth(),
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(if (isLandscape) 4.dp else 8.dp)
+            verticalArrangement = Arrangement.spacedBy(if (isLandscape) 4.dp else 6.dp)
         ) {
             Text(
                 text = itemName,
@@ -429,27 +434,28 @@ private fun AnimatedRateCard(
                 textAlign = TextAlign.Center,
                 maxLines = 2,
                 color = textColor,
-                fontSize = if (isLandscape) 16.sp else 18.sp
+                fontSize = if (isLandscape) 18.sp else 16.sp
             )
 
             // Last updated timestamp (if available)
-            rate.tarih.let {
+            rate.tarih.let { tarih ->
+                val localizedDate = tarih.convertNumerals()
                 Text(
                     text = UiText.stringResource(R.string.last_update).asString(),
                     style = MaterialTheme.typography.bodyMedium,
                     color = textColor.copy(alpha = 0.7f),
-                    fontSize = if (isLandscape) 12.sp else 14.sp
+                    fontSize = if (isLandscape) 14.sp else 12.sp
                 )
                 Text(
-                    text = it,
+                    text = localizedDate,
                     style = MaterialTheme.typography.bodyMedium,
                     color = textColor.copy(alpha = 0.7f),
-                    fontSize = if (isLandscape) 12.sp else 14.sp
+                    fontSize = if (isLandscape) 14.sp else 12.sp
                 )
             }
 
             HorizontalDivider(
-                modifier = Modifier.padding(vertical = if (isLandscape) 2.dp else 4.dp),
+                modifier = Modifier.padding(vertical = if (isLandscape) 4.dp else 2.dp),
                 thickness = 1.dp,
                 color = textColor.copy(alpha = 0.2f)
             )
@@ -465,7 +471,7 @@ private fun AnimatedRateCard(
                     textColor = textColor,
                     itemType = itemType,
                     specificItem = rate.code,
-                    fontSize = if (isLandscape) 12.sp else 14.sp
+                    fontSize = if (isLandscape) 16.sp else 14.sp
                 )
                 InfoColumn(
                     label = UiText.stringResource(R.string.sell).asString(),
@@ -473,7 +479,7 @@ private fun AnimatedRateCard(
                     textColor = textColor,
                     itemType = itemType,
                     specificItem = rate.code,
-                    fontSize = if (isLandscape) 12.sp else 14.sp
+                    fontSize = if (isLandscape) 16.sp else 14.sp
                 )
             }
         }
@@ -527,9 +533,8 @@ fun GoldDayLotteryCard(
     Card(
         modifier = modifier.fillMaxWidth(),
         elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = Gold
-        )
+        border = BorderStroke(width = 0.5.dp, color = NavyBlue),
+        colors = CardDefaults.cardColors(containerColor = White)
     ) {
         Column(
             modifier = Modifier
@@ -540,7 +545,7 @@ fun GoldDayLotteryCard(
             Text(
                 text = UiText.stringResource(R.string.gold_day).asString(),
                 style = MaterialTheme.typography.titleLarge,
-                color = White,
+                color = Gold,
                 fontWeight = FontWeight.Bold
             )
 
@@ -549,23 +554,23 @@ fun GoldDayLotteryCard(
             Text(
                 text = UiText.stringResource(R.string.set_up_raffle_for_thegold_day).asString(),
                 style = MaterialTheme.typography.bodyMedium,
-                color = White.copy(alpha = 0.8f)
+                color = NavyBlue.copy(alpha = 0.8f)
             )
 
             Spacer(modifier = Modifier.height(16.dp))
             Button(
                 onClick = onClick,
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = White,
-                    contentColor = NavyBlue
+                    containerColor = NavyBlue,
+                    contentColor = White
                 ),
-                border = BorderStroke(width = 1.dp, color = NavyBlue),
+                border = BorderStroke(width = 0.5.dp, color = Gold),
                 shape = RoundedCornerShape(8.dp),
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Icon(
                     imageVector = Icons.Rounded.ChevronRight,
-                    tint = NavyBlue,
+                    tint = White,
                     contentDescription = null
                 )
 
@@ -664,8 +669,7 @@ fun <T> CoverFlowCarousel(
 
             else -> {
                 // Uzaktaki kartların açısını daha az artır
-                val angle =
-                    maxRotationY + (absOffset - 1f) * 5f  // Uzak kartlar için açı artışı daha düşük
+                val angle = maxRotationY + (absOffset - 1f) * 5f  // Uzak kartlar için açı artışı daha düşük
                 angle.coerceAtMost(maxRotationY + 10f) * rotationDirection * -offsetSign
             }
         }
@@ -749,6 +753,8 @@ private fun lerp(start: Dp, stop: Dp, fraction: Float): Dp {
         start.value + (stop.value - start.value) * fraction
     )
 }
+
+
 
 
 

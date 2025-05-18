@@ -53,6 +53,7 @@
     <string name="restart">Yeniden Başlat</string>
     <string name="winner">Kazanan</string>
     <string name="winner_celebration">Kazanan:🎉✨ %1$s ✨🎉</string>
+    <string name="the_last_winner_celebration">Son Çekişişte Kazanan:\n  🎉✨ %1$s ✨🎉</string>
     <string name="remaining_participants">Kalan Katılımcılar</string>
     <string name="remaining_participants_special">Kalan Katılımcılar: (%1$d)</string>
     <string name="winners">Kazananlar</string>

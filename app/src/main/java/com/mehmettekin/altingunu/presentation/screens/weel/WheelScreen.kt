@@ -210,7 +210,7 @@ fun WheelScreen(
                                     Spacer(modifier = Modifier.width(8.dp))
                                     Text(
                                         text = UiText.stringResource(R.string.continue_button).asString(),
-                                        fontWeight = FontWeight.Bold,
+                                        style = MaterialTheme.typography.titleMedium,
                                         color = White
                                     )
                                 }
@@ -224,7 +224,6 @@ fun WheelScreen(
                         // Optimize layout when no participants left
                         Row(
                             modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.Center
                         ) {
                             // Last winner announcement in a larger card
                             if (viewModel.winners.isNotEmpty()) {
@@ -236,7 +235,7 @@ fun WheelScreen(
                                     colors = CardDefaults.cardColors(containerColor = NavyBlue)
                                 ) {
                                     Column(
-                                        modifier = Modifier.padding(16.dp),
+                                        modifier = Modifier.fillMaxWidth().padding(8.dp),
                                         horizontalAlignment = Alignment.CenterHorizontally
                                     ) {
                                         Text(
@@ -247,11 +246,11 @@ fun WheelScreen(
                                             textAlign = TextAlign.Center
                                         )
 
-                                        Spacer(modifier = Modifier.height(8.dp))
+                                        Spacer(modifier = Modifier.height(12.dp))
 
                                         Text(
                                             text = UiText.stringResource(
-                                                R.string.winner_celebration,
+                                                R.string.the_last_winner_celebration,
                                                 viewModel.winners[viewModel.winners.size - 2]
                                             ).asString(),
                                             modifier = Modifier.padding(8.dp),
@@ -259,8 +258,7 @@ fun WheelScreen(
                                             fontWeight = FontWeight.ExtraBold,
                                             fontSize = 20.sp,
                                             textAlign = TextAlign.Center,
-                                            maxLines = 1,
-                                            overflow = TextOverflow.Ellipsis
+                                            maxLines = 2,
                                         )
                                     }
                                 }
@@ -307,7 +305,7 @@ fun WheelScreen(
                             Spacer(modifier = Modifier.width(8.dp))
                             Text(
                                 text = UiText.stringResource(R.string.continue_button).asString(),
-                                fontWeight = FontWeight.Bold,
+                                style = MaterialTheme.typography.titleMedium,
                                 color = White
                             )
                         }

@@ -59,12 +59,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
@@ -253,7 +255,7 @@ fun ParticipantsContent(
             Spacer(modifier = Modifier.width(8.dp))
             Text(
                 UiText.stringResource(R.string.continue_button).asString(),
-                fontWeight = FontWeight.Bold,
+                style = MaterialTheme.typography.titleMedium,
                 color = White
             )
         }
@@ -320,9 +322,7 @@ fun ItemTypeSelector(
                 )
             }
         }
-        // Eğer FlowRow'daki verticalArrangement.spacedBy(4.dp) gibi bir boşluk gerekiyorsa
-        // onu bu Row'un altına veya üst konteynere ekleyebilirsiniz.
-        // Örneğin: Spacer(modifier = Modifier.height(4.dp))
+
     }
 }
 
@@ -331,12 +331,11 @@ fun ItemSelectableChip(
     text: String,
     selected: Boolean,
     onClick: () -> Unit,
-    modifier: Modifier = Modifier, // Dışarıdan gelen modifier'ı kabul etmeli (weight burada gelecek)
-    itemType: ItemType // ItemType tanımınızın mevcut olduğunu varsayar
+    modifier: Modifier = Modifier,
+    itemType: ItemType
 ) {
     val shape = RoundedCornerShape(8.dp)
 
-    // İtemType'a göre arka plan rengini belirleme (Gold, NavyBlue renk tanımlarınızın mevcut olduğunu varsayar)
     val backgroundColor = when {
         selected && itemType == ItemType.GOLD -> Gold
         selected && itemType == ItemType.CURRENCY -> NavyBlue
@@ -344,7 +343,6 @@ fun ItemSelectableChip(
         else -> Color.Transparent
     }
 
-    // İtemType'a göre kenarlık rengini belirleme (Gold, NavyBlue renk tanımlarınızın mevcut olduğunu varsayar)
     val borderColor = when {
         selected && itemType == ItemType.GOLD -> Gold
         selected && itemType == ItemType.CURRENCY -> NavyBlue
@@ -353,22 +351,21 @@ fun ItemSelectableChip(
     }
 
     Surface(
-        modifier = modifier // Buraya ItemTypeSelector'dan gelen .weight(1f) gelecek
-            .clip(shape) // Sonra kırpma uygulanır
-            .clickable(onClick = onClick), // Sonra tıklama özelliği eklenir
+        modifier = modifier
+            .clip(shape)
+            .clickable(onClick = onClick),
         color = backgroundColor,
         border = BorderStroke(1.dp, borderColor),
         shape = shape
     ) {
         Box(
             modifier = Modifier
-                // Chippin içindeki padding'i koruyun
                 .padding(vertical = 12.dp, horizontal = 4.dp),
             contentAlignment = Alignment.Center
         ) {
             Text(
                 text = text,
-                color = if (selected) White else Gold, // White renk tanımınızın mevcut olduğunu varsayar
+                color = if (selected) White else Gold,
                 fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal,
                 style = MaterialTheme.typography.bodyMedium,
                 maxLines = 1,
@@ -610,6 +607,11 @@ fun DateSelectorDialog(
     onOptionSelected: (Int) -> Unit,
     onDismiss: () -> Unit
 ) {
+    val configuration = LocalConfiguration.current
+    val screenWidth = configuration.screenWidthDp
+
+    val dynamicFontSize = (screenWidth * 0.045).sp
+
     AlertDialog(
         onDismissRequest = onDismiss,
         title = {
@@ -640,7 +642,8 @@ fun DateSelectorDialog(
                             Text(
                                 text = options[index],
                                 color = if (index == selectedIndex) Gold else Color.DarkGray,
-                                fontWeight = if (index == selectedIndex) FontWeight.Bold else FontWeight.Normal
+                                fontWeight = if (index == selectedIndex) FontWeight.Bold else FontWeight.Normal,
+                                fontSize = dynamicFontSize
                             )
 
                             if (index == selectedIndex) {

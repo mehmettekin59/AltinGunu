@@ -23,6 +23,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -191,7 +192,7 @@ fun ResultScreen(
                     .padding(paddingValues)
             )
         } else {
-            // Display results - Burada içeriği scrollable yapıyoruz
+
             ResultsContent(
                 viewModel = viewModel,
                 results = state.results,
@@ -242,6 +243,7 @@ private fun EmptyResultsView(
             Icon(
                 imageVector = Icons.Default.Refresh,
                 contentDescription = null,
+                tint = White,
                 modifier = Modifier.size(ButtonDefaults.IconSize)
             )
             Spacer(modifier = Modifier.width(8.dp))
@@ -538,29 +540,29 @@ private fun ResultsTable(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(8.dp)
+                .padding(4.dp)
         ) {
             // Table Header
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
                     .background(Gold.copy(alpha = 0.1f))
-                    .padding(8.dp)
+                    .padding(4.dp)
             ) {
                 Text(
                     text = UiText.stringResource(R.string.line_or_queue).asString(),
                     style = MaterialTheme.typography.bodyMedium,
                     fontWeight = FontWeight.Bold,
                     color = Gold,
-                    modifier = Modifier.weight(0.1f)
+                    modifier = Modifier.weight(0.15f)
                 )
-
+                Spacer(modifier = Modifier.width(1.dp))
                 Text(
                     text = UiText.stringResource(R.string.name).asString(),
                     style = MaterialTheme.typography.bodyMedium,
                     fontWeight = FontWeight.Bold,
                     color = Gold,
-                    modifier = Modifier.weight(0.4f)
+                    modifier = Modifier.weight(0.35f)
                 )
 
                 Text(
@@ -601,7 +603,7 @@ private fun ResultsTable(
                             text = "${index + 1}",
                             style = MaterialTheme.typography.bodyMedium,
                             color = Color.DarkGray,
-                            modifier = Modifier.weight(0.1f)
+                            modifier = Modifier.weight(0.15f)
                         )
 
                         Text(
@@ -609,13 +611,17 @@ private fun ResultsTable(
                             style = MaterialTheme.typography.bodyMedium,
                             color = NavyBlue,
                             fontWeight = FontWeight.SemiBold,
-                            modifier = Modifier.weight(0.4f)
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                            modifier = Modifier.weight(0.35f)
                         )
 
                         Text(
                             text = result.month,
                             style = MaterialTheme.typography.bodyMedium,
                             color = Color.DarkGray,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
                             modifier = Modifier.weight(0.3f)
                         )
                         Spacer(Modifier.width(2.dp))

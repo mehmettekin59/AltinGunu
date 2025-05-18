@@ -20,7 +20,7 @@
     <string name="error_duplicate_names">لا يمكن وجود أكثر من مشارك بنفس الاسم</string>
     <string name="error_empty_names">لا يمكن ترك أسماء المشاركين فارغة</string>
     <string name="error_invalid_participant_count">عدد مشاركين غير صالح</string>
-    <string name="participants_count_special">Kişi Sayısı: %1$d kişi</string>
+    <string name="participants_count_special">عدد الأشخاص: (%1$d) شخص</string>
     <string name="error_participant_count_mismatch">عدد المشاركين لا يتطابق مع المشاركين المدخلين</string>
     <string name="error_invalid_monthly_amount">المبلغ الشهري غير صالح</string>
     <string name="error_invalid_duration">المدة غير صالحة</string>
@@ -50,6 +50,7 @@
     <string name="restart">إعادة البدء</string>
     <string name="winner">الفائز</string>
     <string name="winner_celebration">الفائز:🎉✨ %1$s ✨🎉</string>
+    <string name="the_last_winner_celebration">The Last Winner:\n🎉✨ %1$s ✨🎉</string>
     <string name="remaining_participants">المشاركون المتبقون</string>
     <string name="remaining_participants_special">المشاركون المتبقون: (%1$d)</string>
     <string name="winners">الفائزون</string>

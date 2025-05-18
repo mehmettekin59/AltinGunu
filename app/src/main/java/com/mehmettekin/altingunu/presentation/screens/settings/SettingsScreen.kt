@@ -18,6 +18,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -66,7 +67,7 @@ fun SettingsScreen(
             }
             context.startActivity(intent)
 
-            // Eğer bir Activity context'i ise, mevcut Activity'yi sonlandır
+
             if (context is Activity) {
                 context.finish()
             }
@@ -175,7 +176,9 @@ fun LanguageSettingsCard(
 
                 Text(
                     text = UiText.stringResource(R.string.language_selection).asString(),
-                    style = MaterialTheme.typography.titleMedium,
+                    style = MaterialTheme.typography.titleMedium.copy(
+                        fontSize = MaterialTheme.typography.titleLarge.fontSize
+                    ),
                     color = MaterialTheme.colorScheme.surface
                 )
             }
@@ -204,7 +207,7 @@ fun LanguageSettingsCard(
                     ) {
                         Text(
                             text = currentLanguage,
-                            style = MaterialTheme.typography.bodyLarge
+                            style = MaterialTheme.typography.titleMedium
                         )
 
                         Icon(
@@ -223,7 +226,7 @@ fun LanguageSettingsCard(
                 ) {
                     languages.forEach { (code, name) ->
                         DropdownMenuItem(
-                            text = { Text(name) },
+                            text = { Text(name,style = MaterialTheme.typography.titleMedium) },
                             onClick = {
                                 onLanguageChange(code)
                                 expanded = false
@@ -311,7 +314,7 @@ fun UpdateIntervalSettingsCard(
                 border = BorderStroke(1.dp, Color.LightGray.copy(alpha = 0.5f))
             ) {
                 Row(
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier.fillMaxWidth().height(IntrinsicSize.Min),
                     horizontalArrangement = Arrangement.SpaceEvenly
                 ) {
                     updateOptions.forEachIndexed { index, (seconds, label) ->
@@ -319,7 +322,7 @@ fun UpdateIntervalSettingsCard(
                         // Buton
                         Column(
                             modifier = Modifier
-                                .weight(1f)
+                                .wrapContentSize()
                                 .clickable { onIntervalChange(seconds) }
                                 .background(
                                     if (isSelected) Gold else Color.Transparent
@@ -337,7 +340,7 @@ fun UpdateIntervalSettingsCard(
                             if (index == 3 && seconds == 120) { // Normal için etiket göster
                                 Text(
                                     text = UiText.stringResource(R.string.normal).asString(),
-                                    fontSize = 10.sp,
+                                    style = MaterialTheme.typography.bodyMedium,
                                     color = if (isSelected) White.copy(alpha = 0.8f) else Color.Gray,
                                     modifier = Modifier.padding(top = 2.dp)
                                 )
