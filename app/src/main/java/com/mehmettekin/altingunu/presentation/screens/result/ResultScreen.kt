@@ -301,10 +301,15 @@ private fun ResultsContent(
                 Icon(
                     imageVector = Icons.Default.Refresh,
                     contentDescription = null,
-                    modifier = Modifier.size(ButtonDefaults.IconSize)
+                    modifier = Modifier.size(ButtonDefaults.IconSize),
+                    tint = White
                 )
                 Spacer(modifier = Modifier.width(8.dp))
-                Text(UiText.stringResource(R.string.start_a_new_raffle).asString(), color = White)
+                Text(
+                    text = UiText.stringResource(R.string.start_a_new_raffle).asString(),
+                    style = MaterialTheme.typography.titleMedium,
+                    color = White
+                )
             }
 
             // Alt boşluk ekleyerek içeriğin sonunda da scroll edilebilirliği artırıyoruz

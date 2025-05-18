@@ -3,6 +3,7 @@ package com.mehmettekin.altingunu.presentation.screens.enter
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerDefaults
@@ -145,12 +146,12 @@ fun EnterScreen(
                             title = if (selectedItemType == ItemType.GOLD) UiText.stringResource(R.string.gold_price)
                                 .asString()
                             else UiText.stringResource(R.string.currencies).asString(),
-                            titleColor = if (selectedItemType == ItemType.GOLD) Gold else NavyBlue,
+                            titleColor = if (selectedItemType == ItemType.GOLD) MaterialTheme.colorScheme.primary else {if (isSystemInDarkTheme()) White else MaterialTheme.colorScheme.secondary} ,
                             icon = if (selectedItemType == ItemType.GOLD)
                                 painterResource(id = R.drawable.gold_bar)
                             else
                                 painterResource(id = R.drawable.dollar),
-                            iconTint = if (selectedItemType == ItemType.GOLD) Gold else NavyBlue
+                            iconTint = if (selectedItemType == ItemType.GOLD) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.secondary
                         )
 
                         Spacer(modifier = Modifier.height(4.dp))
@@ -178,9 +179,8 @@ fun EnterScreen(
                                 AnimatedRateCard(
                                     rate = rate,
                                     codeToNameMap = codeToNameMap,
-                                    backgroundColor =  if (selectedItemType == ItemType.GOLD) Gold else NavyBlue,
-                                    textColor =  White,
-                                    //borderColor = if (selectedItemType == ItemType.GOLD) NavyBlue else Gold,
+                                    backgroundColor =  if (selectedItemType == ItemType.GOLD) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.secondary,
+                                    textColor =  MaterialTheme.colorScheme.tertiary,
                                     modifier = modifier,
                                     elevation = elevation,
                                     isLandscape = isLandscape
@@ -272,15 +272,15 @@ fun SelectableChip(
     itemType: ItemType = ItemType.GOLD
 ) {
     val backgroundColor = when {
-        selected && itemType == ItemType.GOLD -> Gold
-        selected && itemType == ItemType.CURRENCY -> NavyBlue
+        selected && itemType == ItemType.GOLD -> MaterialTheme.colorScheme.primary
+        selected && itemType == ItemType.CURRENCY ->MaterialTheme.colorScheme.secondary
         else -> Color.Transparent
     }
 
     val textColor = if (selected) White else Color.Gray
     val borderColor = when {
-        selected && itemType == ItemType.GOLD -> Gold
-        selected && itemType == ItemType.CURRENCY -> NavyBlue
+        selected && itemType == ItemType.GOLD -> MaterialTheme.colorScheme.primary
+        selected && itemType == ItemType.CURRENCY -> MaterialTheme.colorScheme.secondary
         else -> Color.Gray.copy(alpha = 0.5f)
     }
 
@@ -357,7 +357,7 @@ private fun ErrorState(
 @Composable
 fun RatesSectionTitle(
     title: String,
-    titleColor: Color = NavyBlue,
+    titleColor: Color = MaterialTheme.colorScheme.secondary,
     icon: androidx.compose.ui.graphics.painter.Painter,
     iconTint: Color,
     modifier: Modifier = Modifier
@@ -396,8 +396,7 @@ private fun AnimatedRateCard(
     rate: ExchangeRate,
     codeToNameMap: Map<String, String>,
     backgroundColor: Color = Gold,
-    textColor: Color = MaterialTheme.colorScheme.onSurface,
-    //borderColor: Color = Gold,
+    textColor: Color = MaterialTheme.colorScheme.tertiary,
     modifier: Modifier = Modifier,
     elevation: Dp = 12.dp,
     isLandscape: Boolean = false
@@ -417,8 +416,7 @@ private fun AnimatedRateCard(
         colors = CardDefaults.cardColors(
             containerColor = backgroundColor,
             contentColor = textColor
-        ),
-       // border = BorderStroke(width = 0.5.dp, color = borderColor)
+        )
     ) {
         Column(
             modifier = Modifier
@@ -492,7 +490,7 @@ private fun InfoColumn(
     value: String,
     itemType: ItemType = ItemType.CURRENCY,
     specificItem: String = "",
-    textColor: Color = MaterialTheme.colorScheme.onSurface,
+    textColor: Color = MaterialTheme.colorScheme.tertiary,
     modifier: Modifier = Modifier,
     fontSize: androidx.compose.ui.unit.TextUnit = 14.sp
 ) {
@@ -534,7 +532,7 @@ fun GoldDayLotteryCard(
         modifier = modifier.fillMaxWidth(),
         elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
         border = BorderStroke(width = 0.5.dp, color = NavyBlue),
-        colors = CardDefaults.cardColors(containerColor = White)
+        colors = CardDefaults.cardColors(containerColor = if (isSystemInDarkTheme()) Color.Transparent else MaterialTheme.colorScheme.tertiary)
     ) {
         Column(
             modifier = Modifier
@@ -545,7 +543,7 @@ fun GoldDayLotteryCard(
             Text(
                 text = UiText.stringResource(R.string.gold_day).asString(),
                 style = MaterialTheme.typography.titleLarge,
-                color = Gold,
+                color = MaterialTheme.colorScheme.primary,
                 fontWeight = FontWeight.Bold
             )
 
@@ -554,7 +552,7 @@ fun GoldDayLotteryCard(
             Text(
                 text = UiText.stringResource(R.string.set_up_raffle_for_thegold_day).asString(),
                 style = MaterialTheme.typography.bodyMedium,
-                color = NavyBlue.copy(alpha = 0.8f)
+                color = if (isSystemInDarkTheme()) MaterialTheme.colorScheme.tertiary.copy(alpha = 0.8f) else MaterialTheme.colorScheme.secondary.copy(alpha = 0.8f)
             )
 
             Spacer(modifier = Modifier.height(16.dp))

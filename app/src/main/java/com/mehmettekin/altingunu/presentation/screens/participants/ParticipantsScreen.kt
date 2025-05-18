@@ -3,6 +3,7 @@ package com.mehmettekin.altingunu.presentation.screens.participants
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -13,6 +14,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -62,6 +64,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextOverflow
@@ -185,7 +188,7 @@ fun ParticipantsContent(
                 Icon(
                     imageVector = Icons.Default.AttachMoney,
                     contentDescription = null,
-                    tint = Gold
+                    tint = if (isSystemInDarkTheme()) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.secondary
                 )
             }
         )
@@ -202,7 +205,7 @@ fun ParticipantsContent(
                 Icon(
                     imageVector = Icons.Default.DateRange,
                     contentDescription = null,
-                    tint = Gold
+                    tint = if (isSystemInDarkTheme()) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.secondary
                 )
             }
         )
@@ -213,8 +216,8 @@ fun ParticipantsContent(
         Text(
             text = UiText.stringResource(R.string.starting_date).asString(),
             style = MaterialTheme.typography.titleMedium,
-            color = Gold,
-            fontWeight = FontWeight.Medium
+            color =  if (isSystemInDarkTheme()) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.secondary,
+            fontWeight = FontWeight.Bold
         )
 
         Spacer(modifier = Modifier.height(8.dp))
@@ -273,16 +276,17 @@ fun ModernTextField(
     OutlinedTextField(
         value = value,
         onValueChange = onValueChange,
-        label = { Text(text = label, color = Gold) },
+        label = { Text(text = label, color = if (isSystemInDarkTheme()) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onTertiary) },
         modifier = Modifier.fillMaxWidth(),
         keyboardOptions = KeyboardOptions(keyboardType = keyboardType),
         leadingIcon = leadingIcon,
         colors = OutlinedTextFieldDefaults.colors(
-            focusedBorderColor = Gold,
-            focusedLabelColor = Gold,
-            cursorColor = Gold,
-            unfocusedBorderColor = Gold,
+            focusedBorderColor = if (isSystemInDarkTheme()) MaterialTheme.colorScheme.primary.copy(alpha = 0.5f) else MaterialTheme.colorScheme.secondary.copy(alpha = 0.5f),
+            focusedLabelColor = if (isSystemInDarkTheme()) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.secondary,
+            cursorColor = if (isSystemInDarkTheme()) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.secondary,
+            unfocusedBorderColor = if (isSystemInDarkTheme()) MaterialTheme.colorScheme.primary.copy(alpha = 0.5f) else MaterialTheme.colorScheme.secondary.copy(alpha = 0.5f),
         ),
+        textStyle = TextStyle(fontWeight = FontWeight.Bold, fontSize = 16.sp),
         shape = RoundedCornerShape(8.dp)
     )
 }
@@ -290,15 +294,15 @@ fun ModernTextField(
 
 @Composable
 fun ItemTypeSelector(
-    selectedItemType: ItemType, // ItemType tanımınızın mevcut olduğunu varsayar
-    onItemTypeSelect: (ItemType) -> Unit // ItemType tanımınızın mevcut olduğunu varsayar
+    selectedItemType: ItemType,
+    onItemTypeSelect: (ItemType) -> Unit
 ) {
     Column {
         Text(
             text = UiText.stringResource(R.string.type_of_value_to_be_collected).asString(),
             style = MaterialTheme.typography.titleMedium,
-            color = Gold,
-            fontWeight = FontWeight.Medium
+            color = if (isSystemInDarkTheme()) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.secondary,
+            fontWeight = FontWeight.Bold
         )
 
         Spacer(modifier = Modifier.height(8.dp))
@@ -312,7 +316,6 @@ fun ItemTypeSelector(
 
             ItemType.entries.forEach { itemType ->
                 ItemSelectableChip(
-
                     text = itemType.displayName.asString(),
                     selected = itemType == selectedItemType,
                     onClick = { onItemTypeSelect(itemType) },
@@ -365,7 +368,9 @@ fun ItemSelectableChip(
         ) {
             Text(
                 text = text,
-                color = if (selected) White else Gold,
+                color = if (selected) White else {
+                    if (isSystemInDarkTheme()) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.secondary
+                },
                 fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal,
                 style = MaterialTheme.typography.bodyMedium,
                 maxLines = 1,
@@ -407,7 +412,7 @@ fun SpecificItemSelector(
         Text(
             text = title,
             style = MaterialTheme.typography.titleMedium,
-            color = Gold,
+            color = if (isSystemInDarkTheme()) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.secondary,
             fontWeight = FontWeight.Medium
         )
 
@@ -418,7 +423,8 @@ fun SpecificItemSelector(
                 .fillMaxWidth()
                 .clip(RoundedCornerShape(8.dp))
                 .clickable { expanded = true },
-            border = BorderStroke(1.dp, Gold.copy(alpha = 0.5f))
+
+            border = BorderStroke(width = 1.dp, color = if (isSystemInDarkTheme()) MaterialTheme.colorScheme.primary.copy(alpha = 0.5f) else MaterialTheme.colorScheme.secondary.copy(alpha = 0.5f))
         ) {
             Row(
                 modifier = Modifier
@@ -429,13 +435,16 @@ fun SpecificItemSelector(
             ) {
                 Text(
                     text = selectedValue.ifEmpty { UiText.stringResource(R.string.select).asString() },
-                    color = if (selectedValue.isEmpty()) Gold.copy(alpha = 0.5f) else Color.DarkGray
+                    fontWeight = FontWeight.Bold,
+                    color = if (selectedValue.isEmpty()) {if (isSystemInDarkTheme()) MaterialTheme.colorScheme.primary.copy(alpha = 0.8f) else MaterialTheme.colorScheme.secondary.copy(alpha = 0.8f)}
+                    else{ if (isSystemInDarkTheme()) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.onTertiary }
+
                 )
 
                 Icon(
                     imageVector = Icons.Default.ArrowDropDown,
                     contentDescription = null,
-                    tint = Gold
+                    tint = if (isSystemInDarkTheme()) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.secondary
                 )
             }
         }
@@ -449,7 +458,7 @@ fun SpecificItemSelector(
         ) {
             options.forEachIndexed { index, option ->
                 DropdownMenuItem(
-                    text = { Text(option) },
+                    text = { Text(option, fontSize = 16.sp) },
                     onClick = {
                         // Find the code that corresponds to this display name
                         val code = if (selectedItemType == ItemType.CURRENCY) {
@@ -461,7 +470,7 @@ fun SpecificItemSelector(
                         expanded = false
                     },
                     colors = MenuDefaults.itemColors(
-                        textColor = NavyBlue
+                        textColor = if (isSystemInDarkTheme()) MaterialTheme.colorScheme.secondary else MaterialTheme.colorScheme.onTertiary
                     )
                 )
             }
@@ -498,7 +507,7 @@ fun ModernDateSelector(
                 .weight(1f)
                 .clip(RoundedCornerShape(8.dp))
                 .clickable { showMonthDialog = true },
-            border = BorderStroke(1.dp, Gold)
+            border = BorderStroke(width = 1.dp, color = if (isSystemInDarkTheme()) MaterialTheme.colorScheme.primary.copy(alpha = 0.5f) else MaterialTheme.colorScheme.secondary.copy(alpha = 0.5f))
         ) {
             Row(
                 modifier = Modifier
@@ -509,13 +518,14 @@ fun ModernDateSelector(
             ) {
                 Text(
                     text = monthFormat.format(calendar.time),
-                    color = Gold
+                    fontWeight = FontWeight.Medium,
+                    color = if (isSystemInDarkTheme()) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.onTertiary
                 )
 
                 Icon(
                     imageVector = Icons.Default.DateRange,
                     contentDescription = null,
-                    tint = Gold
+                    tint = if (isSystemInDarkTheme()) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.secondary
                 )
             }
         }
@@ -526,7 +536,7 @@ fun ModernDateSelector(
                 .weight(1f)
                 .clip(RoundedCornerShape(8.dp))
                 .clickable { showYearDialog = true },
-            border = BorderStroke(1.dp, Color.Gray.copy(alpha = 0.5f))
+            border = BorderStroke(width = 1.dp, color = if (isSystemInDarkTheme()) MaterialTheme.colorScheme.primary.copy(alpha = 0.5f) else MaterialTheme.colorScheme.secondary.copy(alpha = 0.5f))
         ) {
             Row(
                 modifier = Modifier
@@ -537,13 +547,14 @@ fun ModernDateSelector(
             ) {
                 Text(
                     text = selectedYear.toString(),
-                    color = Gold
+                    fontWeight = FontWeight.Medium,
+                    color = if (isSystemInDarkTheme()) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.onTertiary
                 )
 
                 Icon(
                     imageVector = Icons.Default.CalendarMonth,
                     contentDescription = null,
-                    tint = Gold
+                    tint = if (isSystemInDarkTheme()) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.secondary
                 )
             }
         }
@@ -690,8 +701,8 @@ fun ParticipantsSection(
         Text(
             text = UiText.stringResource(R.string.participants_count_special, participants.size).asString(),
             style = MaterialTheme.typography.titleMedium,
-            color = Gold,
-            fontWeight = FontWeight.Medium
+            color = if (isSystemInDarkTheme()) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.secondary,
+            fontWeight = FontWeight.Bold
         )
 
         Spacer(modifier = Modifier.height(2.dp))
@@ -700,13 +711,13 @@ fun ParticipantsSection(
         OutlinedTextField(
             value = name,
             onValueChange = { name = it },
-            label = { Text(text = UiText.stringResource(R.string.participant_name).asString(), color = Gold) },
+            label = { Text(text = UiText.stringResource(R.string.participant_name).asString(), color = if (isSystemInDarkTheme()) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.onTertiary ) },
             modifier = Modifier.fillMaxWidth(),
             colors = OutlinedTextFieldDefaults.colors(
-                focusedBorderColor = Gold,
+                focusedBorderColor = if (isSystemInDarkTheme()) MaterialTheme.colorScheme.primary.copy(alpha = 0.5f) else MaterialTheme.colorScheme.secondary.copy(alpha = 0.5f),
                 focusedLabelColor = Gold,
                 cursorColor = Gold,
-                unfocusedBorderColor = Gold
+                unfocusedBorderColor = if (isSystemInDarkTheme()) MaterialTheme.colorScheme.primary.copy(alpha = 0.5f) else MaterialTheme.colorScheme.secondary.copy(alpha = 0.5f)
             ),
             shape = RoundedCornerShape(8.dp),
             singleLine = true,
@@ -722,10 +733,11 @@ fun ParticipantsSection(
                     Icon(
                         imageVector = Icons.Default.Add,
                         contentDescription = UiText.stringResource(R.string.add_button_description).asString(),
-                        tint = Gold
+                        tint = if (isSystemInDarkTheme()) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.primary
                     )
                 }
-            }
+            },
+            textStyle = TextStyle(fontWeight = FontWeight.Bold, fontSize = MaterialTheme.typography.titleMedium.fontSize)
         )
 
         Spacer(modifier = Modifier.height(8.dp))
@@ -736,7 +748,7 @@ fun ParticipantsSection(
                 .fillMaxWidth()
                 .height(140.dp),
             shape = RoundedCornerShape(8.dp),
-            border = BorderStroke(1.dp, Gold.copy(alpha = 0.2f))
+            border = BorderStroke(width = 1.dp, color = if (isSystemInDarkTheme()) MaterialTheme.colorScheme.primary.copy(alpha = 0.5f) else MaterialTheme.colorScheme.secondary.copy(alpha = 0.5f))
         ) {
             if (participants.isEmpty()) {
                 Box(
@@ -745,7 +757,7 @@ fun ParticipantsSection(
                 ) {
                     Text(
                         UiText.stringResource(R.string.no_participants_have_been_added_yet).asString(),
-                        color = Gold
+                        color = if (isSystemInDarkTheme()) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.secondary
                     )
                 }
             } else {
@@ -754,13 +766,14 @@ fun ParticipantsSection(
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(horizontal = 8.dp, vertical = 2.dp),
+                                .padding(horizontal = 8.dp, vertical = 1.dp),
                             horizontalArrangement = Arrangement.SpaceBetween,
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Text(
                                 text = participant.name,
-                                color = NavyBlue,
+                                fontWeight = FontWeight.Bold,
+                                color = if (isSystemInDarkTheme()) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.secondary,
                             )
 
                             IconButton(
@@ -775,7 +788,7 @@ fun ParticipantsSection(
                         }
 
                         HorizontalDivider(
-                            color = Color.Gray.copy(alpha = 0.2f),
+                            color = Color.Gray.copy(alpha = 0.5f),
                             thickness = 1.dp
                         )
                     }
@@ -880,7 +893,6 @@ fun ConfirmationItem(
         Text(
             text = "$label:",
             color = Gold,
-            style = MaterialTheme.typography.bodyMedium,
             fontWeight = FontWeight.Medium,
             modifier = Modifier.width(110.dp)
         )

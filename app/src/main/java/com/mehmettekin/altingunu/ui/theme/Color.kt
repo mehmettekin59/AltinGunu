@@ -9,6 +9,8 @@ val NavyBlue = Color(0xFF2C3B73) // Lacivert
 //val Gold = Color(0xFFDAA520) // Altın rengi
 val Gold = Color(0xFFD4AF37) // Altın rengi
 val White = Color(0xFFFFFFFF) // Beyaz
+val Black = Color(0xFF000000) // Siyah
+
 
 val Purple40 = Color(0xFF6650a4)
 val PurpleGrey40 = Color(0xFF625b71)
