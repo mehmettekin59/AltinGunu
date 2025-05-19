@@ -1,5 +1,7 @@
 package com.mehmettekin.altingunu.utils
 
+import java.util.Locale
+
 
 object Constraints {
 
@@ -35,7 +37,7 @@ object Constraints {
     )
 
     // Listeleri de burada oluşturabiliriz (opsiyonel, UI'da da yapılabilir)
-        val goldCodeList = goldCodeToName.keys.toList()
+    val goldCodeList = goldCodeToName.keys.toList()
     val currencyCodeList = currencyCodeToName.keys.toList()
 
 

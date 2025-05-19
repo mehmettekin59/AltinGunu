@@ -401,7 +401,6 @@ private fun AnimatedRateCard(
     elevation: Dp = 12.dp,
     isLandscape: Boolean = false
 ) {
-    // Get item name from the map, or use code if not found
     val itemName = codeToNameMap[rate.code] ?: rate.code
     val itemType = if (Constraints.goldCodeList.contains(rate.code)) {
         ItemType.GOLD

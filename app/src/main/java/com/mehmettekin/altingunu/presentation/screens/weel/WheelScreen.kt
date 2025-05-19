@@ -6,6 +6,7 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
@@ -391,24 +392,32 @@ private fun ControlButtons(
                 .weight(1f)
                 .padding(4.dp),
             colors = ButtonDefaults.buttonColors(
-                containerColor = Gold
+                containerColor = if (isSystemInDarkTheme()) MaterialTheme.colorScheme.secondary else MaterialTheme.colorScheme.primary,
+                contentColor =  if (isSystemInDarkTheme()) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.tertiary,
             ),
             shape = RoundedCornerShape(8.dp)
         ) {
-            Text(UiText.stringResource(R.string.spin_wheel).asString())
+            Text(
+                text = UiText.stringResource(R.string.spin_wheel).asString(),
+                style = TextStyle(fontSize = MaterialTheme.typography.titleMedium.fontSize,fontWeight = FontWeight.Bold)
+            )
         }
 
         Button(
             onClick = { viewModel.reset() },
             colors = ButtonDefaults.buttonColors(
-                containerColor = NavyBlue
+                containerColor = if (isSystemInDarkTheme()) MaterialTheme.colorScheme.secondary else MaterialTheme.colorScheme.secondary,
+                contentColor =  if (isSystemInDarkTheme()) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.tertiary,
             ),
             shape = RoundedCornerShape(8.dp),
             modifier = Modifier
                 .weight(1f)
                 .padding(4.dp)
         ) {
-            Text(UiText.stringResource(R.string.restart).asString(), color = White)
+            Text(
+                text = UiText.stringResource(R.string.restart).asString(),
+                style = TextStyle(fontSize = MaterialTheme.typography.titleMedium.fontSize,fontWeight = FontWeight.Bold)
+            )
         }
     }
 }
@@ -454,6 +463,9 @@ private fun ParticipantsSection(
         ) {
             ParticipantList(
                 title = UiText.stringResource(R.string.remaining_participants_special, remainingParticipants.size).asString(),
+                titleTextColor = if (isSystemInDarkTheme()) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.secondary,
+                textColor = if (isSystemInDarkTheme()) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.primary,
+                backgroundColor = if (isSystemInDarkTheme()) MaterialTheme.colorScheme.secondary else MaterialTheme.colorScheme.tertiary,
                 participants = remainingParticipants,
                 modifier = Modifier.weight(1f),
                 listType = ParticipantListType.REMAINING,
@@ -462,6 +474,9 @@ private fun ParticipantsSection(
 
             ParticipantList(
                 title = UiText.stringResource(R.string.winners_special, winners.size).asString(),
+                titleTextColor = if (isSystemInDarkTheme()) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.secondary,
+                textColor = if (isSystemInDarkTheme()) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.secondary,
+                backgroundColor = if (isSystemInDarkTheme()) MaterialTheme.colorScheme.secondary else MaterialTheme.colorScheme.tertiary,
                 participants = winners,
                 modifier = Modifier.weight(1f),
                 listType = ParticipantListType.WINNERS,
@@ -474,9 +489,12 @@ private fun ParticipantsSection(
 @Composable
 private fun ParticipantList(
     title: String,
+    titleTextColor: Color = MaterialTheme.colorScheme.tertiary,
+    textColor: Color = MaterialTheme.colorScheme.onSurface,
     participants: List<String>,
     listType: ParticipantListType,
     modifier: Modifier,
+    backgroundColor: Color = MaterialTheme.colorScheme.primary,
     showIndex: Boolean = false
 ) {
     Card(
@@ -485,7 +503,7 @@ private fun ParticipantList(
     ) {
         Column(
             modifier = Modifier
-                .background(Gold)
+                .background(backgroundColor)
                 .fillMaxWidth()
                 .padding(12.dp)
                 .height(160.dp)
@@ -495,14 +513,16 @@ private fun ParticipantList(
                 style = MaterialTheme.typography.titleSmall,
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier.padding(bottom = 8.dp),
-                color = White
+                color = titleTextColor
             )
 
-            HorizontalDivider(
-                modifier = Modifier.padding(bottom = 8.dp),
-                thickness = 0.5.dp,
-                color = NavyBlue
-            )
+                HorizontalDivider(
+                    modifier = Modifier.padding(bottom = 8.dp),
+                    thickness = 0.5.dp,
+                    color = MaterialTheme.colorScheme.secondary
+                )
+
+
 
             LazyColumn(
                 modifier = Modifier
@@ -517,16 +537,18 @@ private fun ParticipantList(
                             .fillMaxWidth()
                             .padding(vertical = 6.dp, horizontal = 4.dp),
                         fontSize = 14.sp,
-                        color = MaterialTheme.colorScheme.surface
+                        color = textColor
                     )
+                    if (ParticipantListType.REMAINING.name.isNotEmpty() || ParticipantListType.WINNERS.name.isNotEmpty()  && index < participants.size - 1){
+                        HorizontalDivider(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 2.dp),
+                            thickness = 0.5.dp,
+                            color = Color.Gray.copy(alpha = 0.5f)
+                        )
+                    }
 
-                    HorizontalDivider(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 2.dp),
-                        thickness = 0.5.dp,
-                        color = Color.LightGray
-                    )
                 }
 
                 if (participants.isEmpty()) {

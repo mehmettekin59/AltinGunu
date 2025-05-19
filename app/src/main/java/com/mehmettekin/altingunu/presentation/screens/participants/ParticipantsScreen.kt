@@ -14,7 +14,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -618,10 +617,6 @@ fun DateSelectorDialog(
     onOptionSelected: (Int) -> Unit,
     onDismiss: () -> Unit
 ) {
-    val configuration = LocalConfiguration.current
-    val screenWidth = configuration.screenWidthDp
-
-    val dynamicFontSize = (screenWidth * 0.045).sp
 
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -654,7 +649,7 @@ fun DateSelectorDialog(
                                 text = options[index],
                                 color = if (index == selectedIndex) Gold else Color.DarkGray,
                                 fontWeight = if (index == selectedIndex) FontWeight.Bold else FontWeight.Normal,
-                                fontSize = dynamicFontSize
+                                style = TextStyle(fontSize = MaterialTheme.typography.titleLarge.fontSize)
                             )
 
                             if (index == selectedIndex) {
@@ -733,7 +728,7 @@ fun ParticipantsSection(
                     Icon(
                         imageVector = Icons.Default.Add,
                         contentDescription = UiText.stringResource(R.string.add_button_description).asString(),
-                        tint = if (isSystemInDarkTheme()) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.primary
+                        tint = if (isSystemInDarkTheme()) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.primary
                     )
                 }
             },
@@ -804,82 +799,93 @@ fun ConfirmationDialog(
     onConfirm: () -> Unit,
     onDismiss: () -> Unit
 ) {
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = {
-            Text(
-                text =  UiText.stringResource(R.string.confirm_information).asString(),
-                color = NavyBlue,
-                fontWeight = FontWeight.Bold
-            )
-        },
-        containerColor = White,
-        text = {
-            Column(
-                verticalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                ConfirmationItem(
-                    label = UiText.stringResource(R.string.participants_count).asString(),
-                    value = UiText.stringResource(R.string.participant_count_special,state.participants.size).asString()
+    Surface(
+        modifier = Modifier
+            .fillMaxWidth(),
+        color = if (isSystemInDarkTheme()) MaterialTheme.colorScheme.secondary else MaterialTheme.colorScheme.tertiary
+
+    ) {
+        AlertDialog(
+            onDismissRequest = onDismiss,
+            modifier = Modifier.fillMaxWidth(),
+            title = {
+                Text(
+                    text =  UiText.stringResource(R.string.confirm_information).asString(),
+                    color = if (isSystemInDarkTheme()) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.secondary ,
+                    fontWeight = FontWeight.Bold
                 )
-                val valueTypeAndItem = when(state.selectedItemType) {
-                    ItemType.TL -> state.selectedItemType.displayName.asString()
-                    ItemType.CURRENCY -> UiText.stringResource(R.string.currency_with_type, Constraints.currencyCodeToName[state.selectedSpecificItem] ?: state.selectedSpecificItem).asString()
-                    ItemType.GOLD -> UiText.stringResource(R.string.gold_with_type, Constraints.goldCodeToName[state.selectedSpecificItem] ?: state.selectedSpecificItem).asString()
+            },
+            //containerColor = if (isSystemInDarkTheme()) MaterialTheme.colorScheme.secondary else MaterialTheme.colorScheme.tertiary ,
+            text = {
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    ConfirmationItem(
+                        label = UiText.stringResource(R.string.participants_count).asString(),
+                        value = UiText.stringResource(R.string.participant_count_special,state.participants.size).asString()
+                    )
+                    val valueTypeAndItem = when(state.selectedItemType) {
+                        ItemType.TL -> state.selectedItemType.displayName.asString()
+                        ItemType.CURRENCY -> UiText.stringResource(R.string.currency_with_type, Constraints.currencyCodeToName[state.selectedSpecificItem] ?: state.selectedSpecificItem).asString()
+                        ItemType.GOLD -> UiText.stringResource(R.string.gold_with_type, Constraints.goldCodeToName[state.selectedSpecificItem] ?: state.selectedSpecificItem).asString()
+                    }
+
+
+                    ConfirmationItem(
+                        label = UiText.stringResource(R.string.type_of_value_to_be_collected).asString(),
+                        value = valueTypeAndItem
+                    )
+
+                    ConfirmationItem(
+                        label = UiText.stringResource(R.string.monthly_amount).asString(),
+                        value = state.monthlyAmount
+                    )
+
+                    ConfirmationItem(
+                        label = UiText.stringResource(R.string.duration).asString(),
+                        value = UiText.stringResource(R.string.duration_months,state.durationMonths).asString()
+                    )
+
+                    // Başlangıç ayı ve yılı
+                    val monthFormat = SimpleDateFormat("MMMM", Locale.getDefault())
+                    val calendar = Calendar.getInstance()
+                    calendar.set(Calendar.MONTH, state.startMonth - 1)
+                    val monthName = monthFormat.format(calendar.time)
+
+                    ConfirmationItem(
+                        label = UiText.stringResource(R.string.starting_date).asString(),
+                        value = "$monthName ${state.startYear}"
+                    )
                 }
-
-
-                ConfirmationItem(
-                    label = UiText.stringResource(R.string.type_of_value_to_be_collected).asString(),
-                    value = valueTypeAndItem
-                )
-
-                ConfirmationItem(
-                    label = UiText.stringResource(R.string.monthly_amount).asString(),
-                    value = state.monthlyAmount
-                )
-
-                ConfirmationItem(
-                    label = UiText.stringResource(R.string.duration).asString(),
-                    value = UiText.stringResource(R.string.duration_months,state.durationMonths).asString()
-                )
-
-                // Başlangıç ayı ve yılı
-                val monthFormat = SimpleDateFormat("MMMM", Locale.getDefault())
-                val calendar = Calendar.getInstance()
-                calendar.set(Calendar.MONTH, state.startMonth - 1)
-                val monthName = monthFormat.format(calendar.time)
-
-                ConfirmationItem(
-                    label = UiText.stringResource(R.string.starting_date).asString(),
-                    value = "$monthName ${state.startYear}"
-                )
+            },
+            confirmButton = {
+                Button(
+                    onClick = onConfirm,
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = NavyBlue
+                    ),
+                    border = BorderStroke(1.dp, if (isSystemInDarkTheme()) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.secondary),
+                    shape = RoundedCornerShape(8.dp)
+                ) {
+                    Text(UiText.stringResource(R.string.confirm).asString(), color = if (isSystemInDarkTheme()) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.tertiary)
+                }
+            },
+            dismissButton = {
+                OutlinedButton(
+                    onClick = onDismiss,
+                    colors = ButtonDefaults.outlinedButtonColors(
+                        containerColor = if (isSystemInDarkTheme()) MaterialTheme.colorScheme.onTertiary else MaterialTheme.colorScheme.tertiary
+                    ),
+                    border = BorderStroke(1.dp, if (isSystemInDarkTheme()) MaterialTheme.colorScheme.secondary else MaterialTheme.colorScheme.secondary),
+                    shape = RoundedCornerShape(8.dp)
+                ) {
+                    Text(UiText.stringResource(R.string.cancel).asString(),color = if (isSystemInDarkTheme()) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.secondary)
+                }
             }
-        },
-        confirmButton = {
-            Button(
-                onClick = onConfirm,
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = NavyBlue
-                ),
-                shape = RoundedCornerShape(8.dp)
-            ) {
-                Text(UiText.stringResource(R.string.confirm).asString(), color = White)
-            }
-        },
-        dismissButton = {
-            OutlinedButton(
-                onClick = onDismiss,
-                colors = ButtonDefaults.outlinedButtonColors(
-                    contentColor = NavyBlue
-                ),
-                border = BorderStroke(1.dp, NavyBlue),
-                shape = RoundedCornerShape(8.dp)
-            ) {
-                Text(UiText.stringResource(R.string.cancel).asString())
-            }
-        }
-    )
+        )
+    }
+
 }
 
 @Composable
@@ -887,21 +893,25 @@ fun ConfirmationItem(
     label: String,
     value: String
 ) {
-    Row(
-        modifier = Modifier.fillMaxWidth()
-    ) {
-        Text(
-            text = "$label:",
-            color = Gold,
-            fontWeight = FontWeight.Medium,
-            modifier = Modifier.width(110.dp)
-        )
+        Row(
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text(
+                text = "$label:",
+                color = if (isSystemInDarkTheme()) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.secondary,
+                fontWeight = FontWeight.Medium,
+                modifier = Modifier.weight(2f),
+                maxLines = 1,
+            )
 
-        Text(
-            text = value,
-            color = NavyBlue,
-            style = MaterialTheme.typography.bodyMedium,
-            fontWeight = FontWeight.Bold
-        )
-    }
+            Text(
+                text = value,
+                color =  if (isSystemInDarkTheme()) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.secondary,
+                style = MaterialTheme.typography.bodyMedium,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.weight(1f),
+                maxLines = 1,
+            )
+        }
+
 }

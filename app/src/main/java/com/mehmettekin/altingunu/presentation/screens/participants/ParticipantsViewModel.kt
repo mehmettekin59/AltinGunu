@@ -1,5 +1,7 @@
 package com.mehmettekin.altingunu.presentation.screens.participants
 
+import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.text.intl.Locale
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.mehmettekin.altingunu.R
@@ -33,9 +35,9 @@ class ParticipantsViewModel @Inject constructor(
 
     private val _state = MutableStateFlow(ParticipantsState())
     val state: StateFlow<ParticipantsState> = _state.asStateFlow()
-
     private val _navigationEvent = MutableSharedFlow<Unit>()
     val navigationEvent: SharedFlow<Unit> = _navigationEvent.asSharedFlow()
+
 
     init {
         // Set current month and year as default
