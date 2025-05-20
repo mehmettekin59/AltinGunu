@@ -8,6 +8,7 @@ import com.mehmettekin.altingunu.utils.ResultState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -21,8 +22,13 @@ class KapaliCarsiViewModel @Inject constructor(
     private val _exchangeRates = MutableStateFlow<ResultState<List<ExchangeRate>>>(ResultState.Idle)
     val exchangeRates: StateFlow<ResultState<List<ExchangeRate>>> = _exchangeRates
 
-    // Saklanan tüm verilerin bir kopyası (Success durumunda güncellenir)
-    // findExchangeRateByCode bunun üzerinden çalışacak
+    private val _showDataSourceDialogState = MutableStateFlow(true)
+    val showDataSourceDialogState = _showDataSourceDialogState.asStateFlow()
+
+
+    fun dismissDataSourceDialog() {
+        _showDataSourceDialogState.value = false
+    }
 
     private var currentDataList: List<ExchangeRate> = emptyList()
 

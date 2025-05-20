@@ -272,16 +272,9 @@ private fun ResultsContent(
                 Spacer(modifier = Modifier.height(24.dp))
             }
 
-            // Results header
-            Text(
-                text = UiText.stringResource(R.string.the_raffle_results).asString(),
-                style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.Bold,
-                color = NavyBlue,
-                modifier = Modifier.fillMaxWidth()
-            )
 
-            Spacer(modifier = Modifier.height(16.dp))
+
+            Spacer(modifier = Modifier.height(1.dp))
 
             // Results table
             ResultsTable(results = results)
@@ -343,7 +336,7 @@ private fun ResultsSettingsSummary(
                 text = UiText.stringResource(R.string.raffle_info).asString(),
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold,
-                color = NavyBlue
+                color = MaterialTheme.colorScheme.secondary
             )
 
             Spacer(modifier = Modifier.height(8.dp))
@@ -546,7 +539,16 @@ private fun ResultsTable(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(4.dp)
+                .padding(vertical = 12.dp)
         ) {
+            Text(
+                text = UiText.stringResource(R.string.the_raffle_results).asString(),
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold,
+                color =  MaterialTheme.colorScheme.secondary,
+                modifier = Modifier.fillMaxWidth()
+            )
+            Spacer(modifier = Modifier.height(12.dp))
             // Table Header
             Row(
                 modifier = Modifier

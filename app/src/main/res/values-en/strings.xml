@@ -9,6 +9,10 @@
     <string name="delete">Delete</string>
     <string name="what_is_the_app_name">Gold Day</string>
 
+    <string name="data_source_info">Data Source Information</string>
+    <string name="api_info">This application fetches currency and gold data from "Kapalıçarşı Döviz Kurları Web API | Grand Bazaar API"</string>
+    <string name="ok">OK</string>
+
     <string name="title_home">Home</string>
     <string name="title_participants">Participants</string>
     <string name="title_wheel">Raffle Wheel</string>

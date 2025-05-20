@@ -255,7 +255,7 @@ fun WheelScreen(
                                                 viewModel.winners[viewModel.winners.size - 2]
                                             ).asString(),
                                             modifier = Modifier.padding(8.dp),
-                                            color = Gold,
+                                            color = White,
                                             fontWeight = FontWeight.ExtraBold,
                                             fontSize = 20.sp,
                                             textAlign = TextAlign.Center,

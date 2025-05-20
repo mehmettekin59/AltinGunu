@@ -8,6 +8,10 @@
     <string name="delete">حذف</string>
     <string name="what_is_the_app_name">يوم الذهب</string>
 
+    <string name="data_source_info">معلومات مصدر البيانات</string>
+    <string name="api_info">يقوم هذا التطبيق بجلب بيانات العملات والذهب من Kapalıçarşı Döviz Kurları Web API | Grand Bazaar API.</string>
+    <string name="ok">حسناً</string>
+
     <string name="title_home">الصفحة الرئيسية</string>
     <string name="title_participants">المشاركون</string>
     <string name="title_wheel">عجلة السحب</string>

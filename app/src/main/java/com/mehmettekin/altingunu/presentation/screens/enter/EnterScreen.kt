@@ -26,8 +26,11 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
@@ -66,7 +69,7 @@ fun EnterScreen(
     val currencyCodeList = remember { Constraints.currencyCodeList }
 
     val codeToNameMap = remember { goldCodeToName + currencyCodeToName }
-
+    val showDataSourceDialog by viewModel.showDataSourceDialogState.collectAsStateWithLifecycle()
 
     // Ekran yapılandırmasını al
     val configuration = LocalConfiguration.current
@@ -89,6 +92,47 @@ fun EnterScreen(
                 else -> emptyList()
             }
         }
+    }
+
+    if (showDataSourceDialog) {
+        AlertDialog(
+            onDismissRequest = { viewModel.dismissDataSourceDialog() },
+            title = {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Info,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.primary
+                    )
+                    Text(
+                        text = UiText.stringResource(R.string.data_source_info).asString(),
+                        style = MaterialTheme.typography.titleLarge
+                    )
+                }
+            },
+            text = {
+                Text(
+                    text = UiText.stringResource(R.string.api_info).asString(),
+                    style = MaterialTheme.typography.bodyLarge
+                )
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = { viewModel.dismissDataSourceDialog() },
+                    colors = ButtonDefaults.textButtonColors(
+                        contentColor = MaterialTheme.colorScheme.primary
+                    )
+                ) {
+                    Text(UiText.stringResource(R.string.ok).asString())
+                }
+            },
+            shape = RoundedCornerShape(16.dp),
+            containerColor = MaterialTheme.colorScheme.surface,
+            tonalElevation = 8.dp
+        )
     }
 
     Scaffold(
@@ -401,6 +445,7 @@ private fun AnimatedRateCard(
     elevation: Dp = 12.dp,
     isLandscape: Boolean = false
 ) {
+    val locale = LocalConfiguration.current.locales[0]
     val itemName = codeToNameMap[rate.code] ?: rate.code
     val itemType = if (Constraints.goldCodeList.contains(rate.code)) {
         ItemType.GOLD
@@ -436,7 +481,7 @@ private fun AnimatedRateCard(
 
             // Last updated timestamp (if available)
             rate.tarih.let { tarih ->
-                val localizedDate = tarih.convertNumerals()
+                val localizedDate = tarih.convertNumerals(locale)
                 Text(
                     text = UiText.stringResource(R.string.last_update).asString(),
                     style = MaterialTheme.typography.bodyMedium,
@@ -468,7 +513,7 @@ private fun AnimatedRateCard(
                     textColor = textColor,
                     itemType = itemType,
                     specificItem = rate.code,
-                    fontSize = if (isLandscape) 16.sp else 14.sp
+                    fontSize = MaterialTheme.typography.bodyMedium.fontSize
                 )
                 InfoColumn(
                     label = UiText.stringResource(R.string.sell).asString(),
@@ -476,7 +521,7 @@ private fun AnimatedRateCard(
                     textColor = textColor,
                     itemType = itemType,
                     specificItem = rate.code,
-                    fontSize = if (isLandscape) 16.sp else 14.sp
+                    fontSize = MaterialTheme.typography.bodyMedium.fontSize
                 )
             }
         }
@@ -530,7 +575,7 @@ fun GoldDayLotteryCard(
     Card(
         modifier = modifier.fillMaxWidth(),
         elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
-        border = BorderStroke(width = 0.5.dp, color = NavyBlue),
+        border = BorderStroke(width = 0.5.dp, color = Color.Gray.copy(alpha = 0.5f)),
         colors = CardDefaults.cardColors(containerColor = if (isSystemInDarkTheme()) Color.Transparent else MaterialTheme.colorScheme.tertiary)
     ) {
         Column(

@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
@@ -62,11 +63,13 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -82,10 +85,10 @@ import com.mehmettekin.altingunu.ui.theme.NavyBlue
 import com.mehmettekin.altingunu.ui.theme.White
 import com.mehmettekin.altingunu.utils.Constraints
 import com.mehmettekin.altingunu.utils.UiText
+import com.mehmettekin.altingunu.utils.convertNumerals
 import kotlinx.coroutines.flow.collectLatest
 import java.text.SimpleDateFormat
 import java.util.Calendar
-import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -487,7 +490,9 @@ fun ModernDateSelector(
     var showMonthDialog by remember { mutableStateOf(false) }
     var showYearDialog by remember { mutableStateOf(false) }
 
-    val monthFormat = SimpleDateFormat("MMMM", Locale.getDefault())
+    val locale = LocalConfiguration.current.locales[0]
+    val monthFormat = SimpleDateFormat("MMMM", locale)
+    val yearFormat = SimpleDateFormat("yyyy", locale)
     val calendar = Calendar.getInstance()
     calendar.set(Calendar.MONTH, selectedMonth - 1)
 
@@ -545,7 +550,7 @@ fun ModernDateSelector(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = selectedYear.toString(),
+                    text = yearFormat.format(calendar.time),
                     fontWeight = FontWeight.Medium,
                     color = if (isSystemInDarkTheme()) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.onTertiary
                 )
@@ -589,9 +594,13 @@ fun ModernDateSelector(
     if (showYearDialog) {
         val yearOptions = (currentYear..currentYear + 9).toList()  // Güncel yıl ve sonraki 9 yıl
 
+        val formattedYearOptions = yearOptions.map {
+            calendar.set(Calendar.YEAR, it)
+            yearFormat.format(calendar.time)
+        }
         DateSelectorDialog(
             title = UiText.stringResource(R.string.select_year).asString(),
-            options = yearOptions.map { it.toString() },
+            options = formattedYearOptions,
             selectedIndex = yearOptions.indexOf(selectedYear),
             onOptionSelected = { index ->
                 val newYear = yearOptions[index]
@@ -793,29 +802,35 @@ fun ParticipantsSection(
     }
 }
 
+
 @Composable
 fun ConfirmationDialog(
     state: ParticipantsState,
     onConfirm: () -> Unit,
     onDismiss: () -> Unit
 ) {
+    val locale = LocalConfiguration.current.locales[0]
+    val monthFormat = SimpleDateFormat("MMMM", locale)
+    val yearFormat = SimpleDateFormat("yyyy", locale)
+    val calendar = Calendar.getInstance()
+    val layoutDirection = LocalLayoutDirection.current
+    val isRtl = layoutDirection == LayoutDirection.Rtl
+
     Surface(
         modifier = Modifier
             .fillMaxWidth(),
         color = if (isSystemInDarkTheme()) MaterialTheme.colorScheme.secondary else MaterialTheme.colorScheme.tertiary
-
     ) {
         AlertDialog(
             onDismissRequest = onDismiss,
             modifier = Modifier.fillMaxWidth(),
             title = {
                 Text(
-                    text =  UiText.stringResource(R.string.confirm_information).asString(),
-                    color = if (isSystemInDarkTheme()) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.secondary ,
+                    text = UiText.stringResource(R.string.confirm_information).asString(),
+                    color = if (isSystemInDarkTheme()) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.secondary,
                     fontWeight = FontWeight.Bold
                 )
             },
-            //containerColor = if (isSystemInDarkTheme()) MaterialTheme.colorScheme.secondary else MaterialTheme.colorScheme.tertiary ,
             text = {
                 Column(
                     modifier = Modifier.fillMaxWidth(),
@@ -839,23 +854,23 @@ fun ConfirmationDialog(
 
                     ConfirmationItem(
                         label = UiText.stringResource(R.string.monthly_amount).asString(),
-                        value = state.monthlyAmount
+                        value = state.monthlyAmount.convertNumerals(locale)
                     )
 
                     ConfirmationItem(
                         label = UiText.stringResource(R.string.duration).asString(),
-                        value = UiText.stringResource(R.string.duration_months,state.durationMonths).asString()
+                        value = UiText.stringResource(R.string.duration_months,state.durationMonths.convertNumerals(locale)).asString()
                     )
 
                     // Başlangıç ayı ve yılı
-                    val monthFormat = SimpleDateFormat("MMMM", Locale.getDefault())
-                    val calendar = Calendar.getInstance()
                     calendar.set(Calendar.MONTH, state.startMonth - 1)
+                    calendar.set(Calendar.YEAR, state.startYear)
                     val monthName = monthFormat.format(calendar.time)
+                    val yearValue = yearFormat.format(calendar.time)
 
                     ConfirmationItem(
                         label = UiText.stringResource(R.string.starting_date).asString(),
-                        value = "$monthName ${state.startYear}"
+                        value = "$monthName $yearValue"
                     )
                 }
             },
@@ -866,9 +881,16 @@ fun ConfirmationDialog(
                         containerColor = NavyBlue
                     ),
                     border = BorderStroke(1.dp, if (isSystemInDarkTheme()) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.secondary),
-                    shape = RoundedCornerShape(8.dp)
+                    shape = RoundedCornerShape(8.dp),
+                    modifier = Modifier
+                        .padding(start = if(isRtl) 12.dp else 0.dp, end = if(isRtl) 0.dp else 12.dp)
+                        .widthIn(min = 120.dp)
                 ) {
-                    Text(UiText.stringResource(R.string.confirm).asString(), color = if (isSystemInDarkTheme()) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.tertiary)
+                    Text(
+                        text = UiText.stringResource(R.string.confirm).asString(),
+                        color = if (isSystemInDarkTheme()) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.tertiary,
+                        modifier = Modifier.padding(horizontal = 8.dp)
+                    )
                 }
             },
             dismissButton = {
@@ -878,14 +900,18 @@ fun ConfirmationDialog(
                         containerColor = if (isSystemInDarkTheme()) MaterialTheme.colorScheme.onTertiary else MaterialTheme.colorScheme.tertiary
                     ),
                     border = BorderStroke(1.dp, if (isSystemInDarkTheme()) MaterialTheme.colorScheme.secondary else MaterialTheme.colorScheme.secondary),
-                    shape = RoundedCornerShape(8.dp)
+                    shape = RoundedCornerShape(8.dp),
+                    modifier = Modifier.widthIn(min = 60.dp)
                 ) {
-                    Text(UiText.stringResource(R.string.cancel).asString(),color = if (isSystemInDarkTheme()) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.secondary)
+                    Text(
+                        text = UiText.stringResource(R.string.cancel).asString(),
+                        color = if (isSystemInDarkTheme()) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.secondary,
+                        modifier = Modifier.padding(horizontal = 8.dp)
+                    )
                 }
             }
         )
     }
-
 }
 
 @Composable

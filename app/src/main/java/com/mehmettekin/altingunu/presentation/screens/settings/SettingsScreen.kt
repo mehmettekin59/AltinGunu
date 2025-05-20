@@ -18,10 +18,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
@@ -179,7 +177,7 @@ fun LanguageSettingsCard(
                     style = MaterialTheme.typography.titleMedium.copy(
                         fontSize = MaterialTheme.typography.titleLarge.fontSize
                     ),
-                    color = MaterialTheme.colorScheme.surface
+                    color = MaterialTheme.colorScheme.secondary
                 )
             }
 
@@ -226,7 +224,7 @@ fun LanguageSettingsCard(
                 ) {
                     languages.forEach { (code, name) ->
                         DropdownMenuItem(
-                            text = { Text(name,style = MaterialTheme.typography.titleMedium) },
+                            text = { Text(name,style = MaterialTheme.typography.titleMedium,color = NavyBlue) },
                             onClick = {
                                 onLanguageChange(code)
                                 expanded = false
