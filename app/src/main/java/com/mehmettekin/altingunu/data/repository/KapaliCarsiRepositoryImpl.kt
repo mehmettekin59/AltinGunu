@@ -45,7 +45,7 @@ class KapaliCarsiRepositoryImpl @Inject constructor(
 
     @OptIn(ExperimentalCoroutinesApi::class)
     override fun getExchangeRates(): Flow<ResultState<List<ExchangeRate>>> {
-        val refreshInterval = settingsDataStore.getApiUpdateInterval()
+        val refreshInterval = settingsDataStore.getApiUpdateIntervalFlow()
             .map { seconds -> seconds * 1000L }
 
         val automaticRefresh = refreshInterval.flatMapLatest {internalMs ->

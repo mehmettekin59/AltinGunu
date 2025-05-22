@@ -42,14 +42,28 @@ object Constraints {
 
 
     // DataStore keys
+    object DataStoreNames {
+        const val SETTINGS_PREFERENCES = "settings_preferences"
+    }
+
     object DataStoreKeys {
         const val API_UPDATE_INTERVAL = "api_update_interval"
         const val LANGUAGE_CODE = "language_code"
+        const val IS_FIRST_LAUNCH = "is_first_launch"
     }
 
-    // Default settings
     object DefaultSettings {
-        const val DEFAULT_API_UPDATE_INTERVAL = 120 // seconds
-        const val DEFAULT_LANGUAGE = "tr" // Turkish
+        const val DEFAULT_API_UPDATE_INTERVAL = 30 // saniye
+        const val DEFAULT_LANGUAGE = "tr"
     }
+
+    // Arap ülkeleri
+    val ARABIC_COUNTRIES = setOf("sa", "ae", "bh", "kw", "om", "qa", "ye", "jo", "lb", "sy", "iq", "eg", "ly", "dz", "ma", "tn", "sd")
+
+    // İngilizce konuşulan ülkeler
+    val ENGLISH_COUNTRIES = setOf("us", "gb", "ca", "au", "nz", "ie", "za")
+
+    // Desteklenen diller
+    val SUPPORTED_LANGUAGES = setOf("tr", "en", "ar")
+
 }

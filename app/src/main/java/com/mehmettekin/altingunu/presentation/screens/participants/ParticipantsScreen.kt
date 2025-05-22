@@ -810,6 +810,7 @@ fun ConfirmationDialog(
     onDismiss: () -> Unit
 ) {
     val locale = LocalConfiguration.current.locales[0]
+    val context = LocalContext.current
     val monthFormat = SimpleDateFormat("MMMM", locale)
     val yearFormat = SimpleDateFormat("yyyy", locale)
     val calendar = Calendar.getInstance()
@@ -854,12 +855,12 @@ fun ConfirmationDialog(
 
                     ConfirmationItem(
                         label = UiText.stringResource(R.string.monthly_amount).asString(),
-                        value = state.monthlyAmount.convertNumerals(locale)
+                        value = state.monthlyAmount.convertNumerals(context)
                     )
 
                     ConfirmationItem(
                         label = UiText.stringResource(R.string.duration).asString(),
-                        value = UiText.stringResource(R.string.duration_months,state.durationMonths.convertNumerals(locale)).asString()
+                        value = UiText.stringResource(R.string.duration_months,state.durationMonths.convertNumerals(context)).asString()
                     )
 
                     // Başlangıç ayı ve yılı

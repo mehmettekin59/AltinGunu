@@ -9,7 +9,7 @@
     <string name="what_is_the_app_name">Altın Günü</string>
 
     <string name="data_source_info">Veri Kaynağı Bilgisi</string>
-    <string name="api_info">Bu uygulama,Döviz ve Altın verilerini Kapalıçarşı Döviz Kurları Web API | Grand Bazaar API\'sinden çekmektedir.</string>
+    <string name="api_info">Bu uygulama, Döviz ve Altın verilerini Kapalıçarşı Döviz Kurları API (Grand Bazaar API)\'sinden çekmektedir.</string>
     <string name="ok">Tamam</string>
 
 

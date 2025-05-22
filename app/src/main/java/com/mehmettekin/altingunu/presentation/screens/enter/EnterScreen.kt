@@ -23,14 +23,12 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
@@ -445,7 +443,7 @@ private fun AnimatedRateCard(
     elevation: Dp = 12.dp,
     isLandscape: Boolean = false
 ) {
-    val locale = LocalConfiguration.current.locales[0]
+    val context = LocalContext.current
     val itemName = codeToNameMap[rate.code] ?: rate.code
     val itemType = if (Constraints.goldCodeList.contains(rate.code)) {
         ItemType.GOLD
@@ -481,7 +479,7 @@ private fun AnimatedRateCard(
 
             // Last updated timestamp (if available)
             rate.tarih.let { tarih ->
-                val localizedDate = tarih.convertNumerals(locale)
+                val localizedDate = tarih.convertNumerals(context)
                 Text(
                     text = UiText.stringResource(R.string.last_update).asString(),
                     style = MaterialTheme.typography.bodyMedium,
@@ -515,6 +513,7 @@ private fun AnimatedRateCard(
                     specificItem = rate.code,
                     fontSize = MaterialTheme.typography.bodyMedium.fontSize
                 )
+                Spacer(modifier = Modifier.height(8.dp))
                 InfoColumn(
                     label = UiText.stringResource(R.string.sell).asString(),
                     value = rate.satis,
