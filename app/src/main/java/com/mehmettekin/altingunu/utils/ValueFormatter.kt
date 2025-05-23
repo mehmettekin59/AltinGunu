@@ -1,5 +1,6 @@
 package com.mehmettekin.altingunu.utils
 
+import android.content.Context
 import com.mehmettekin.altingunu.domain.model.ItemType
 import java.text.DecimalFormat
 import java.text.DecimalFormatSymbols
@@ -28,7 +29,7 @@ object ValueFormatter {
         }
     }
 
-    private fun tryFormatValue(value: String?, itemType: ItemType, locale: Locale): ResultState<String> {
+    private fun tryFormatValue(value: String?, itemType: ItemType,context: Context, locale: Locale): ResultState<String> {
         return try {
             // Parse the value to double to clean up extra zeros
             val parsedValue = value?.toDoubleOrNull() ?: 0.0
@@ -56,7 +57,7 @@ object ValueFormatter {
                 }
             }
 
-            val formatted = formatter.format(parsedValue).convertNumerals(locale)
+            val formatted = formatter.format(parsedValue).convertNumerals(context)
             ResultState.Success(formatted)
 
         } catch (e: Exception) {

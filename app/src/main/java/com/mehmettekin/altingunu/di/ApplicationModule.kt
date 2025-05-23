@@ -1,12 +1,6 @@
 package com.mehmettekin.altingunu.di
 
 import android.content.Context
-import androidx.datastore.core.DataStore
-import androidx.datastore.core.handlers.ReplaceFileCorruptionHandler
-import androidx.datastore.preferences.SharedPreferencesMigration
-import androidx.datastore.preferences.core.PreferenceDataStoreFactory
-import androidx.datastore.preferences.core.emptyPreferences
-import androidx.datastore.preferences.preferencesDataStoreFile
 import com.mehmettekin.altingunu.AltinGunuApplication
 import com.mehmettekin.altingunu.data.remote.KapaliCarsiApi
 import com.mehmettekin.altingunu.data.repository.DrawRepositoryImpl
@@ -29,9 +23,6 @@ import retrofit2.converter.moshi.MoshiConverterFactory
 import javax.inject.Singleton
 import androidx.lifecycle.ProcessLifecycleOwner
 import androidx.lifecycle.lifecycleScope
-import com.mehmettekin.altingunu.utils.Constraints
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
 
 
 @Module
@@ -74,18 +65,6 @@ abstract class ApplicationModule {
             return ProcessLifecycleOwner.get().lifecycleScope
         }
 
-        @Provides
-        @Singleton
-        fun provideSettingsDataStore(@ApplicationContext context: Context): DataStore<androidx.datastore.preferences.core.Preferences> {
-            return PreferenceDataStoreFactory.create(
-                corruptionHandler = ReplaceFileCorruptionHandler(
-                    produceNewData = { emptyPreferences() }
-                ),
-                migrations = listOf(SharedPreferencesMigration(context, Constraints.DataStoreNames.SETTINGS_PREFERENCES)),
-                scope = CoroutineScope(Dispatchers.IO + SupervisorJob()),
-                produceFile = { context.preferencesDataStoreFile(Constraints.DataStoreNames.SETTINGS_PREFERENCES) }
-            )
-        }
 
         // AltinGunuApplication için provider ekleyin
         @Provides
