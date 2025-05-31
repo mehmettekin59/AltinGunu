@@ -473,13 +473,16 @@ fun ModernDateSelector(
     val locale = LocalConfiguration.current.locales[0]
     val monthFormat = SimpleDateFormat("MMMM", locale)
     val yearFormat = SimpleDateFormat("yyyy", locale)
-    val calendar = Calendar.getInstance()
-    calendar.set(Calendar.MONTH, selectedMonth - 1)
 
     // Mevcut ay ve yılı al
     val currentCalendar = Calendar.getInstance()
     val currentMonth = currentCalendar.get(Calendar.MONTH) + 1  // 0-based to 1-based
     val currentYear = currentCalendar.get(Calendar.YEAR)
+
+    // Seçili ay için calendar oluştur (display için)
+    val displayCalendar = Calendar.getInstance()
+    displayCalendar.set(Calendar.YEAR, selectedYear)
+    displayCalendar.set(Calendar.MONTH, selectedMonth - 1) // 1-based to 0-based
 
     Row(
         modifier = Modifier.fillMaxWidth(),
@@ -501,7 +504,7 @@ fun ModernDateSelector(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = monthFormat.format(calendar.time),
+                    text = monthFormat.format(displayCalendar.time),
                     fontWeight = FontWeight.Medium,
                     color = if (isSystemInDarkTheme()) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.onTertiary
                 )
@@ -530,7 +533,7 @@ fun ModernDateSelector(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = yearFormat.format(calendar.time),
+                    text = yearFormat.format(displayCalendar.time),
                     fontWeight = FontWeight.Medium,
                     color = if (isSystemInDarkTheme()) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.onTertiary
                 )
@@ -546,38 +549,115 @@ fun ModernDateSelector(
 
     // Month selection dialog
     if (showMonthDialog) {
-        // Seçilebilecek ayları belirle
-        val availableMonths = if (selectedYear == currentYear) {
-            // Eğer seçili yıl mevcut yılsa, sadece mevcut ay ve sonraki aylar seçilebilir
-            (currentMonth..12).toList()
-        } else {
-            // Eğer gelecek bir yılsa, tüm aylar seçilebilir
-            (1..12).toList()
+        // DÜZELTME: Tüm ayları göster, geçmiş ayları sadece disable et
+        val allMonths = (1..12).toList()
+
+        // Ay isimlerini oluştur - her ay için ayrı calendar
+        val monthNames = allMonths.map { monthNumber ->
+            val tempCalendar = Calendar.getInstance()
+            tempCalendar.set(Calendar.YEAR, 2025) // Sabit yıl kullan
+            tempCalendar.set(Calendar.MONTH, monthNumber - 1)
+            tempCalendar.set(Calendar.DAY_OF_MONTH, 1) // Ayın ilk günü
+            monthFormat.format(tempCalendar.time)
         }
 
-        DateSelectorDialog(
-            title = UiText.stringResource(R.string.select_month).asString(),
-            options = availableMonths.map {
-                calendar.set(Calendar.MONTH, it - 1)
-                monthFormat.format(calendar.time)
+        // Seçilebilir ayları belirle (sadece disable/enable için)
+        val isMonthSelectable = allMonths.map { monthNumber ->
+            if (selectedYear == currentYear) {
+                monthNumber >= currentMonth // Sadece mevcut ay ve sonrası seçilebilir
+            } else {
+                true // Gelecek yıllarda tüm aylar seçilebilir
+            }
+        }
+
+        AlertDialog(
+            onDismissRequest = { showMonthDialog = false },
+            title = {
+                Text(
+                    text = UiText.stringResource(R.string.select_month).asString(),
+                    style = MaterialTheme.typography.titleLarge,
+                    color = NavyBlue,
+                    fontWeight = FontWeight.Bold
+                )
             },
-            selectedIndex = availableMonths.indexOf(selectedMonth),
-            onOptionSelected = { index ->
-                onMonthSelected(availableMonths[index])
-                showMonthDialog = false
+            containerColor = White,
+            text = {
+                LazyColumn(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .heightIn(max = 300.dp)
+                ) {
+                    items(allMonths.size) { index ->
+                        val monthNumber = allMonths[index]
+                        val monthName = monthNames[index]
+                        val isSelectable = isMonthSelectable[index]
+                        val isSelected = monthNumber == selectedMonth
+
+                        Column {
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .clickable(enabled = isSelectable) {
+                                        if (isSelectable) {
+                                            onMonthSelected(monthNumber)
+                                            showMonthDialog = false
+                                        }
+                                    }
+                                    .padding(16.dp),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Text(
+                                    text = monthName,
+                                    color = when {
+                                        isSelected -> Gold
+                                        !isSelectable -> Color.Gray.copy(alpha = 0.5f)
+                                        else -> Color.DarkGray
+                                    },
+                                    fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
+                                    style = TextStyle(fontSize = MaterialTheme.typography.titleLarge.fontSize)
+                                )
+
+                                if (isSelected) {
+                                    Icon(
+                                        imageVector = Icons.Default.Check,
+                                        contentDescription = null,
+                                        tint = Gold
+                                    )
+                                }
+                            }
+
+                            if (index < allMonths.size - 1) {
+                                HorizontalDivider(
+                                    color = Color.Gray.copy(alpha = 0.2f),
+                                    thickness = 1.dp
+                                )
+                            }
+                        }
+                    }
+                }
             },
-            onDismiss = { showMonthDialog = false }
+            confirmButton = {
+                TextButton(
+                    onClick = { showMonthDialog = false },
+                    colors = ButtonDefaults.textButtonColors(
+                        contentColor = Gold
+                    )
+                ) {
+                    Text(UiText.stringResource(R.string.close).asString())
+                }
+            }
         )
     }
 
     // Year selection dialog
     if (showYearDialog) {
-        val yearOptions = (currentYear..currentYear + 9).toList()  // Güncel yıl ve sonraki 9 yıl
+        val yearOptions = (currentYear..currentYear + 9).toList()
 
-        val formattedYearOptions = yearOptions.map {
-            calendar.set(Calendar.YEAR, it)
-            yearFormat.format(calendar.time)
+        val formattedYearOptions = yearOptions.map { year ->
+            year.toString() // Basit string dönüşümü
         }
+
         DateSelectorDialog(
             title = UiText.stringResource(R.string.select_year).asString(),
             options = formattedYearOptions,
@@ -586,7 +666,7 @@ fun ModernDateSelector(
                 val newYear = yearOptions[index]
                 onYearSelected(newYear)
 
-                // Eğer yıl değişip mevcut yıla eşitlenirse ve seçili ay geçmiş bir aysa, ayı güncel aya güncelle
+                // Eğer yıl mevcut yıla değişirse ve seçili ay geçmişse, mevcut aya güncelle
                 if (newYear == currentYear && selectedMonth < currentMonth) {
                     onMonthSelected(currentMonth)
                 }
