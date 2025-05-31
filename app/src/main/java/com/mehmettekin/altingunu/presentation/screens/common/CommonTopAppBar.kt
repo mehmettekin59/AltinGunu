@@ -38,6 +38,7 @@ import com.mehmettekin.altingunu.ui.theme.White
 import com.mehmettekin.altingunu.utils.UiText
 import com.mehmettekin.altingunu.R
 import com.mehmettekin.altingunu.ui.theme.Gold
+import com.mehmettekin.altingunu.utils.RTLHelper
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
