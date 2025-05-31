@@ -12,7 +12,7 @@
     <string name="api_info">يقوم هذا التطبيق بجلب بيانات العملات والذهب من Kapalıçarşı Döviz Kurları Web API | Grand Bazaar API.</string>
     <string name="ok">حسناً</string>
 
-    <string name="title_home">الصفحة الرئيسية</string>
+
     <string name="title_participants">المشاركون</string>
     <string name="title_wheel">عجلة السحب</string>
     <string name="title_results">النتائج</string>
@@ -62,8 +62,6 @@
     <string name="no_winners_yet">لا يوجد فائزون بعد</string>
     <string name="save_results">حفظ النتائج</string>
     <string name="there_is_no_winner_yet">لا يوجد فائز بعد</string>
-
-    <string name="no_results">لا توجد نتائج سحب بعد</string>
 
     <string name="raffle_info">معلومات السحب</string>
     <string name="value_type">نوع القيمة</string>

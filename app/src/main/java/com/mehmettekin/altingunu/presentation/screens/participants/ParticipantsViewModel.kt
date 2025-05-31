@@ -1,7 +1,5 @@
 package com.mehmettekin.altingunu.presentation.screens.participants
 
-import androidx.compose.ui.platform.LocalConfiguration
-import androidx.compose.ui.text.intl.Locale
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.mehmettekin.altingunu.R

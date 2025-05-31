@@ -1,21 +1,17 @@
 package com.mehmettekin.altingunu.presentation.screens.weel
 
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableFloatStateOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.mehmettekin.altingunu.domain.model.DrawResult
 import com.mehmettekin.altingunu.domain.model.Participant
 import com.mehmettekin.altingunu.domain.model.ParticipantsScreenWholeInformation
 import com.mehmettekin.altingunu.domain.repository.DrawRepository
-import com.mehmettekin.altingunu.domain.repository.KapaliCarsiRepository
 import com.mehmettekin.altingunu.utils.ResultState
 import com.mehmettekin.altingunu.utils.ValueFormatter
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Calendar
@@ -24,29 +20,21 @@ import javax.inject.Inject
 
 @HiltViewModel
 class WheelViewModel @Inject constructor(
-    private val drawRepository: DrawRepository,
-    //private val kapaliCarsiRepository: KapaliCarsiRepository
+    private val drawRepository: DrawRepository
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(WheelState())
     val state = _state.asStateFlow()
 
-    // UI states
-    var participants by mutableStateOf<List<Participant>>(emptyList())
-        private set
-    var winners by mutableStateOf<List<String>>(emptyList())
-        private set
-    var winnerParticipants by mutableStateOf<List<Participant>>(emptyList())
-        private set
-    var rotation by mutableFloatStateOf(0f)
-        private set
-    var isSpinning by mutableStateOf(false)
-        private set
-    var winner by mutableStateOf<String?>(null)
-        private set
-
-    // Settings related to the draw
-    private var drawSettings: ParticipantsScreenWholeInformation? = null
+    // ✅ Backward compatibility için convenience getters - Updated
+    val participants: List<Participant> get() = _state.value.remainingParticipants // participants = remaining
+    val allParticipants: List<Participant> get() = _state.value.allParticipants
+    val remainingParticipants: List<Participant> get() = _state.value.remainingParticipants
+    val winners: List<String> get() = _state.value.winners
+    val winnerParticipants: List<Participant> get() = _state.value.winnerParticipants
+    val rotation: Float get() = _state.value.rotation
+    val isSpinning: Boolean get() = _state.value.isSpinning
+    val winner: String? get() = _state.value.currentWinner
 
     init {
         loadParticipants()
@@ -55,23 +43,28 @@ class WheelViewModel @Inject constructor(
 
     private fun loadParticipants() {
         viewModelScope.launch {
+            _state.update { it.copy(isLoading = true) }
+
             when (val result = drawRepository.getParticipants()) {
                 is ResultState.Success -> {
-                    val participantsList = result.data
-                    participants = participantsList
-                    _state.value = _state.value.copy(
-                        participants = participantsList.map { it.name },
-                        isLoading = false
-                    )
+                    _state.update { currentState ->
+                        currentState.copy(
+                            allParticipants = result.data,
+                            remainingParticipants = result.data, // Başlangıçta hepsi "remaining"
+                            isLoading = false
+                        )
+                    }
                 }
                 is ResultState.Error -> {
-                    _state.value = _state.value.copy(
-                        error = result.message,
-                        isLoading = false
-                    )
+                    _state.update { currentState ->
+                        currentState.copy(
+                            error = result.message,
+                            isLoading = false
+                        )
+                    }
                 }
                 ResultState.Loading -> {
-                    _state.value = _state.value.copy(isLoading = true)
+                    _state.update { it.copy(isLoading = true) }
                 }
                 ResultState.Idle -> {
                     // No action needed
@@ -84,20 +77,17 @@ class WheelViewModel @Inject constructor(
         viewModelScope.launch {
             when (val result = drawRepository.getDrawSettings()) {
                 is ResultState.Success -> {
-                    drawSettings = result.data
-                    _state.value = _state.value.copy(
-                        drawSettings = result.data,
-                        isLoading = false
-                    )
+                    _state.update { currentState ->
+                        currentState.copy(drawSettings = result.data)
+                    }
                 }
                 is ResultState.Error -> {
-                    _state.value = _state.value.copy(
-                        error = result.message,
-                        isLoading = false
-                    )
+                    _state.update { currentState ->
+                        currentState.copy(error = result.message)
+                    }
                 }
                 ResultState.Loading -> {
-                    _state.value = _state.value.copy(isLoading = true)
+                    _state.update { it.copy(isLoading = true) }
                 }
                 ResultState.Idle -> {
                     // No action needed
@@ -107,102 +97,103 @@ class WheelViewModel @Inject constructor(
     }
 
     fun spinWheel() {
-        if (isSpinning || participants.isEmpty() || participants.size <= 1) return
-        rotation = 0f
-        isSpinning = true
-        winner = null
+        val currentRemainingParticipants = _state.value.remainingParticipants
+        if (_state.value.isSpinning || currentRemainingParticipants.isEmpty() || currentRemainingParticipants.size <= 1) return
+
+        _state.update { currentState ->
+            currentState.copy(
+                rotation = 0f,
+                isSpinning = true,
+                currentWinner = null
+            )
+        }
     }
 
     fun updateRotation(newRotation: Float) {
-        rotation = newRotation
+        _state.update { currentState ->
+            currentState.copy(rotation = newRotation)
+        }
     }
 
     fun finishSpin(finalRotation: Float) {
-        rotation = finalRotation
-        val remainingParticipantNames = _state.value.participants
+        val currentRemainingParticipants = _state.value.remainingParticipants
 
-        if (remainingParticipantNames.isNotEmpty()) {
-            val sliceAngle = 360f / remainingParticipantNames.size
+        if (currentRemainingParticipants.isNotEmpty()) {
+            val sliceAngle = 360f / currentRemainingParticipants.size
             val pointerAngle = (finalRotation % 360f)
             val normalizedAngle = (360f - pointerAngle + 90f) % 360f
             val winnerIndex = (normalizedAngle / sliceAngle).toInt()
-            val selectedWinner = remainingParticipantNames[winnerIndex % remainingParticipantNames.size]
+            val selectedWinner = currentRemainingParticipants[winnerIndex % currentRemainingParticipants.size]
 
             addWinner(selectedWinner)
+        }
 
-            // Update remaining participants
-            val updatedParticipants = remainingParticipantNames.toMutableList()
-            updatedParticipants.remove(selectedWinner)
-
-            _state.value = _state.value.copy(
-                participants = updatedParticipants
+        _state.update { currentState ->
+            currentState.copy(
+                rotation = finalRotation,
+                isSpinning = false
             )
         }
-
-        isSpinning = false
     }
 
-    private fun addWinner(winnerName: String) {
-        val updatedWinners = winners.toMutableList()
-        updatedWinners.add(winnerName)
-        winners = updatedWinners
+    private fun addWinner(winnerParticipant: Participant) {
+        _state.update { currentState ->
+            val updatedWinners = currentState.winners + winnerParticipant.name
+            val updatedWinnerParticipants = currentState.winnerParticipants + winnerParticipant
+            val updatedRemainingParticipants = currentState.remainingParticipants.filter { it.id != winnerParticipant.id }
 
-        // Find the corresponding participant object
-        val participant = participants.find { it.name == winnerName }
-        participant?.let {
-            val updatedWinnerParticipants = winnerParticipants.toMutableList()
-            updatedWinnerParticipants.add(it)
-            winnerParticipants = updatedWinnerParticipants
+            currentState.copy(
+                winners = updatedWinners,
+                winnerParticipants = updatedWinnerParticipants,
+                remainingParticipants = updatedRemainingParticipants,
+                currentWinner = winnerParticipant.name
+            )
         }
-
-        winner = winnerName
-
-        // State'i de güncelleyin
-        _state.value = _state.value.copy(
-            winners = winners,  // State'deki winners listesini güncelle
-            participants = _state.value.participants.filter { it != winnerName },
-            currentWinner = winnerName
-        )
     }
 
     fun handleLastParticipant() {
-        val remainingParticipants = _state.value.participants
-        if (remainingParticipants.size == 1 && !isSpinning) {
-            remainingParticipants.firstOrNull()?.let {
-                addWinner(it)
-                _state.value = _state.value.copy(
-                    participants = emptyList()
-                )
+        val currentRemainingParticipants = _state.value.remainingParticipants
+        if (currentRemainingParticipants.size == 1 && !_state.value.isSpinning) {
+            currentRemainingParticipants.firstOrNull()?.let { lastParticipant ->
+                addWinner(lastParticipant)
             }
         }
     }
 
     fun reset() {
-        loadParticipants() // Reload from DataStore
-        winners = emptyList()
-        winnerParticipants = emptyList()
-        rotation = 0f
-        isSpinning = false
-        winner = null
+        // İlk olarak state'i resetle
+        _state.update { currentState ->
+            currentState.copy(
+                remainingParticipants = currentState.allParticipants, // Tüm katılımcıları geri remaining'e koy
+                winners = emptyList(),
+                winnerParticipants = emptyList(),
+                rotation = 0f,
+                isSpinning = false,
+                currentWinner = null
+            )
+        }
+        // Not: allParticipants'ı tekrar yüklemeye gerek yok, zaten mevcut
     }
 
     fun saveResults() {
         viewModelScope.launch {
-            if (winnerParticipants.isEmpty() || drawSettings == null) return@launch
+            val currentWinnerParticipants = _state.value.winnerParticipants
+            val currentDrawSettings = _state.value.drawSettings
 
-            val settings = drawSettings!!
-            val results = createDrawResults(winnerParticipants, settings)
+            if (currentWinnerParticipants.isEmpty() || currentDrawSettings == null) return@launch
+
+            val results = createDrawResults(currentWinnerParticipants, currentDrawSettings)
 
             when (val saveResult = drawRepository.saveDrawResults(results)) {
                 is ResultState.Success -> {
-                    _state.value = _state.value.copy(
-                        resultsSaved = true
-                    )
+                    _state.update { currentState ->
+                        currentState.copy(resultsSaved = true)
+                    }
                 }
                 is ResultState.Error -> {
-                    _state.value = _state.value.copy(
-                        error = saveResult.message
-                    )
+                    _state.update { currentState ->
+                        currentState.copy(error = saveResult.message)
+                    }
                 }
                 ResultState.Loading, ResultState.Idle -> {
                     // No action needed
@@ -260,8 +251,7 @@ class WheelViewModel @Inject constructor(
 
         return results
     }
-
-
 }
+
 
 

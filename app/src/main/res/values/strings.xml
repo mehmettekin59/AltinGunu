@@ -12,8 +12,6 @@
     <string name="api_info">Bu uygulama, Döviz ve Altın verilerini Kapalıçarşı Döviz Kurları API (Grand Bazaar API)\'sinden çekmektedir.</string>
     <string name="ok">Tamam</string>
 
-
-    <string name="title_home">Ana Sayfa</string>
     <string name="title_participants">Katılımcılar</string>
     <string name="title_wheel">Çekiliş Çarkı</string>
     <string name="title_results">Sonuçlar</string>
@@ -66,8 +64,6 @@
     <string name="save_results">Sonuçları Kaydet</string>
     <string name="there_is_no_winner_yet">Henüz kazanan yok</string>
 
-
-    <string name="no_results">Henüz çekiliş sonucu bulunmuyor</string>
 
     <string name="raffle_info">Çekiliş Bilgileri</string>
     <string name="value_type">Değer Türü</string>

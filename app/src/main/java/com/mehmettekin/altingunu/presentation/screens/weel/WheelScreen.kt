@@ -48,9 +48,12 @@ import com.mehmettekin.altingunu.ui.theme.White
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.ui.graphics.drawscope.rotate
 import com.mehmettekin.altingunu.R
+import com.mehmettekin.altingunu.domain.model.Participant
 import com.mehmettekin.altingunu.presentation.screens.common.CommonTopAppBar
 import com.mehmettekin.altingunu.ui.theme.Gold
 import com.mehmettekin.altingunu.utils.UiText
+import kotlin.collections.isNotEmpty
+import kotlin.collections.map
 import kotlin.math.cos
 import kotlin.math.sin
 
@@ -79,16 +82,16 @@ fun WheelScreen(
     val scrollState = rememberScrollState()
 
     val textMeasurer = rememberTextMeasurer()
-    val rotationAnimatable = remember { Animatable(viewModel.rotation) }
+    val rotationAnimatable = remember { Animatable(0f) }
 
     // Determine layout based on screen width
     val configuration = LocalConfiguration.current
     val screenWidth = configuration.screenWidthDp.dp
     val isWideScreen = screenWidth > 600.dp
 
-    // Handle wheel spinning animation
-    LaunchedEffect(viewModel.isSpinning) {
-        if (viewModel.isSpinning) {
+    // ✅ Handle wheel spinning animation - StateFlow kullanarak
+    LaunchedEffect(state.isSpinning) {
+        if (state.isSpinning) {
             val spinCount = 5 + (3 * Math.random()).toFloat()
             val targetRotation = rotationAnimatable.value + (spinCount * 360f)
 
@@ -109,19 +112,19 @@ fun WheelScreen(
         }
     }
 
-    // Handle last participant automatically
-    LaunchedEffect(state.participants) {
+    // ✅ Handle last participant automatically - StateFlow kullanarak
+    LaunchedEffect(state.remainingParticipants) {
         viewModel.handleLastParticipant()
     }
 
-    // Show error message if there's an error
+    // ✅ Show error message if there's an error - StateFlow kullanarak
     LaunchedEffect(state.error) {
         state.error?.let { error ->
             snackbarHostState.showSnackbar(error.asString(context))
         }
     }
 
-    // Navigate to results screen when results are saved
+    // ✅ Navigate to results screen when results are saved - StateFlow kullanarak
     LaunchedEffect(state.resultsSaved) {
         if (state.resultsSaved) {
             navController.navigate(Screen.Results.route) {
@@ -157,7 +160,7 @@ fun WheelScreen(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(paddingValues)
-                    .verticalScroll(scrollState) // Apply vertical scroll to the whole screen
+                    .verticalScroll(scrollState)
                     .padding(vertical = 4.dp, horizontal = 8.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
@@ -167,13 +170,18 @@ fun WheelScreen(
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
-                        verticalAlignment = Alignment.CenterVertically // Changed to CenterVertically to align wheel and participants
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
                         WheelSection(
                             modifier = Modifier.weight(1f),
-                            viewModel = viewModel,
+                            remainingParticipants = state.remainingParticipants, // ✅ Explicit naming
+                            rotation = state.rotation,
+                            currentWinner = state.currentWinner,
+                            winners = state.winners,
+                            isSpinning = state.isSpinning,
                             textMeasurer = textMeasurer,
-                            participants = state.participants
+                            onSpin = { viewModel.spinWheel() },
+                            onReset = { viewModel.reset() }
                         )
 
                         Spacer(modifier = Modifier.width(8.dp))
@@ -184,15 +192,15 @@ fun WheelScreen(
                         ) {
                             ParticipantsSection(
                                 modifier = Modifier.fillMaxWidth(),
-                                remainingParticipants = state.participants,
-                                winners = viewModel.winners,
+                                remainingParticipants = state.remainingParticipants.map { it.name }, // ✅ Explicit
+                                winners = state.winners,
                                 onSaveResults = { viewModel.saveResults() }
                             )
 
                             Spacer(modifier = Modifier.height(8.dp))
 
                             // Continue button for wide layout
-                            if (state.participants.isEmpty() && viewModel.winners.isNotEmpty()) {
+                            if (state.remainingParticipants.isEmpty() && state.winners.isNotEmpty()) {
                                 Button(
                                     onClick = { viewModel.saveResults() },
                                     colors = ButtonDefaults.buttonColors(
@@ -220,14 +228,13 @@ fun WheelScreen(
                     }
                 } else {
                     // Narrow screen layout - Stacked with optimized space
-                    // For empty participants list, use a more compact layout
-                    if (state.participants.isEmpty()) {
+                    if (state.remainingParticipants.isEmpty()) {
                         // Optimize layout when no participants left
                         Row(
                             modifier = Modifier.fillMaxWidth(),
                         ) {
                             // Last winner announcement in a larger card
-                            if (viewModel.winners.isNotEmpty()) {
+                            if (state.winners.isNotEmpty()) {
                                 Card(
                                     modifier = Modifier
                                         .padding(2.dp)
@@ -252,7 +259,7 @@ fun WheelScreen(
                                         Text(
                                             text = UiText.stringResource(
                                                 R.string.the_last_winner_celebration,
-                                                viewModel.winners[viewModel.winners.size - 2]
+                                                state.winners[state.winners.size - 2] // ✅ StateFlow'dan direkt
                                             ).asString(),
                                             modifier = Modifier.padding(8.dp),
                                             color = White,
@@ -269,9 +276,14 @@ fun WheelScreen(
                         // Normal layout when there are participants
                         WheelSection(
                             modifier = Modifier.fillMaxWidth(),
-                            viewModel = viewModel,
+                            remainingParticipants = state.remainingParticipants,
+                            rotation = state.rotation,
+                            currentWinner = state.currentWinner,
+                            winners = state.winners,
+                            isSpinning = state.isSpinning,
                             textMeasurer = textMeasurer,
-                            participants = state.participants
+                            onSpin = { viewModel.spinWheel() },
+                            onReset = { viewModel.reset() }
                         )
                     }
 
@@ -279,13 +291,13 @@ fun WheelScreen(
 
                     ParticipantsSection(
                         modifier = Modifier.fillMaxWidth(),
-                        remainingParticipants = state.participants,
-                        winners = viewModel.winners,
+                        remainingParticipants = state.remainingParticipants.map { it.name },
+                        winners = state.winners,
                         onSaveResults = { viewModel.saveResults() }
                     )
 
                     // Only show save button when all participants have been selected
-                    if (state.participants.isEmpty() && viewModel.winners.isNotEmpty()) {
+                    if (state.remainingParticipants.isEmpty() && state.winners.isNotEmpty()) {
                         Spacer(modifier = Modifier.height(16.dp))
 
                         Button(
@@ -320,13 +332,19 @@ fun WheelScreen(
     }
 }
 
+//  WheelSection'ı da güncelle
 @OptIn(ExperimentalTextApi::class)
 @Composable
 private fun WheelSection(
     modifier: Modifier,
-    viewModel: WheelViewModel,
+    remainingParticipants: List<Participant>, // ✅ Explicit naming
+    rotation: Float,
+    currentWinner: String?,
+    winners: List<String>,
+    isSpinning: Boolean,
     textMeasurer: TextMeasurer,
-    participants: List<String>
+    onSpin: () -> Unit,
+    onReset: () -> Unit
 ) {
     Column(
         modifier = modifier,
@@ -344,11 +362,11 @@ private fun WheelSection(
                     .padding(4.dp)
             ) {
                 // Always draw wheel, using a default list if participants is empty
-                val displayParticipants = if (participants.isNotEmpty()) {
-                    participants
-                } else if (viewModel.winners.isNotEmpty()) {
+                val displayParticipants = if (remainingParticipants.isNotEmpty()) {
+                    remainingParticipants.map { it.name } // ✅ Name'leri extract et
+                } else if (winners.isNotEmpty()) {
                     // Show the winners on the wheel when participants list is empty
-                    viewModel.winners
+                    winners
                 } else {
                     emptyList()
                 }
@@ -356,7 +374,7 @@ private fun WheelSection(
                 if (displayParticipants.isNotEmpty()) {
                     drawWheel(
                         participants = displayParticipants,
-                        rotation = viewModel.rotation,
+                        rotation = rotation,
                         textMeasurer = textMeasurer
                     )
                     drawPointer()
@@ -364,29 +382,36 @@ private fun WheelSection(
             }
         }
 
-        WinnerAnnouncement(winner = if (participants.isEmpty() && viewModel.winners.size > 1)
-            viewModel.winners[viewModel.winners.size - 2]
-        else
-            viewModel.winner)
+        WinnerAnnouncement(
+            winner = if (remainingParticipants.isEmpty() && winners.size > 1)
+                winners[winners.size - 2]
+            else
+                currentWinner
+        )
+
         Spacer(modifier = Modifier.height(4.dp))
+
         ControlButtons(
-            viewModel = viewModel,
-            canSpin = participants.size > 1 && !viewModel.isSpinning
+            canSpin = remainingParticipants.size > 1 && !isSpinning,
+            onSpin = onSpin,
+            onReset = onReset
         )
     }
 }
 
+// ✅ ControlButtons'ı da güncelle
 @Composable
 private fun ControlButtons(
-    viewModel: WheelViewModel,
-    canSpin: Boolean
+    canSpin: Boolean,
+    onSpin: () -> Unit,
+    onReset: () -> Unit
 ) {
     Row(
         modifier = Modifier.padding(4.dp),
         horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         Button(
-            onClick = { viewModel.spinWheel() },
+            onClick = onSpin,
             enabled = canSpin,
             modifier = Modifier
                 .weight(1f)
@@ -399,12 +424,12 @@ private fun ControlButtons(
         ) {
             Text(
                 text = UiText.stringResource(R.string.spin_wheel).asString(),
-                style = TextStyle(fontSize = MaterialTheme.typography.titleMedium.fontSize,fontWeight = FontWeight.Bold)
+                style = TextStyle(fontSize = MaterialTheme.typography.titleSmall.fontSize,fontWeight = FontWeight.Bold)
             )
         }
 
         Button(
-            onClick = { viewModel.reset() },
+            onClick = onReset,
             colors = ButtonDefaults.buttonColors(
                 containerColor = if (isSystemInDarkTheme()) MaterialTheme.colorScheme.secondary else MaterialTheme.colorScheme.secondary,
                 contentColor =  if (isSystemInDarkTheme()) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.tertiary,
@@ -416,11 +441,13 @@ private fun ControlButtons(
         ) {
             Text(
                 text = UiText.stringResource(R.string.restart).asString(),
-                style = TextStyle(fontSize = MaterialTheme.typography.titleMedium.fontSize,fontWeight = FontWeight.Bold)
+                style = TextStyle(fontSize = MaterialTheme.typography.titleSmall.fontSize,fontWeight = FontWeight.Bold)
             )
         }
     }
 }
+
+
 
 @Composable
 private fun WinnerAnnouncement(winner: String?) {
@@ -510,10 +537,11 @@ private fun ParticipantList(
         ) {
             Text(
                 text = title,
-                style = MaterialTheme.typography.titleSmall,
-                fontWeight = FontWeight.Bold,
+                style = MaterialTheme.typography.bodyLarge,
+                fontWeight = FontWeight.Normal,
                 modifier = Modifier.padding(bottom = 8.dp),
-                color = titleTextColor
+                color = titleTextColor,
+
             )
 
                 HorizontalDivider(
@@ -694,3 +722,5 @@ private fun DrawScope.drawPointer() {
     )
     drawPath(path = path, color = Color.Red)
 }
+
+

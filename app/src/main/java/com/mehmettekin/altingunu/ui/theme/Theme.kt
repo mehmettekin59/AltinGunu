@@ -71,13 +71,13 @@ fun responsiveTypography(): androidx.compose.material3.Typography {
     }
 
     val titleMediumFontSize = when {
-        screenWidth < 320 -> 18.sp
+        screenWidth < 320 -> 16.sp
         screenWidth < 480 -> 20.sp
         else -> 22.sp
     }
 
     val titleSmallFontSize = when {
-        screenWidth < 320 -> 16.sp
+        screenWidth < 320 -> 14.sp
         screenWidth < 480 -> 18.sp
         else -> 20.sp
     }

@@ -13,7 +13,7 @@
     <string name="api_info">This application fetches currency and gold data from "Kapalıçarşı Döviz Kurları Web API | Grand Bazaar API"</string>
     <string name="ok">OK</string>
 
-    <string name="title_home">Home</string>
+
     <string name="title_participants">Participants</string>
     <string name="title_wheel">Raffle Wheel</string>
     <string name="title_results">Results</string>
@@ -64,7 +64,6 @@
     <string name="save_results">Save Results</string>
     <string name="there_is_no_winner_yet">There is no winner yet</string>
 
-    <string name="no_results">No raffle results available yet</string>
     <string name="raffle_info">Raffle Information</string>
     <string name="value_type">Value Type</string>
     <string name="monthly_amount">Monthly Amount Per Person</string>
