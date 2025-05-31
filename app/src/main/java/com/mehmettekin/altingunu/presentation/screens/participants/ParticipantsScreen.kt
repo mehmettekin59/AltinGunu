@@ -20,13 +20,13 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.AttachMoney
 import androidx.compose.material.icons.filled.CalendarMonth
+import androidx.compose.material.icons.filled.CalendarToday
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Delete
@@ -229,8 +229,10 @@ fun ParticipantsContent(
         Spacer(modifier = Modifier.height(8.dp))
 
         ModernDateSelector(
+            selectedDay = state.startDay,
             selectedMonth = state.startMonth,
             selectedYear = state.startYear,
+            onDaySelected = {onEvent(ParticipantsEvent.OnStartDaySelect(it))},
             onMonthSelected = { onEvent(ParticipantsEvent.OnStartMonthSelect(it)) },
             onYearSelected = { onEvent(ParticipantsEvent.OnStartYearSelect(it)) }
         )
@@ -464,30 +466,164 @@ fun SpecificItemSelector(
 fun ModernDateSelector(
     selectedMonth: Int,
     selectedYear: Int,
+    selectedDay: Int,
     onMonthSelected: (Int) -> Unit,
-    onYearSelected: (Int) -> Unit
+    onYearSelected: (Int) -> Unit,
+    onDaySelected: (Int) -> Unit
 ) {
     var showMonthDialog by remember { mutableStateOf(false) }
     var showYearDialog by remember { mutableStateOf(false) }
+    var showDayDialog by remember { mutableStateOf(false) }
 
     val locale = LocalConfiguration.current.locales[0]
     val monthFormat = SimpleDateFormat("MMMM", locale)
     val yearFormat = SimpleDateFormat("yyyy", locale)
+    val dayFormat = SimpleDateFormat("dd", locale)
 
-    // Mevcut ay ve yılı al
+    // Mevcut tarih bilgilerini al
     val currentCalendar = Calendar.getInstance()
     val currentMonth = currentCalendar.get(Calendar.MONTH) + 1  // 0-based to 1-based
     val currentYear = currentCalendar.get(Calendar.YEAR)
+    val currentDay = currentCalendar.get(Calendar.DAY_OF_MONTH)
 
-    // Seçili ay için calendar oluştur (display için)
+    // Seçili tarih için calendar oluştur (display için)
     val displayCalendar = Calendar.getInstance()
     displayCalendar.set(Calendar.YEAR, selectedYear)
     displayCalendar.set(Calendar.MONTH, selectedMonth - 1) // 1-based to 0-based
+    displayCalendar.set(Calendar.DAY_OF_MONTH, selectedDay)
 
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
+        // Day selector
+        Surface(
+            modifier = Modifier
+                .weight(1f)
+                .clip(RoundedCornerShape(8.dp))
+                .clickable { showDayDialog = true },
+            border = BorderStroke(width = 1.dp, color = if (isSystemInDarkTheme()) MaterialTheme.colorScheme.primary.copy(alpha = 0.5f) else MaterialTheme.colorScheme.secondary.copy(alpha = 0.5f))
+        ) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = dayFormat.format(displayCalendar.time),
+                    fontWeight = FontWeight.Medium,
+                    color = if (isSystemInDarkTheme()) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.onTertiary
+                )
+
+                Icon(
+                    imageVector = Icons.Default.CalendarToday,
+                    contentDescription = null,
+                    tint = if (isSystemInDarkTheme()) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.secondary
+                )
+            }
+
+            // Day selection dialog
+            if (showDayDialog) {
+                // Seçili ay için kaç gün olduğunu hesapla
+                val daysInMonth = Calendar.getInstance().apply {
+                    set(Calendar.YEAR, selectedYear)
+                    set(Calendar.MONTH, selectedMonth - 1)
+                }.getActualMaximum(Calendar.DAY_OF_MONTH)
+
+                val dayOptions = (1..daysInMonth).toList()
+
+                // Seçilebilir günleri belirle
+                val isSelectableDay = dayOptions.map { dayNumber ->
+                    when {
+                        selectedYear > currentYear -> true // Gelecek yıllarda tüm günler seçilebilir
+                        selectedYear == currentYear && selectedMonth > currentMonth -> true // Gelecek aylarda tüm günler seçilebilir
+                        selectedYear == currentYear && selectedMonth == currentMonth -> dayNumber >= currentDay // Mevcut ayda bugün ve sonrası
+                        else -> false // Geçmiş tarihler seçilemez
+                    }
+                }
+
+                AlertDialog(
+                    onDismissRequest = { showDayDialog = false },
+                    title = {
+                        Text(
+                            text = UiText.stringResource(R.string.select_day).asString(),
+                            style = MaterialTheme.typography.titleLarge,
+                            color = NavyBlue,
+                            fontWeight = FontWeight.Bold
+                        )
+                    },
+                    containerColor = White,
+                    text = {
+                        LazyColumn(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .heightIn(max = 300.dp)
+                        ) {
+                            items(dayOptions.size) { index ->
+                                val dayNumber = dayOptions[index]
+                                val isSelectable = isSelectableDay[index]
+                                val isSelected = dayNumber == selectedDay
+
+                                Column {
+                                    Row(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .clickable(enabled = isSelectable) {
+                                                if (isSelectable) {
+                                                    onDaySelected(dayNumber)
+                                                    showDayDialog = false
+                                                }
+                                            }
+                                            .padding(16.dp),
+                                        horizontalArrangement = Arrangement.SpaceBetween,
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        Text(
+                                            text = dayNumber.toString().convertNumerals(),
+                                            color = when {
+                                                isSelected -> Gold
+                                                !isSelectable -> Color.Gray.copy(alpha = 0.5f)
+                                                else -> Color.DarkGray
+                                            },
+                                            fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
+                                            style = TextStyle(fontSize = MaterialTheme.typography.titleLarge.fontSize)
+                                        )
+
+                                        if (isSelected) {
+                                            Icon(
+                                                imageVector = Icons.Default.Check,
+                                                contentDescription = null,
+                                                tint = Gold
+                                            )
+                                        }
+                                    }
+
+                                    if (index < dayOptions.size - 1) {
+                                        HorizontalDivider(
+                                            color = Color.Gray.copy(alpha = 0.2f),
+                                            thickness = 1.dp
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    confirmButton = {
+                        TextButton(
+                            onClick = { showDayDialog = false },
+                            colors = ButtonDefaults.textButtonColors(
+                                contentColor = Gold
+                            )
+                        ) {
+                            Text(UiText.stringResource(R.string.close).asString())
+                        }
+                    }
+                )
+            }
+        }
+
         // Month selector
         Surface(
             modifier = Modifier
@@ -549,7 +685,6 @@ fun ModernDateSelector(
 
     // Month selection dialog
     if (showMonthDialog) {
-        // DÜZELTME: Tüm ayları göster, geçmiş ayları sadece disable et
         val allMonths = (1..12).toList()
 
         // Ay isimlerini oluştur - her ay için ayrı calendar
@@ -561,12 +696,12 @@ fun ModernDateSelector(
             monthFormat.format(tempCalendar.time)
         }
 
-        // Seçilebilir ayları belirle (sadece disable/enable için)
+        // Seçilebilir ayları belirle
         val isMonthSelectable = allMonths.map { monthNumber ->
-            if (selectedYear == currentYear) {
-                monthNumber >= currentMonth // Sadece mevcut ay ve sonrası seçilebilir
-            } else {
-                true // Gelecek yıllarda tüm aylar seçilebilir
+            when {
+                selectedYear > currentYear -> true // Gelecek yıllarda tüm aylar seçilebilir
+                selectedYear == currentYear -> monthNumber >= currentMonth // Mevcut yılda sadece mevcut ay ve sonrası
+                else -> false // Geçmiş yıllarda hiçbir ay seçilemez
             }
         }
 
@@ -600,6 +735,12 @@ fun ModernDateSelector(
                                     .clickable(enabled = isSelectable) {
                                         if (isSelectable) {
                                             onMonthSelected(monthNumber)
+
+                                            // Eğer mevcut ay seçildiyse ve seçili gün geçmişte kalıyorsa, bugünü seç
+                                            if (selectedYear == currentYear && monthNumber == currentMonth && selectedDay < currentDay) {
+                                                onDaySelected(currentDay)
+                                            }
+
                                             showMonthDialog = false
                                         }
                                     }
@@ -654,21 +795,35 @@ fun ModernDateSelector(
     if (showYearDialog) {
         val yearOptions = (currentYear..currentYear + 9).toList()
 
-        val formattedYearOptions = yearOptions.map { year ->
-            year.toString() // Basit string dönüşümü
-        }
-
         DateSelectorDialog(
             title = UiText.stringResource(R.string.select_year).asString(),
-            options = formattedYearOptions,
+            options = yearOptions.map { it.toString() },
             selectedIndex = yearOptions.indexOf(selectedYear),
             onOptionSelected = { index ->
                 val newYear = yearOptions[index]
                 onYearSelected(newYear)
 
-                // Eğer yıl mevcut yıla değişirse ve seçili ay geçmişse, mevcut aya güncelle
-                if (newYear == currentYear && selectedMonth < currentMonth) {
-                    onMonthSelected(currentMonth)
+                // Yıl değişikliklerinde tarih kontrolü
+                when {
+                    // Geçmiş yıl seçildiyse (normalde olmaması gerekir)
+                    newYear < currentYear -> {
+                        onMonthSelected(12) // Aralık ayını seç
+                        onDaySelected(31) // Yılın son günü
+                    }
+                    // Mevcut yıl seçildiyse
+                    newYear == currentYear -> {
+                        if (selectedMonth < currentMonth) {
+                            onMonthSelected(currentMonth)
+                            onDaySelected(currentDay)
+                        } else if (selectedMonth == currentMonth && selectedDay < currentDay) {
+                            onDaySelected(currentDay)
+                        }
+                    }
+                    // Gelecek yıl seçildiyse, ocak ayının ilk günü
+                    else -> {
+                        onMonthSelected(1)
+                        onDaySelected(1)
+                    }
                 }
 
                 showYearDialog = false
@@ -678,15 +833,16 @@ fun ModernDateSelector(
     }
 }
 
+// ✅ YENİ: Güncellenmiş DateSelectorDialog (selectableFlags parametresi eklendi)
 @Composable
 fun DateSelectorDialog(
     title: String,
     options: List<String>,
     selectedIndex: Int,
+    selectableFlags: List<Boolean> = List(options.size) { true },
     onOptionSelected: (Int) -> Unit,
     onDismiss: () -> Unit
 ) {
-
     AlertDialog(
         onDismissRequest = onDismiss,
         title = {
@@ -705,23 +861,32 @@ fun DateSelectorDialog(
                     .heightIn(max = 300.dp)
             ) {
                 items(options.size) { index ->
+                    val isSelectable = selectableFlags[index]
+                    val isSelected = index == selectedIndex
+
                     Column {
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .clickable { onOptionSelected(index) }
+                                .clickable(enabled = isSelectable) {
+                                    if (isSelectable) onOptionSelected(index)
+                                }
                                 .padding(16.dp),
                             horizontalArrangement = Arrangement.SpaceBetween,
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Text(
                                 text = options[index],
-                                color = if (index == selectedIndex) Gold else Color.DarkGray,
-                                fontWeight = if (index == selectedIndex) FontWeight.Bold else FontWeight.Normal,
+                                color = when {
+                                    isSelected -> Gold
+                                    !isSelectable -> Color.Gray.copy(alpha = 0.5f)
+                                    else -> Color.DarkGray
+                                },
+                                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
                                 style = TextStyle(fontSize = MaterialTheme.typography.titleLarge.fontSize)
                             )
 
-                            if (index == selectedIndex) {
+                            if (isSelected) {
                                 Icon(
                                     imageVector = Icons.Default.Check,
                                     contentDescription = null,
@@ -743,9 +908,7 @@ fun DateSelectorDialog(
         confirmButton = {
             TextButton(
                 onClick = onDismiss,
-                colors = ButtonDefaults.textButtonColors(
-                    contentColor = Gold
-                )
+                colors = ButtonDefaults.textButtonColors(contentColor = Gold)
             ) {
                 Text(UiText.stringResource(R.string.close).asString())
             }
@@ -870,7 +1033,6 @@ fun ConfirmationDialog(
     onDismiss: () -> Unit
 ) {
     val locale = LocalConfiguration.current.locales[0]
-    val context = LocalContext.current
     val monthFormat = SimpleDateFormat("MMMM", locale)
     val yearFormat = SimpleDateFormat("yyyy", locale)
     val calendar = Calendar.getInstance()
@@ -924,14 +1086,16 @@ fun ConfirmationDialog(
                     )
 
                     // Başlangıç ayı ve yılı
+                    calendar.set(Calendar.DATE,state.startDay)
                     calendar.set(Calendar.MONTH, state.startMonth - 1)
                     calendar.set(Calendar.YEAR, state.startYear)
+
                     val monthName = monthFormat.format(calendar.time)
                     val yearValue = yearFormat.format(calendar.time)
 
                     ConfirmationItem(
                         label = UiText.stringResource(R.string.starting_date).asString(),
-                        value = "$monthName $yearValue"
+                        value = "${state.startDay}/${state.startMonth}/${state.startYear}"
                     )
                 }
             },

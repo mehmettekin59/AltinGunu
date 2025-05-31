@@ -61,6 +61,7 @@ class ParticipantsViewModel @Inject constructor(
             is ParticipantsEvent.OnSpecificItemSelect -> handleSpecificItemSelect(event.item)
             is ParticipantsEvent.OnMonthlyAmountChange -> handleMonthlyAmountChange(event.amount)
             is ParticipantsEvent.OnDurationChange -> handleDurationChange(event.duration)
+            is ParticipantsEvent.OnStartDaySelect -> handleStartDaySelect(event.day)
             is ParticipantsEvent.OnStartMonthSelect -> handleStartMonthSelect(event.month)
             is ParticipantsEvent.OnStartYearSelect -> handleStartYearSelect(event.year)
             is ParticipantsEvent.OnContinueClick -> handleContinueClick()
@@ -142,6 +143,9 @@ class ParticipantsViewModel @Inject constructor(
             _state.update { it.copy(durationMonths = duration) }
         }
     }
+    private fun handleStartDaySelect(day: Int) {
+        _state.update { it.copy(startDay = day) }
+    }
 
     private fun handleStartMonthSelect(month: Int) {
         _state.update { it.copy(startMonth = month) }
@@ -179,6 +183,7 @@ class ParticipantsViewModel @Inject constructor(
                 specificItem = _state.value.selectedSpecificItem,
                 monthlyAmount = monthlyAmount,
                 durationMonths = durationMonths,
+                startDay = _state.value.startDay,
                 startMonth = _state.value.startMonth,
                 startYear = _state.value.startYear
             )
@@ -217,6 +222,7 @@ class ParticipantsViewModel @Inject constructor(
                 specificItem = _state.value.selectedSpecificItem,
                 monthlyAmount = monthlyAmount,
                 durationMonths = durationMonths,
+                startDay = _state.value.startDay,
                 startMonth = _state.value.startMonth,
                 startYear = _state.value.startYear
             )

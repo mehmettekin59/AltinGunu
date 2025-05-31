@@ -23,6 +23,7 @@ import retrofit2.converter.moshi.MoshiConverterFactory
 import javax.inject.Singleton
 import androidx.lifecycle.ProcessLifecycleOwner
 import androidx.lifecycle.lifecycleScope
+import com.mehmettekin.altingunu.notification.GoldDayNotificationManager
 
 
 @Module
@@ -71,6 +72,14 @@ abstract class ApplicationModule {
         @Singleton
         fun provideApplication(@ApplicationContext context: Context): AltinGunuApplication {
             return context.applicationContext as AltinGunuApplication
+        }
+
+        @Provides
+        @Singleton
+        fun provideGoldDayNotificationManager(
+            @ApplicationContext context: Context
+        ): GoldDayNotificationManager {
+            return GoldDayNotificationManager(context)
         }
 
     }

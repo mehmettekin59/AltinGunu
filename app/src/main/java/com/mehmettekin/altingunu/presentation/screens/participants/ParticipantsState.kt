@@ -11,6 +11,7 @@ data class ParticipantsState(
     val selectedSpecificItem: String = "",
     val monthlyAmount: String = "",
     val durationMonths: String = "",
+    val startDay: Int = Calendar.getInstance().get(Calendar.DAY_OF_MONTH),
     val startMonth: Int = 1,
     val startYear: Int = Calendar.getInstance().get(Calendar.YEAR),
     val participants: List<Participant> = emptyList(),

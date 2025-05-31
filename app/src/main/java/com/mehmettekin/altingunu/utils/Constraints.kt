@@ -50,11 +50,15 @@ object Constraints {
         const val API_UPDATE_INTERVAL = "api_update_interval"
         const val LANGUAGE_CODE = "language_code"
         const val IS_FIRST_LAUNCH = "is_first_launch"
+        const val IS_REMINDER_ENABLED = "is_reminder_enabled"
+        const val REMINDER_DAYS_BEFORE = "reminder_days_before"
     }
 
     object DefaultSettings {
         const val DEFAULT_API_UPDATE_INTERVAL = 30 // saniye
         const val DEFAULT_LANGUAGE = "tr"
+        const val DEFAULT_REMINDER_ENABLED = true
+        const val DEFAULT_REMINDER_DAYS_BEFORE = 1
     }
 
     val SUPPORTED_LANGUAGES = setOf("tr", "en", "ar")

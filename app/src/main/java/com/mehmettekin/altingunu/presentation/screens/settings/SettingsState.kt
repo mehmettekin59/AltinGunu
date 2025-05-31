@@ -5,6 +5,8 @@ import com.mehmettekin.altingunu.utils.UiText
 data class SettingsState(
     val selectedLanguage: String = "tr",
     val apiUpdateInterval: Int = 120,
+    val isReminderEnabled: Boolean = true,
+    val reminderDaysBefore: Int = 1,
     val isLoading: Boolean = false,
     val error: UiText? = null,
     val needsRestart: Boolean = false,

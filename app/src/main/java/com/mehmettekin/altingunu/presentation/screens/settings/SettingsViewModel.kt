@@ -142,6 +142,31 @@ class SettingsViewModel @Inject constructor(
             is SettingsEvent.OnErrorDismiss -> {
                 _state.value = _state.value.copy(error = null)
             }
+
+            is SettingsEvent.OnReminderToggle -> {
+                viewModelScope.launch {
+                    settingsDataStore.setReminderEnabled(event.enabled)
+                    _state.update { it.copy(isReminderEnabled = event.enabled) }
+                }
+            }
+
+            is SettingsEvent.OnReminderDaysChange -> {
+                viewModelScope.launch {
+                    settingsDataStore.setReminderDaysBefore(event.days)
+                    _state.update { it.copy(reminderDaysBefore = event.days) }
+                }
+            }
+
+            is SettingsEvent.OnTestNotification -> {
+                viewModelScope.launch {
+                    notificationManager.showTestNotification(
+                        winnerName = "Test Kullanıcı",
+                        amount = "1.000 TL",
+                        paymentDate = "01/01/2025"
+                    )
+                }
+            }
+
         }
     }
 

@@ -30,7 +30,7 @@ import com.mehmettekin.altingunu.ui.theme.NavyBlue
 import com.mehmettekin.altingunu.ui.theme.White
 import com.mehmettekin.altingunu.utils.UiText
 import com.mehmettekin.altingunu.R
-
+import com.mehmettekin.altingunu.notification.NotificationSettingsCard
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -115,6 +115,13 @@ fun SettingsScreen(
             LanguageSettingsCard(
                 selectedLanguage = state.selectedLanguage,
                 onLanguageChange = { viewModel.onEvent(SettingsEvent.OnLanguageChange(it)) }
+            )
+            NotificationSettingsCard(
+                isReminderEnabled = state.isReminderEnabled,
+                reminderDaysBefore = state.reminderDaysBefore,
+                onReminderToggle = { viewModel.onEvent(SettingsEvent.OnReminderToggle(it)) },
+                onReminderDaysChange = { viewModel.onEvent(SettingsEvent.OnReminderDaysChange(it)) },
+                onTestNotification = { viewModel.onEvent(SettingsEvent.OnTestNotification) }
             )
 
             // API Update Interval Settings

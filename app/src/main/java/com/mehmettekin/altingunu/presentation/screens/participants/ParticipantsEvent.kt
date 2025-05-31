@@ -11,6 +11,7 @@ sealed class ParticipantsEvent {
     data class OnDurationChange(val duration: String) : ParticipantsEvent()
     data class OnStartMonthSelect(val month: Int) : ParticipantsEvent()
     data class OnStartYearSelect(val year: Int) : ParticipantsEvent()
+    data class OnStartDaySelect(val day: Int) : ParticipantsEvent()
     data class OnAddParticipant(val name: String) : ParticipantsEvent()
     data class OnRemoveParticipant(val participant: Participant) : ParticipantsEvent()
     data object OnContinueClick : ParticipantsEvent()

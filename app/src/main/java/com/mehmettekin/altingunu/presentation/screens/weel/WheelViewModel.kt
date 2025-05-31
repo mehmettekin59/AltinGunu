@@ -1,11 +1,14 @@
 package com.mehmettekin.altingunu.presentation.screens.weel
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.mehmettekin.altingunu.data.local.SettingsDataStore
 import com.mehmettekin.altingunu.domain.model.DrawResult
 import com.mehmettekin.altingunu.domain.model.Participant
 import com.mehmettekin.altingunu.domain.model.ParticipantsScreenWholeInformation
 import com.mehmettekin.altingunu.domain.repository.DrawRepository
+import com.mehmettekin.altingunu.notification.GoldDayNotificationManager
 import com.mehmettekin.altingunu.utils.ResultState
 import com.mehmettekin.altingunu.utils.ValueFormatter
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -20,21 +23,17 @@ import javax.inject.Inject
 
 @HiltViewModel
 class WheelViewModel @Inject constructor(
-    private val drawRepository: DrawRepository
+    private val drawRepository: DrawRepository,
+    private val notificationManager: GoldDayNotificationManager,
+    private val settingsDataStore: SettingsDataStore
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(WheelState())
     val state = _state.asStateFlow()
 
-    // ✅ Backward compatibility için convenience getters - Updated
+
     val participants: List<Participant> get() = _state.value.remainingParticipants // participants = remaining
-    val allParticipants: List<Participant> get() = _state.value.allParticipants
-    val remainingParticipants: List<Participant> get() = _state.value.remainingParticipants
-    val winners: List<String> get() = _state.value.winners
-    val winnerParticipants: List<Participant> get() = _state.value.winnerParticipants
-    val rotation: Float get() = _state.value.rotation
-    val isSpinning: Boolean get() = _state.value.isSpinning
-    val winner: String? get() = _state.value.currentWinner
+
 
     init {
         loadParticipants()
@@ -189,6 +188,7 @@ class WheelViewModel @Inject constructor(
                     _state.update { currentState ->
                         currentState.copy(resultsSaved = true)
                     }
+                    scheduleNotifications(currentDrawSettings, results)
                 }
                 is ResultState.Error -> {
                     _state.update { currentState ->
@@ -199,6 +199,30 @@ class WheelViewModel @Inject constructor(
                     // No action needed
                 }
             }
+        }
+    }
+
+    private suspend fun scheduleNotifications(
+        settings: ParticipantsScreenWholeInformation,
+        results: List<DrawResult>
+    ) {
+        try {
+            // Settings'ten reminder durumunu kontrol et
+            val isReminderEnabled = settingsDataStore.isReminderEnabled()
+
+            if (isReminderEnabled) {
+                val reminderDaysBefore = settingsDataStore.getReminderDaysBefore()
+
+                notificationManager.scheduleReminders(
+                    drawSettings = settings,
+                    results = results,
+                    reminderDaysBefore = reminderDaysBefore
+                )
+
+                Log.d("WheelViewModel", "Notifications scheduled for ${results.size} payments")
+            }
+        } catch (e: Exception) {
+            Log.e("WheelViewModel", "Failed to schedule notifications", e)
         }
     }
 
@@ -222,7 +246,7 @@ class WheelViewModel @Inject constructor(
         calendar.set(Calendar.YEAR, settings.startYear)
         calendar.set(Calendar.MONTH, settings.startMonth - 1) // 0-based month
 
-        val dateFormat = SimpleDateFormat("MMMM yyyy", Locale.getDefault())
+        val dateFormat = SimpleDateFormat("dd MMMM yyyy", Locale.getDefault())
 
         // Katılımcı sayısının ay sayısına bölümünden her aya kaç kişi düştüğünü hesaplıyoruz
         val peoplePerMonth = settings.participantCount / settings.durationMonths
@@ -231,19 +255,17 @@ class WheelViewModel @Inject constructor(
         winners.forEachIndexed { index, participant ->
             // Katılımcının hangi aya düştüğünü hesaplıyoruz
             val monthIndex = index / peoplePerMonth
+            val (day, month, year) = settings.getNextPaymentDate(monthIndex)
 
-            // Ayı ayarlıyoruz
-            calendar.set(Calendar.YEAR, settings.startYear)
-            calendar.set(Calendar.MONTH, settings.startMonth - 1)
-            calendar.add(Calendar.MONTH, monthIndex)
-
-            val monthName = dateFormat.format(calendar.time)
+            val calendar = Calendar.getInstance()
+            calendar.set(year, month - 1, day)
+            val dateString = dateFormat.format(calendar.time)
 
             results.add(
                 DrawResult(
                     participantId = participant.id,
                     participantName = participant.name,
-                    month = monthName,
+                    month = dateString,
                     amount = formattedAmount
                 )
             )
