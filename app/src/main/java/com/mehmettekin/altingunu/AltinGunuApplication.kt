@@ -2,22 +2,12 @@ package com.mehmettekin.altingunu
 
 import android.app.Application
 import android.content.Context
-import android.os.Build
-import android.util.Log
-import com.mehmettekin.altingunu.data.local.SettingsDataStore
 import com.mehmettekin.altingunu.utils.Constraints
 import com.mehmettekin.altingunu.utils.LocaleHelper
+import com.mehmettekin.altingunu.utils.NumeralHelper
+import com.mehmettekin.altingunu.utils.RTLHelper
 import dagger.hilt.android.HiltAndroidApp
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.cancel
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
-import java.util.Locale
-import javax.inject.Inject
+
 
 
 @HiltAndroidApp
@@ -27,15 +17,42 @@ class AltinGunuApplication: Application() {
         private set
 
     override fun attachBaseContext(base: Context) {
-        // Sync olarak SharedPreferences'dan yükle
+        // Sync olarak dil ayarını yükle
         currentLanguage = loadLanguageSync(base)
         super.attachBaseContext(LocaleHelper.updateLocale(base, currentLanguage))
     }
 
     private fun loadLanguageSync(context: Context): String {
         val prefs = context.getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
-        return prefs.getString("language_code",
-            detectUserLanguage(context)) ?: Constraints.DefaultSettings.DEFAULT_LANGUAGE
+        return prefs.getString("language_code", detectUserLanguage())
+            ?: Constraints.DefaultSettings.DEFAULT_LANGUAGE
+    }
+
+    private fun detectUserLanguage(): String {
+        val deviceLanguage = java.util.Locale.getDefault().language
+        return when {
+            deviceLanguage in Constraints.SUPPORTED_LANGUAGES -> deviceLanguage
+            "en" in Constraints.SUPPORTED_LANGUAGES -> "en"
+            else -> Constraints.DefaultSettings.DEFAULT_LANGUAGE
+        }
+    }
+
+    fun setCurrentLanguage(languageCode: String) {
+        currentLanguage = languageCode
+
+        // NumeralHelper'a da dili bildir
+        NumeralHelper.setLanguage(languageCode)
+
+        // RTLHelper'a da dili bildir
+        RTLHelper.setLanguage(languageCode)
+
+        // SharedPreferences'a da kaydet
+        val prefs = getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
+        prefs.edit().putString("language_code", languageCode).apply()
+    }
+
+    fun updateCurrentLanguage(languageCode: String) {
+        setCurrentLanguage(languageCode)
     }
 }
 

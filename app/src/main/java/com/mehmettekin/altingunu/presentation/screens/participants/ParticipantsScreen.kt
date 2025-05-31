@@ -84,6 +84,7 @@ import com.mehmettekin.altingunu.ui.theme.Gold
 import com.mehmettekin.altingunu.ui.theme.NavyBlue
 import com.mehmettekin.altingunu.ui.theme.White
 import com.mehmettekin.altingunu.utils.Constraints
+import com.mehmettekin.altingunu.utils.NumeralTextField
 import com.mehmettekin.altingunu.utils.UiText
 import com.mehmettekin.altingunu.utils.convertNumerals
 import kotlinx.coroutines.flow.collectLatest
@@ -178,7 +179,7 @@ fun ParticipantsContent(
         }
 
         // Monthly amount
-        ModernTextField(
+        NumeralTextField(
             value = state.monthlyAmount,
             onValueChange = { onEvent(ParticipantsEvent.OnMonthlyAmountChange(it)) },
             label = when (state.selectedItemType) {
@@ -192,13 +193,15 @@ fun ParticipantsContent(
                     contentDescription = null,
                     tint = if (isSystemInDarkTheme()) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.secondary
                 )
-            }
+            },
+            modifier = Modifier.fillMaxWidth()
         )
+
 
         Spacer(modifier = Modifier.height(6.dp))
 
         // Duration in months
-        ModernTextField(
+        NumeralTextField(
             value = state.durationMonths,
             onValueChange = { onEvent(ParticipantsEvent.OnDurationChange(it)) },
             label = stringResource(R.string.how_many_months_will_it_last),
@@ -209,7 +212,8 @@ fun ParticipantsContent(
                     contentDescription = null,
                     tint = if (isSystemInDarkTheme()) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.secondary
                 )
-            }
+            },
+            modifier = Modifier.fillMaxWidth()
         )
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -267,31 +271,7 @@ fun ParticipantsContent(
     }
 }
 
-@Composable
-fun ModernTextField(
-    value: String,
-    onValueChange: (String) -> Unit,
-    label: String,
-    keyboardType: KeyboardType = KeyboardType.Text,
-    leadingIcon: @Composable (() -> Unit)? = null,
-) {
-    OutlinedTextField(
-        value = value,
-        onValueChange = onValueChange,
-        label = { Text(text = label, color = if (isSystemInDarkTheme()) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onTertiary) },
-        modifier = Modifier.fillMaxWidth(),
-        keyboardOptions = KeyboardOptions(keyboardType = keyboardType),
-        leadingIcon = leadingIcon,
-        colors = OutlinedTextFieldDefaults.colors(
-            focusedBorderColor = if (isSystemInDarkTheme()) MaterialTheme.colorScheme.primary.copy(alpha = 0.5f) else MaterialTheme.colorScheme.secondary.copy(alpha = 0.5f),
-            focusedLabelColor = if (isSystemInDarkTheme()) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.secondary,
-            cursorColor = if (isSystemInDarkTheme()) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.secondary,
-            unfocusedBorderColor = if (isSystemInDarkTheme()) MaterialTheme.colorScheme.primary.copy(alpha = 0.5f) else MaterialTheme.colorScheme.secondary.copy(alpha = 0.5f),
-        ),
-        textStyle = TextStyle(fontWeight = FontWeight.Bold, fontSize = 16.sp),
-        shape = RoundedCornerShape(8.dp)
-    )
-}
+
 
 
 @Composable
@@ -855,12 +835,12 @@ fun ConfirmationDialog(
 
                     ConfirmationItem(
                         label = UiText.stringResource(R.string.monthly_amount).asString(),
-                        value = state.monthlyAmount.convertNumerals(context)
+                        value = state.monthlyAmount.convertNumerals()
                     )
 
                     ConfirmationItem(
                         label = UiText.stringResource(R.string.duration).asString(),
-                        value = UiText.stringResource(R.string.duration_months,state.durationMonths.convertNumerals(context)).asString()
+                        value = UiText.stringResource(R.string.duration_months,state.durationMonths.convertNumerals()).asString()
                     )
 
                     // Başlangıç ayı ve yılı

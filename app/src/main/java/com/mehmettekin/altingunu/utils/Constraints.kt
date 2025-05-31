@@ -57,13 +57,6 @@ object Constraints {
         const val DEFAULT_LANGUAGE = "tr"
     }
 
-    // Arap ülkeleri
-    val ARABIC_COUNTRIES = setOf("sa", "ae", "bh", "kw", "om", "qa", "ye", "jo", "lb", "sy", "iq", "eg", "ly", "dz", "ma", "tn", "sd")
-
-    // İngilizce konuşulan ülkeler
-    val ENGLISH_COUNTRIES = setOf("us", "gb", "ca", "au", "nz", "ie", "za")
-
-    // Desteklenen diller
     val SUPPORTED_LANGUAGES = setOf("tr", "en", "ar")
 
 }

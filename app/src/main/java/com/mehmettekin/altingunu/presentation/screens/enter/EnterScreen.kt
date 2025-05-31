@@ -479,7 +479,7 @@ private fun AnimatedRateCard(
 
             // Last updated timestamp (if available)
             rate.tarih.let { tarih ->
-                val localizedDate = tarih.convertNumerals(context)
+                val localizedDate = tarih.convertNumerals()
                 Text(
                     text = UiText.stringResource(R.string.last_update).asString(),
                     style = MaterialTheme.typography.bodyMedium,

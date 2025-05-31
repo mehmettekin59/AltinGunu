@@ -1,6 +1,5 @@
 package com.mehmettekin.altingunu.utils
 
-import android.content.Context
 import com.mehmettekin.altingunu.domain.model.ItemType
 import java.text.DecimalFormat
 import java.text.DecimalFormatSymbols
@@ -10,37 +9,22 @@ import java.util.Locale
 
 object ValueFormatter {
 
-    fun format(value: String?, itemType: ItemType, locale: Locale = Locale.getDefault(), specificItem: String = ""): String {
-        // Handle null or empty values
+    fun format(value: String?, itemType: ItemType): String {
+        // Null veya boş değerler için varsayılan döndür
         if (value.isNullOrBlank()) {
-            return defaultValueFor(itemType, locale)
+            return defaultValueFor(itemType)
         }
 
-        val result = tryFormatValue(value, itemType, locale)
-
-        return when (result) {
-            is ResultState.Success -> result.data
-            is ResultState.Error -> {
-                // İsteğe bağlı olarak hatayı loglamak için
-                // Log.e("ValueFormatter", "Value formatting error: ${result.message.asString()}")
-                defaultValueFor(itemType, locale)
-            }
-            else -> defaultValueFor(itemType, locale) // Loading ve Idle durumları için varsayılan değer
-        }
-    }
-
-    private fun tryFormatValue(value: String?, itemType: ItemType,context: Context, locale: Locale): ResultState<String> {
         return try {
-            // Parse the value to double to clean up extra zeros
-            val parsedValue = value?.toDoubleOrNull() ?: 0.0
+            // Değeri önce normalize et (Latin rakamlar)
+            val normalizedValue = NumeralHelper.normalizeInput(value)
 
-            // Use DecimalFormat for precise control
+            // Double'a çevir ve formatla
+            val parsedValue = normalizedValue.toDoubleOrNull() ?: 0.0
+
+            // DecimalFormat ile formatla
             val formatter = DecimalFormat().apply {
-                // Use Western digits by forcing US locale for symbols, but keep decimal/grouping separators
-                val symbols = DecimalFormatSymbols(Locale.US).apply {
-                    decimalSeparator = DecimalFormatSymbols(locale).decimalSeparator
-                    groupingSeparator = DecimalFormatSymbols(locale).groupingSeparator
-                }
+                val symbols = DecimalFormatSymbols(Locale.getDefault())
                 decimalFormatSymbols = symbols
 
                 when (itemType) {
@@ -57,30 +41,26 @@ object ValueFormatter {
                 }
             }
 
-            val formatted = formatter.format(parsedValue).convertNumerals(context)
-            ResultState.Success(formatted)
+            val formatted = formatter.format(parsedValue)
+
+            // Uygun sayı sistemine çevir
+            formatted.convertNumerals()
 
         } catch (e: Exception) {
-            ResultState.Error(UiText.dynamicString(e.message ?: "Formatlama hatası"))
+            defaultValueFor(itemType)
         }
     }
 
     fun formatWithSymbol(value: String?, itemType: ItemType, specificItem: String = ""): String {
-        return format(value, itemType, Locale.getDefault(), specificItem)
+        val formattedValue = format(value, itemType)
+        return formattedValue // TL sembolü zaten currency_value string'inde var
     }
 
-    // Varsayılan değerler için yardımcı fonksiyon
-    private fun defaultValueFor(itemType: ItemType, locale: Locale): String {
-        return if (itemType == ItemType.GOLD) {
-            "0"
-        } else {
-            "0${decimalSeparator(locale)}00"
+    private fun defaultValueFor(itemType: ItemType): String {
+        return when (itemType) {
+            ItemType.GOLD -> "0"
+            else -> "0,00"
         }
-    }
-
-    // Ondalık ayırıcıyı alma yardımcı fonksiyonu
-    private fun decimalSeparator(locale: Locale): String {
-        return DecimalFormatSymbols(locale).decimalSeparator.toString()
     }
 }
 
