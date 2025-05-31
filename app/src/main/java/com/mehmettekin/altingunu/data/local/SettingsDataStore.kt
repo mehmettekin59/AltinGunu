@@ -20,6 +20,10 @@ class SettingsDataStore @Inject constructor(
     private val isFirstLaunchKey = booleanPreferencesKey(Constraints.DataStoreKeys.IS_FIRST_LAUNCH)
     private val apiUpdateIntervalKey = intPreferencesKey(Constraints.DataStoreKeys.API_UPDATE_INTERVAL)
 
+    // ✅ Eksik olan notification keys
+    private val isReminderEnabledKey = booleanPreferencesKey(Constraints.DataStoreKeys.IS_REMINDER_ENABLED)
+    private val reminderDaysBeforeKey = intPreferencesKey(Constraints.DataStoreKeys.REMINDER_DAYS_BEFORE)
+
     suspend fun getLanguageCode(): String {
         return dataStore.data.map { preferences ->
             preferences[languageKey] ?: Constraints.DefaultSettings.DEFAULT_LANGUAGE
@@ -62,5 +66,43 @@ class SettingsDataStore @Inject constructor(
     // Add this alias method to match what's being called in SettingsViewModel
     suspend fun setApiUpdateInterval(intervalSeconds: Int) {
         saveApiUpdateInterval(intervalSeconds)
+    }
+
+    // ✅ Eksik olan notification metodları
+    suspend fun isReminderEnabled(): Boolean {
+        return dataStore.data.map { preferences ->
+            preferences[isReminderEnabledKey] ?: Constraints.DefaultSettings.DEFAULT_REMINDER_ENABLED
+        }.first()
+    }
+
+    suspend fun setReminderEnabled(enabled: Boolean) {
+        dataStore.edit { preferences ->
+            preferences[isReminderEnabledKey] = enabled
+        }
+    }
+
+    suspend fun getReminderDaysBefore(): Int {
+        return dataStore.data.map { preferences ->
+            preferences[reminderDaysBeforeKey] ?: Constraints.DefaultSettings.DEFAULT_REMINDER_DAYS_BEFORE
+        }.first()
+    }
+
+    suspend fun setReminderDaysBefore(days: Int) {
+        dataStore.edit { preferences ->
+            preferences[reminderDaysBeforeKey] = days
+        }
+    }
+
+    // ✅ Flow versiyonları da eklenebilir (opsiyonel)
+    fun getReminderEnabledFlow(): Flow<Boolean> {
+        return dataStore.data.map { preferences ->
+            preferences[isReminderEnabledKey] ?: Constraints.DefaultSettings.DEFAULT_REMINDER_ENABLED
+        }
+    }
+
+    fun getReminderDaysBeforeFlow(): Flow<Int> {
+        return dataStore.data.map { preferences ->
+            preferences[reminderDaysBeforeKey] ?: Constraints.DefaultSettings.DEFAULT_REMINDER_DAYS_BEFORE
+        }
     }
 }
