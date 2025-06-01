@@ -1,8 +1,11 @@
 package com.mehmettekin.altingunu.presentation.screens.settings
 
+import android.Manifest
+import android.content.pm.PackageManager
 import android.content.res.Configuration
 import android.os.Build
 import android.os.LocaleList
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.mehmettekin.altingunu.AltinGunuApplication
@@ -214,17 +217,37 @@ class SettingsViewModel @Inject constructor(
 
             is SettingsEvent.OnTestNotification -> {
                 viewModelScope.launch {
-                    notificationManager.showTestNotification(
-                        winnerName = "Test Kullanıcı",
-                        amount = "1.000 TL",
-                        paymentDate = "01/01/2025"
-                    )
+                    if (checkNotificationPermission()) {
+                        // Hemen test notification göster
+                        notificationManager.showTestNotification(
+                            winnerName = "Test Kullanıcı",
+                            amount = "1.000 TL",
+                            paymentDate = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(Date())
+                        )
+
+                        // 10 saniye sonra da WorkManager ile test et
+                        notificationManager.scheduleTestReminder(10)
+                    } else {
+                        _state.value = _state.value.copy(
+                            error = UiText.stringResource(R.string.notification_permission_required)
+                        )
+                    }
                 }
             }
 
         }
     }
 
+    private fun checkNotificationPermission(): Boolean {
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            ContextCompat.checkSelfPermission(
+                application,
+                Manifest.permission.POST_NOTIFICATIONS
+            ) == PackageManager.PERMISSION_GRANTED
+        } else {
+            true // Android 13 öncesinde izin gerekmiyor
+        }
+    }
     private fun updateApplicationLocale(languageCode: String) {
         // This will force the application to apply the language change at the system level
         val locale = Locale(languageCode)

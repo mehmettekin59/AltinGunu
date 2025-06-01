@@ -26,27 +26,7 @@ class GoldDayNotificationManager @Inject constructor(
     companion object {
         private const val CHANNEL_ID = "gold_day_reminders"
         private const val NOTIFICATION_ID = 1001
-        private const val WORK_NAME = "gold_day_reminder_work"
-    }
-
-    init {
-        createNotificationChannel()
-    }
-
-    private fun createNotificationChannel() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val channel = NotificationChannel(
-                CHANNEL_ID,
-                context.getString(R.string.gold_day_reminders),
-                NotificationManager.IMPORTANCE_DEFAULT
-            ).apply {
-                description = context.getString(R.string.gold_day_reminder_description)
-                setShowBadge(true)
-            }
-
-            val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-            notificationManager.createNotificationChannel(channel)
-        }
+        private const val WORK_TAG_PREFIX = "gold_day_reminder"
     }
 
     fun scheduleReminders(
@@ -57,7 +37,6 @@ class GoldDayNotificationManager @Inject constructor(
         // Önceki reminder'ları iptal et
         cancelAllReminders()
 
-        // Her ödeme tarihi için reminder schedule et
         results.forEachIndexed { index, result ->
             val (day, month, year) = drawSettings.getNextPaymentDate(index)
             scheduleReminderForDate(
@@ -82,15 +61,14 @@ class GoldDayNotificationManager @Inject constructor(
         resultIndex: Int
     ) {
         val paymentDate = Calendar.getInstance().apply {
-            set(year, month - 1, day, 9, 0, 0) // Sabah 9'da hatırlat
+            set(year, month - 1, day, 9, 0, 0)
             set(Calendar.MILLISECOND, 0)
         }
 
-        // Hatırlatma tarihini hesapla
         val reminderDate = paymentDate.clone() as Calendar
         reminderDate.add(Calendar.DAY_OF_MONTH, -reminderDaysBefore)
 
-        // Eğer hatırlatma tarihi geçmişse skip et
+        // Geçmiş tarihler için skip
         if (reminderDate.timeInMillis <= System.currentTimeMillis()) {
             return
         }
@@ -106,60 +84,37 @@ class GoldDayNotificationManager @Inject constructor(
             "reminder_days_before" to reminderDaysBefore
         )
 
-        val reminderWork = OneTimeWorkRequestBuilder<GoldDayReminderWorker>()
+        val workRequest = OneTimeWorkRequestBuilder<GoldDayReminderWorker>()
             .setInitialDelay(delay, TimeUnit.MILLISECONDS)
             .setInputData(inputData)
-            .addTag("reminder_$resultIndex")
+            .addTag("$WORK_TAG_PREFIX$resultIndex") // Tutarlı etiketleme
             .build()
 
-        WorkManager.getInstance(context).enqueue(reminderWork)
+        WorkManager.getInstance(context).enqueue(workRequest)
     }
 
     fun cancelAllReminders() {
-        WorkManager.getInstance(context).cancelAllWorkByTag(WORK_NAME)
+        // Tüm gold day reminder work'lerini iptal et
+        WorkManager.getInstance(context).cancelAllWorkByTag(WORK_TAG_PREFIX)
     }
 
-    fun showTestNotification(winnerName: String, amount: String, paymentDate: String) {
-        val intent = Intent(context, MainActivity::class.java).apply {
-            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-        }
-
-        val pendingIntent = PendingIntent.getActivity(
-            context,
-            0,
-            intent,
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+    // Test için geliştirme fonksiyonu
+    fun scheduleTestReminder(delaySeconds: Long = 10) {
+        val inputData = workDataOf(
+            "winner_name" to "Test Kullanıcı",
+            "amount" to "1.000 TL",
+            "payment_day" to Calendar.getInstance().get(Calendar.DAY_OF_MONTH),
+            "payment_month" to Calendar.getInstance().get(Calendar.MONTH) + 1,
+            "payment_year" to Calendar.getInstance().get(Calendar.YEAR),
+            "reminder_days_before" to 0
         )
 
-        val notification = NotificationCompat.Builder(context, CHANNEL_ID)
-            .setSmallIcon(R.drawable.gold_bar)
-            .setContentTitle(context.getString(R.string.gold_day_reminder_title))
-            .setContentText(
-                context.getString(
-                    R.string.gold_day_reminder_text,
-                    winnerName,
-                    amount,
-                    paymentDate
-                )
-            )
-            .setStyle(
-                NotificationCompat.BigTextStyle()
-                    .bigText(
-                        context.getString(
-                            R.string.gold_day_reminder_big_text,
-                            winnerName,
-                            amount,
-                            paymentDate
-                        )
-                    )
-            )
-            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
-            .setContentIntent(pendingIntent)
-            .setAutoCancel(true)
-            .setCategory(NotificationCompat.CATEGORY_REMINDER)
+        val testWork = OneTimeWorkRequestBuilder<GoldDayReminderWorker>()
+            .setInitialDelay(delaySeconds, TimeUnit.SECONDS)
+            .setInputData(inputData)
+            .addTag("test_reminder")
             .build()
 
-        val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-        notificationManager.notify(NOTIFICATION_ID, notification)
+        WorkManager.getInstance(context).enqueue(testWork)
     }
 }
