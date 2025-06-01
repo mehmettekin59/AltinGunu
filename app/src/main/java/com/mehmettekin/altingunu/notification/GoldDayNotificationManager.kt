@@ -47,12 +47,30 @@ class GoldDayNotificationManager @Inject constructor(
         }
     }
 
+    /**
+     * Exact alarm izni olup olmadığını kontrol eder
+     */
+    fun hasExactAlarmPermission(): Boolean {
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+            alarmManager.canScheduleExactAlarms()
+        } else {
+            true // Android 12 öncesi sürümlerde bu izin gerekli değil
+        }
+    }
+
     fun scheduleReminders(
         drawSettings: ParticipantsScreenWholeInformation,
         results: List<DrawResult>,
         reminderDaysBefore: Int = 1
     ) {
         try {
+            // Exact alarm izni kontrolü
+            if (!hasExactAlarmPermission()) {
+                android.util.Log.w("NotificationManager", "SCHEDULE_EXACT_ALARM permission not granted")
+                return
+            }
+
             // Önceki alarm'ları iptal et
             cancelAllReminders()
 
@@ -113,8 +131,24 @@ class GoldDayNotificationManager @Inject constructor(
                 PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
             )
 
-            // Alarm'ı ayarla
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            // Alarm'ı ayarla - exact alarm iznini kontrol et
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                if (alarmManager.canScheduleExactAlarms()) {
+                    alarmManager.setExactAndAllowWhileIdle(
+                        AlarmManager.RTC_WAKEUP,
+                        reminderDate.timeInMillis,
+                        pendingIntent
+                    )
+                } else {
+                    // Exact alarm izni yoksa normal alarm kullan
+                    alarmManager.set(
+                        AlarmManager.RTC_WAKEUP,
+                        reminderDate.timeInMillis,
+                        pendingIntent
+                    )
+                    android.util.Log.w("NotificationManager", "Using regular alarm instead of exact alarm")
+                }
+            } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                 alarmManager.setExactAndAllowWhileIdle(
                     AlarmManager.RTC_WAKEUP,
                     reminderDate.timeInMillis,
@@ -199,7 +233,6 @@ class GoldDayNotificationManager @Inject constructor(
     }
 }
 
-// ✅ BroadcastReceiver for AlarmManager
 class NotificationReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
         try {
@@ -213,38 +246,9 @@ class NotificationReceiver : BroadcastReceiver() {
 
             val paymentDate = String.format("%02d/%02d/%d", paymentDay, paymentMonth, paymentYear)
 
-            // Direkt notification oluştur (Hilt kullanmıyoruz çünkü BroadcastReceiver)
-            val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-
-            val mainIntent = Intent(context, MainActivity::class.java).apply {
-                flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-            }
-
-            val pendingIntent = PendingIntent.getActivity(
-                context,
-                0,
-                mainIntent,
-                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-            )
-
-            val notification = NotificationCompat.Builder(context, "gold_day_reminders")
-                .setSmallIcon(R.drawable.gold_bar)
-                .setContentTitle(context.getString(R.string.gold_day_reminder_title))
-                .setContentText(
-                    context.getString(R.string.gold_day_reminder_text, winnerName, amount, paymentDate)
-                )
-                .setStyle(
-                    NotificationCompat.BigTextStyle()
-                        .bigText(
-                            context.getString(R.string.gold_day_reminder_big_text, winnerName, amount, paymentDate)
-                        )
-                )
-                .setPriority(NotificationCompat.PRIORITY_DEFAULT)
-                .setContentIntent(pendingIntent)
-                .setAutoCancel(true)
-                .build()
-
-            notificationManager.notify(1001, notification)
+            // NotificationManager oluştur ve bildirimi göster
+            val notificationManager = GoldDayNotificationManager(context)
+            notificationManager.createAndShowNotification(winnerName, amount, paymentDate)
 
         } catch (e: Exception) {
             android.util.Log.e("NotificationReceiver", "Error showing notification", e)

@@ -1,7 +1,14 @@
 package com.mehmettekin.altingunu.presentation.screens.settings
 
+import android.Manifest
 import android.app.Activity
+import android.app.AlarmManager
+import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
+import android.os.Build
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -20,6 +27,7 @@ import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.core.content.ContextCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
@@ -42,6 +50,17 @@ fun SettingsScreen(
     val state by viewModel.state.collectAsStateWithLifecycle()
     val context = LocalContext.current
     val snackbarHostState = remember { SnackbarHostState() }
+
+    // ✅ YENİ: İzin isteme launcher'ları
+    val requestNotificationPermissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission()
+    ) { isGranted ->
+        if (!isGranted) {
+            snackbarHostState.currentSnackbarData?.dismiss()
+            viewModel.onEvent(SettingsEvent.OnErrorDismiss)
+            viewModel.setError(UiText.stringResource(R.string.notification_permission_denied))
+        }
+    }
 
     // ScrollBehavior için gerekli
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
@@ -116,12 +135,49 @@ fun SettingsScreen(
                 selectedLanguage = state.selectedLanguage,
                 onLanguageChange = { viewModel.onEvent(SettingsEvent.OnLanguageChange(it)) }
             )
+
+            // ✅ Güncellenmiş NotificationSettingsCard
             NotificationSettingsCard(
                 isReminderEnabled = state.isReminderEnabled,
                 reminderDaysBefore = state.reminderDaysBefore,
                 onReminderToggle = { viewModel.onEvent(SettingsEvent.OnReminderToggle(it)) },
                 onReminderDaysChange = { viewModel.onEvent(SettingsEvent.OnReminderDaysChange(it)) },
-                onTestNotification = { viewModel.onEvent(SettingsEvent.OnTestNotification) }
+                onTestNotification = { viewModel.onEvent(SettingsEvent.OnTestNotification) },
+                onRequestPermissions = { // ✅ YENİ callback
+                    // Notification permission check ve istek
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                        val hasNotificationPermission = ContextCompat.checkSelfPermission(
+                            context,
+                            Manifest.permission.POST_NOTIFICATIONS
+                        ) == PackageManager.PERMISSION_GRANTED
+
+                        if (!hasNotificationPermission) {
+                            requestNotificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+                            return@NotificationSettingsCard
+                        }
+                    }
+
+                    // Exact alarm permission check ve settings'e yönlendirme
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                        val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+                        if (!alarmManager.canScheduleExactAlarms()) {
+                            try {
+                                val intent = Intent().apply {
+                                    action = android.provider.Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM
+                                    data = android.net.Uri.parse("package:${context.packageName}")
+                                }
+                                context.startActivity(intent)
+                            } catch (e: Exception) {
+                                // Fallback: genel ayarlar sayfasına yönlendir
+                                val intent = Intent().apply {
+                                    action = android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS
+                                    data = android.net.Uri.parse("package:${context.packageName}")
+                                }
+                                context.startActivity(intent)
+                            }
+                        }
+                    }
+                }
             )
 
             // API Update Interval Settings

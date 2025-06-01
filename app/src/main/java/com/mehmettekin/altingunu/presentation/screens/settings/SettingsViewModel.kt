@@ -212,13 +212,10 @@ class SettingsViewModel @Inject constructor(
                 _state.value = _state.value.copy(error = null)
             }
         }
-
-        // ✅ DÜZELTME: Duplicate event handling kodları tamamen kaldırıldı
-        // Önceki versiyonda 108. satırdan sonra aynı event'ler tekrar handle ediliyordu
     }
 
     private fun checkNotificationPermission(): Boolean {
-        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+        val hasPostNotificationPermission = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             ContextCompat.checkSelfPermission(
                 application,
                 Manifest.permission.POST_NOTIFICATIONS
@@ -226,6 +223,14 @@ class SettingsViewModel @Inject constructor(
         } else {
             true // Android 13 öncesinde izin gerekmiyor
         }
+
+        val hasExactAlarmPermission = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            notificationManager.hasExactAlarmPermission()
+        } else {
+            true // Android 12 öncesinde izin gerekmiyor
+        }
+
+        return hasPostNotificationPermission && hasExactAlarmPermission
     }
 
     private fun updateApplicationLocale(languageCode: String) {
@@ -249,6 +254,11 @@ class SettingsViewModel @Inject constructor(
 
     fun resetLanguageChanged() {
         _state.value = _state.value.copy(languageChanged = false)
+    }
+
+    // ✅ YENİ: Eksik olan setError fonksiyonu
+    fun setError(error: UiText) {
+        _state.update { it.copy(error = error) }
     }
 }
 
