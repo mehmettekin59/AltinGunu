@@ -418,7 +418,7 @@ private fun ResultsSettingsSummary(
                 )
 
                 Text(
-                    text = UiText.stringResource(R.string.duration_months, settings.durationMonths.convertNumerals()).asString(),
+                    text = UiText.stringResource(R.string.duration_months, settings.durationMonths).asString().convertNumerals(),
                     style = MaterialTheme.typography.bodyMedium,
                     fontWeight = FontWeight.SemiBold,
                     color = NavyBlue
@@ -439,7 +439,7 @@ private fun ResultsSettingsSummary(
                 )
 
                 Text(
-                    text = "${settings.participantCount}".convertNumerals(),
+                    text = settings.participantCount.convertNumerals(),
                     style = MaterialTheme.typography.bodyMedium,
                     fontWeight = FontWeight.SemiBold,
                     color = NavyBlue

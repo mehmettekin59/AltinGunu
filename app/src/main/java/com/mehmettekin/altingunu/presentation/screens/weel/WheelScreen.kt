@@ -490,7 +490,7 @@ private fun ParticipantsSection(
             horizontalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             ParticipantList(
-                title = UiText.stringResource(R.string.remaining_participants_special, remainingParticipants.size.convertNumerals()).asString(),
+                title = UiText.stringResource(R.string.remaining_participants_special, remainingParticipants.size).asString().convertNumerals(),
                 titleTextColor = if (isSystemInDarkTheme()) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.secondary,
                 textColor = if (isSystemInDarkTheme()) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.primary,
                 backgroundColor = if (isSystemInDarkTheme()) MaterialTheme.colorScheme.secondary else MaterialTheme.colorScheme.tertiary,
@@ -501,7 +501,7 @@ private fun ParticipantsSection(
             )
 
             ParticipantList(
-                title = UiText.stringResource(R.string.winners_special, winners.size.convertNumerals()).asString(),
+                title = UiText.stringResource(R.string.winners_special, winners.size).asString().convertNumerals(),
                 titleTextColor = if (isSystemInDarkTheme()) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.secondary,
                 textColor = if (isSystemInDarkTheme()) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.secondary,
                 backgroundColor = if (isSystemInDarkTheme()) MaterialTheme.colorScheme.secondary else MaterialTheme.colorScheme.tertiary,

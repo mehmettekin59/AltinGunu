@@ -1061,7 +1061,7 @@ fun ConfirmationDialog(
                 ) {
                     ConfirmationItem(
                         label = UiText.stringResource(R.string.participants_count).asString(),
-                        value = UiText.stringResource(R.string.participant_count_special,state.participants.size).asString()
+                        value = UiText.stringResource(R.string.participant_count_special,state.participants.size).asString().convertNumerals()
                     )
                     val valueTypeAndItem = when(state.selectedItemType) {
                         ItemType.TL -> state.selectedItemType.displayName.asString()
@@ -1082,7 +1082,7 @@ fun ConfirmationDialog(
 
                     ConfirmationItem(
                         label = UiText.stringResource(R.string.duration).asString(),
-                        value = UiText.stringResource(R.string.duration_months,state.durationMonths.convertNumerals()).asString()
+                        value = UiText.stringResource(R.string.duration_months,state.durationMonths).asString().convertNumerals()
                     )
 
                     // Başlangıç ayı ve yılı
