@@ -206,7 +206,7 @@ class ResultsViewModel @Inject constructor(
 
         canvas.drawText(UiText.stringResource(R.string.total_duration).asString(context), 50f, currentY, paint)
         canvas.drawText(
-            UiText.stringResource(R.string.duration_months, settings.durationMonths).asString(context),
+            UiText.stringResource(R.string.duration_months, settings.durationMonths.convertNumerals()).asString(context),
             250f,
             currentY,
             paint
@@ -214,7 +214,7 @@ class ResultsViewModel @Inject constructor(
         currentY += 20
 
         canvas.drawText(UiText.stringResource(R.string.participant_count).asString(context), 50f, currentY, paint)
-        canvas.drawText("${settings.participantCount}".convertNumerals(), 250f, currentY, paint) // Adjust X position
+        canvas.drawText("${(settings.participantCount).convertNumerals()}", 250f, currentY, paint) // Adjust X position
         currentY += 20
 
         // Add Current Unit Price if applicable <-- NEW
@@ -281,13 +281,7 @@ class ResultsViewModel @Inject constructor(
                 val newPageInfo = PdfDocument.PageInfo.Builder(595, 842, document.pages.size + 1).create()
                 page = document.startPage(newPageInfo)
                 canvas = page.canvas
-                y = 50.toFloat() // Reset Y for the new page
-                // Optionally redraw table header on new page
-                // canvas.drawText("Sıra", 50f, y, tableHeaderPaint)
-                // canvas.drawText("İsim", 120f, y, tableHeaderPaint)
-                // canvas.drawText("Ay", 350f, y, tableHeaderPaint)
-                // canvas.drawText("Miktar", 450f, y, tableHeaderPaint)
-                // y += 40 // Add space after header
+                y = 50.toFloat()
             }
 
             // Adjusted X positions for table content

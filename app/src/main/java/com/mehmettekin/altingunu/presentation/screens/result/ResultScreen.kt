@@ -397,7 +397,7 @@ private fun ResultsSettingsSummary(
                 )
 
                 Text(
-                    text = formattedAmount,
+                    text = formattedAmount.convertNumerals(),
                     style = MaterialTheme.typography.bodyMedium,
                     fontWeight = FontWeight.SemiBold,
                     color = NavyBlue
@@ -418,7 +418,7 @@ private fun ResultsSettingsSummary(
                 )
 
                 Text(
-                    text = UiText.stringResource(R.string.duration_months, settings.durationMonths).asString(),
+                    text = UiText.stringResource(R.string.duration_months, settings.durationMonths.convertNumerals()).asString(),
                     style = MaterialTheme.typography.bodyMedium,
                     fontWeight = FontWeight.SemiBold,
                     color = NavyBlue
@@ -439,7 +439,7 @@ private fun ResultsSettingsSummary(
                 )
 
                 Text(
-                    text = "${settings.participantCount}",
+                    text = "${settings.participantCount}".convertNumerals(),
                     style = MaterialTheme.typography.bodyMedium,
                     fontWeight = FontWeight.SemiBold,
                     color = NavyBlue
@@ -480,7 +480,7 @@ private fun ResultsSettingsSummary(
                                 }
 
                                 Text(
-                                    text = UiText.stringResource(R.string.currency_value, formattedValue).asString(),
+                                    text = UiText.stringResource(R.string.currency_value, formattedValue.convertNumerals()).asString(),
                                     style = MaterialTheme.typography.bodyMedium,
                                     fontWeight = FontWeight.SemiBold,
                                     color = NavyBlue
