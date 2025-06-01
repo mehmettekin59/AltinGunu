@@ -25,7 +25,6 @@ import androidx.lifecycle.ProcessLifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import com.mehmettekin.altingunu.notification.GoldDayNotificationManager
 
-
 @Module
 @InstallIn(SingletonComponent::class)
 abstract class ApplicationModule {
@@ -49,7 +48,6 @@ abstract class ApplicationModule {
         }
 
         @Provides
-
         @Singleton
         fun provideKapaliCarsiApi(moshi: Moshi): KapaliCarsiApi {
             return Retrofit.Builder()
@@ -59,15 +57,12 @@ abstract class ApplicationModule {
                 .create(KapaliCarsiApi::class.java)
         }
 
-
         @Provides
         @Singleton
         fun provideApplicationCoroutineScope(): CoroutineScope {
             return ProcessLifecycleOwner.get().lifecycleScope
         }
 
-
-        // AltinGunuApplication için provider ekleyin
         @Provides
         @Singleton
         fun provideApplication(@ApplicationContext context: Context): AltinGunuApplication {
@@ -81,7 +76,6 @@ abstract class ApplicationModule {
         ): GoldDayNotificationManager {
             return GoldDayNotificationManager(context)
         }
-
     }
 }
 

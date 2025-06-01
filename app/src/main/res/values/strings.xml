@@ -27,7 +27,7 @@
     <string name="reminder_enabled">Hatırlatmaları Etkinleştir</string>
     <string name="reminder_disabled">Hatırlatmalar Kapalı</string>
     <string name="test_notification">Test Bildirimi Gönder</string>
-    <string name="notification_permission_required">Bildirim izni gerekli</string>
+    <string name="test_notification_sent">Test bildirimi başarıyla gönderildi!</string>
 
 
     <!-- Notification Content -->

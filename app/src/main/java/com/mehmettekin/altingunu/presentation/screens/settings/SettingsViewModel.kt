@@ -22,6 +22,8 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import java.text.SimpleDateFormat
+import java.util.Date
 import java.util.Locale
 import javax.inject.Inject
 
@@ -99,7 +101,6 @@ class SettingsViewModel @Inject constructor(
                 }
             }
 
-            // Other event handlers remain the same
             is SettingsEvent.OnApiUpdateIntervalChange -> {
                 if (event.seconds == _state.value.apiUpdateInterval) return
 
@@ -133,7 +134,6 @@ class SettingsViewModel @Inject constructor(
                 }
             }
 
-            // ✅ EKLENEN: Bildirim günleri değiştirme eventi
             is SettingsEvent.OnReminderDaysChange -> {
                 viewModelScope.launch {
                     try {
@@ -147,18 +147,29 @@ class SettingsViewModel @Inject constructor(
                 }
             }
 
-            // ✅ EKLENEN: Test bildirimi eventi
             is SettingsEvent.OnTestNotification -> {
                 viewModelScope.launch {
-                    try {
-                        notificationManager.showTestNotification(
-                            winnerName = "Test Kullanıcı",
-                            amount = "1.000 TL",
-                            paymentDate = "01/01/2025"
-                        )
-                    } catch (e: Exception) {
+                    if (checkNotificationPermission()) {
+                        try {
+                            // ✅ DÜZELTME: Sadece bir test bildirimi gönder
+                            notificationManager.showTestNotification(
+                                winnerName = "Test Kullanıcı",
+                                amount = "1.000 TL",
+                                paymentDate = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(Date())
+                            )
+
+                            // ✅ BAŞARI MESAJI EKLE
+                            _state.value = _state.value.copy(
+                                error = UiText.stringResource(R.string.test_notification_sent)
+                            )
+                        } catch (e: Exception) {
+                            _state.value = _state.value.copy(
+                                error = UiText.stringResource(R.string.error_changing_update_interval, e.message ?: "")
+                            )
+                        }
+                    } else {
                         _state.value = _state.value.copy(
-                            error = UiText.stringResource(R.string.error_changing_update_interval, e.message ?: "")
+                            error = UiText.stringResource(R.string.notification_permission_required)
                         )
                     }
                 }
@@ -183,7 +194,7 @@ class SettingsViewModel @Inject constructor(
                         _state.value = _state.value.copy(
                             selectedLanguage = Constraints.DefaultSettings.DEFAULT_LANGUAGE,
                             apiUpdateInterval = Constraints.DefaultSettings.DEFAULT_API_UPDATE_INTERVAL,
-                            isReminderEnabled = Constraints.DefaultSettings.DEFAULT_REMINDER_ENABLED, // ✅ EKLENEN
+                            isReminderEnabled = Constraints.DefaultSettings.DEFAULT_REMINDER_ENABLED,
                             reminderDaysBefore = Constraints.DefaultSettings.DEFAULT_REMINDER_DAYS_BEFORE,
                             isLoading = false,
                             languageChanged = true
@@ -200,42 +211,10 @@ class SettingsViewModel @Inject constructor(
             is SettingsEvent.OnErrorDismiss -> {
                 _state.value = _state.value.copy(error = null)
             }
-
-            is SettingsEvent.OnReminderToggle -> {
-                viewModelScope.launch {
-                    settingsDataStore.setReminderEnabled(event.enabled)
-                    _state.update { it.copy(isReminderEnabled = event.enabled) }
-                }
-            }
-
-            is SettingsEvent.OnReminderDaysChange -> {
-                viewModelScope.launch {
-                    settingsDataStore.setReminderDaysBefore(event.days)
-                    _state.update { it.copy(reminderDaysBefore = event.days) }
-                }
-            }
-
-            is SettingsEvent.OnTestNotification -> {
-                viewModelScope.launch {
-                    if (checkNotificationPermission()) {
-                        // Hemen test notification göster
-                        notificationManager.showTestNotification(
-                            winnerName = "Test Kullanıcı",
-                            amount = "1.000 TL",
-                            paymentDate = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(Date())
-                        )
-
-                        // 10 saniye sonra da WorkManager ile test et
-                        notificationManager.scheduleTestReminder(10)
-                    } else {
-                        _state.value = _state.value.copy(
-                            error = UiText.stringResource(R.string.notification_permission_required)
-                        )
-                    }
-                }
-            }
-
         }
+
+        // ✅ DÜZELTME: Duplicate event handling kodları tamamen kaldırıldı
+        // Önceki versiyonda 108. satırdan sonra aynı event'ler tekrar handle ediliyordu
     }
 
     private fun checkNotificationPermission(): Boolean {
@@ -248,6 +227,7 @@ class SettingsViewModel @Inject constructor(
             true // Android 13 öncesinde izin gerekmiyor
         }
     }
+
     private fun updateApplicationLocale(languageCode: String) {
         // This will force the application to apply the language change at the system level
         val locale = Locale(languageCode)

@@ -88,7 +88,6 @@ dependencies {
 
     //splashscreen
     implementation(libs.androidx.core.splashscreen)
-    implementation(libs.androidx.work.runtime.ktx)
 
     implementation("org.slf4j:slf4j-api:1.7.36")
     implementation("org.slf4j:slf4j-simple:1.7.36")

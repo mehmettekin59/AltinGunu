@@ -31,9 +31,7 @@ class WheelViewModel @Inject constructor(
     private val _state = MutableStateFlow(WheelState())
     val state = _state.asStateFlow()
 
-
-    val participants: List<Participant> get() = _state.value.remainingParticipants // participants = remaining
-
+    val participants: List<Participant> get() = _state.value.remainingParticipants
 
     init {
         loadParticipants()
@@ -49,7 +47,7 @@ class WheelViewModel @Inject constructor(
                     _state.update { currentState ->
                         currentState.copy(
                             allParticipants = result.data,
-                            remainingParticipants = result.data, // Başlangıçta hepsi "remaining"
+                            remainingParticipants = result.data,
                             isLoading = false
                         )
                     }
@@ -160,10 +158,9 @@ class WheelViewModel @Inject constructor(
     }
 
     fun reset() {
-        // İlk olarak state'i resetle
         _state.update { currentState ->
             currentState.copy(
-                remainingParticipants = currentState.allParticipants, // Tüm katılımcıları geri remaining'e koy
+                remainingParticipants = currentState.allParticipants,
                 winners = emptyList(),
                 winnerParticipants = emptyList(),
                 rotation = 0f,
@@ -171,7 +168,6 @@ class WheelViewModel @Inject constructor(
                 currentWinner = null
             )
         }
-        // Not: allParticipants'ı tekrar yüklemeye gerek yok, zaten mevcut
     }
 
     fun saveResults() {
@@ -202,6 +198,7 @@ class WheelViewModel @Inject constructor(
         }
     }
 
+    // ✅ TEMİZLENDİ: WorkManager referansları kaldırıldı, sadece AlarmManager kullanıyor
     private suspend fun scheduleNotifications(
         settings: ParticipantsScreenWholeInformation,
         results: List<DrawResult>
@@ -213,6 +210,7 @@ class WheelViewModel @Inject constructor(
             if (isReminderEnabled) {
                 val reminderDaysBefore = settingsDataStore.getReminderDaysBefore()
 
+                // ✅ AlarmManager ile scheduling
                 notificationManager.scheduleReminders(
                     drawSettings = settings,
                     results = results,
@@ -241,19 +239,11 @@ class WheelViewModel @Inject constructor(
             settings.specificItem
         )
 
-        // Starting month and year
-        val calendar = Calendar.getInstance()
-        calendar.set(Calendar.YEAR, settings.startYear)
-        calendar.set(Calendar.MONTH, settings.startMonth - 1) // 0-based month
-
         val dateFormat = SimpleDateFormat("dd MMMM yyyy", Locale.getDefault())
 
-        // Katılımcı sayısının ay sayısına bölümünden her aya kaç kişi düştüğünü hesaplıyoruz
         val peoplePerMonth = settings.participantCount / settings.durationMonths
 
-        // Generate results for each winner
         winners.forEachIndexed { index, participant ->
-            // Katılımcının hangi aya düştüğünü hesaplıyoruz
             val monthIndex = index / peoplePerMonth
             val (day, month, year) = settings.getNextPaymentDate(monthIndex)
 

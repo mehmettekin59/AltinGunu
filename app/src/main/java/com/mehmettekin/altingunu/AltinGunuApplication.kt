@@ -22,6 +22,12 @@ class AltinGunuApplication: Application() {
         super.attachBaseContext(LocaleHelper.updateLocale(base, currentLanguage))
     }
 
+    override fun onCreate() {
+        super.onCreate()
+        // ✅ WorkManager kaldırıldı - sorun yok!
+        android.util.Log.d("AltinGunuApp", "Application started successfully")
+    }
+
     private fun loadLanguageSync(context: Context): String {
         val prefs = context.getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
         return prefs.getString("language_code", detectUserLanguage())
