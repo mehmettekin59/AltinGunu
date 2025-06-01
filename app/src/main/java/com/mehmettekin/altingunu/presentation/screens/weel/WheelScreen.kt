@@ -52,6 +52,7 @@ import com.mehmettekin.altingunu.domain.model.Participant
 import com.mehmettekin.altingunu.presentation.screens.common.CommonTopAppBar
 import com.mehmettekin.altingunu.ui.theme.Gold
 import com.mehmettekin.altingunu.utils.UiText
+import com.mehmettekin.altingunu.utils.convertNumerals
 import kotlin.collections.isNotEmpty
 import kotlin.collections.map
 import kotlin.math.cos
@@ -489,7 +490,7 @@ private fun ParticipantsSection(
             horizontalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             ParticipantList(
-                title = UiText.stringResource(R.string.remaining_participants_special, remainingParticipants.size).asString(),
+                title = UiText.stringResource(R.string.remaining_participants_special, remainingParticipants.size.convertNumerals()).asString(),
                 titleTextColor = if (isSystemInDarkTheme()) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.secondary,
                 textColor = if (isSystemInDarkTheme()) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.primary,
                 backgroundColor = if (isSystemInDarkTheme()) MaterialTheme.colorScheme.secondary else MaterialTheme.colorScheme.tertiary,
@@ -500,7 +501,7 @@ private fun ParticipantsSection(
             )
 
             ParticipantList(
-                title = UiText.stringResource(R.string.winners_special, winners.size).asString(),
+                title = UiText.stringResource(R.string.winners_special, winners.size.convertNumerals()).asString(),
                 titleTextColor = if (isSystemInDarkTheme()) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.secondary,
                 textColor = if (isSystemInDarkTheme()) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.secondary,
                 backgroundColor = if (isSystemInDarkTheme()) MaterialTheme.colorScheme.secondary else MaterialTheme.colorScheme.tertiary,
@@ -558,7 +559,7 @@ private fun ParticipantList(
                     .weight(1f)
             ) {
                 itemsIndexed(participants) { index, participant ->
-                    val displayText = if(showIndex){"${index + 1}. $participant"} else {participant}
+                    val displayText = if(showIndex){"${(index + 1).convertNumerals()}. $participant"} else {participant}
                     Text(
                         text = displayText,
                         modifier = Modifier
