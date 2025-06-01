@@ -9,6 +9,7 @@ import com.mehmettekin.altingunu.AltinGunuApplication
 import com.mehmettekin.altingunu.R
 import com.mehmettekin.altingunu.data.local.SettingsDataStore
 import com.mehmettekin.altingunu.domain.repository.UserPreferencesRepository
+import com.mehmettekin.altingunu.notification.GoldDayNotificationManager
 import com.mehmettekin.altingunu.utils.Constraints
 import com.mehmettekin.altingunu.utils.UiText
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -16,6 +17,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.util.Locale
 import javax.inject.Inject
@@ -24,7 +26,8 @@ import javax.inject.Inject
 class SettingsViewModel @Inject constructor(
     private val userPreferencesRepository: UserPreferencesRepository,
     private val settingsDataStore: SettingsDataStore,
-    private val application: AltinGunuApplication
+    private val application: AltinGunuApplication,
+    private val notificationManager: GoldDayNotificationManager
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(SettingsState())
@@ -42,10 +45,14 @@ class SettingsViewModel @Inject constructor(
 
                 // Load API update interval
                 val interval = settingsDataStore.getApiUpdateInterval()
+                val isReminderEnabled = settingsDataStore.isReminderEnabled()
+                val reminderDaysBefore = settingsDataStore.getReminderDaysBefore()
 
                 _state.value = _state.value.copy(
                     selectedLanguage = language,
                     apiUpdateInterval = interval,
+                    isReminderEnabled = isReminderEnabled,
+                    reminderDaysBefore = reminderDaysBefore,
                     isLoading = false
                 )
             } catch (e: Exception) {
@@ -110,6 +117,50 @@ class SettingsViewModel @Inject constructor(
                 }
             }
 
+            is SettingsEvent.OnReminderToggle -> {
+                viewModelScope.launch {
+                    try {
+                        settingsDataStore.setReminderEnabled(event.enabled)
+                        _state.update { it.copy(isReminderEnabled = event.enabled) }
+                    } catch (e: Exception) {
+                        _state.value = _state.value.copy(
+                            error = UiText.stringResource(R.string.error_changing_update_interval, e.message ?: "")
+                        )
+                    }
+                }
+            }
+
+            // ✅ EKLENEN: Bildirim günleri değiştirme eventi
+            is SettingsEvent.OnReminderDaysChange -> {
+                viewModelScope.launch {
+                    try {
+                        settingsDataStore.setReminderDaysBefore(event.days)
+                        _state.update { it.copy(reminderDaysBefore = event.days) }
+                    } catch (e: Exception) {
+                        _state.value = _state.value.copy(
+                            error = UiText.stringResource(R.string.error_changing_update_interval, e.message ?: "")
+                        )
+                    }
+                }
+            }
+
+            // ✅ EKLENEN: Test bildirimi eventi
+            is SettingsEvent.OnTestNotification -> {
+                viewModelScope.launch {
+                    try {
+                        notificationManager.showTestNotification(
+                            winnerName = "Test Kullanıcı",
+                            amount = "1.000 TL",
+                            paymentDate = "01/01/2025"
+                        )
+                    } catch (e: Exception) {
+                        _state.value = _state.value.copy(
+                            error = UiText.stringResource(R.string.error_changing_update_interval, e.message ?: "")
+                        )
+                    }
+                }
+            }
+
             is SettingsEvent.OnDefaultsReset -> {
                 _state.value = _state.value.copy(isLoading = true)
                 viewModelScope.launch {
@@ -123,10 +174,14 @@ class SettingsViewModel @Inject constructor(
 
                         // Reset API update interval to default
                         settingsDataStore.setApiUpdateInterval(Constraints.DefaultSettings.DEFAULT_API_UPDATE_INTERVAL)
+                        settingsDataStore.setReminderEnabled(Constraints.DefaultSettings.DEFAULT_REMINDER_ENABLED)
+                        settingsDataStore.setReminderDaysBefore(Constraints.DefaultSettings.DEFAULT_REMINDER_DAYS_BEFORE)
 
                         _state.value = _state.value.copy(
                             selectedLanguage = Constraints.DefaultSettings.DEFAULT_LANGUAGE,
                             apiUpdateInterval = Constraints.DefaultSettings.DEFAULT_API_UPDATE_INTERVAL,
+                            isReminderEnabled = Constraints.DefaultSettings.DEFAULT_REMINDER_ENABLED, // ✅ EKLENEN
+                            reminderDaysBefore = Constraints.DefaultSettings.DEFAULT_REMINDER_DAYS_BEFORE,
                             isLoading = false,
                             languageChanged = true
                         )
