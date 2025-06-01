@@ -115,7 +115,7 @@ fun NotificationSettingsCard(
                         Column(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(12.dp)
+                                .padding(6.dp)
                         ) {
                             Row(
                                 verticalAlignment = Alignment.CenterVertically
@@ -231,7 +231,7 @@ fun NotificationSettingsCard(
                 Card(
                     modifier = Modifier.fillMaxWidth(),
                     colors = CardDefaults.cardColors(containerColor = White),
-                    shape = RoundedCornerShape(8.dp)
+                    shape = RoundedCornerShape(4.dp)
                 ) {
                     Column {
                         reminderOptions.forEachIndexed { index, (days, label) ->
@@ -239,7 +239,7 @@ fun NotificationSettingsCard(
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .clickable { onReminderDaysChange(days) }
-                                    .padding(16.dp),
+                                    .padding(8.dp),
                                 horizontalArrangement = Arrangement.SpaceBetween,
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
@@ -271,7 +271,7 @@ fun NotificationSettingsCard(
                 }
 
                 // Test butonu
-                Spacer(modifier = Modifier.height(12.dp))
+                Spacer(modifier = Modifier.height(6.dp))
 
                 OutlinedButton(
                     onClick = onTestNotification,
@@ -287,9 +287,9 @@ fun NotificationSettingsCard(
                         imageVector = Icons.Default.NotificationsActive,
                         contentDescription = null,
                         tint = White,
-                        modifier = Modifier.size(16.dp)
+                        modifier = Modifier.size(8.dp)
                     )
-                    Spacer(modifier = Modifier.width(8.dp))
+                    Spacer(modifier = Modifier.width(4.dp))
                     Text(
                         text = UiText.stringResource(R.string.test_notification).asString(),
                         style = MaterialTheme.typography.bodyMedium

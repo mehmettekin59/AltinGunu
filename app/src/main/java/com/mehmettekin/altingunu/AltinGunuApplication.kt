@@ -57,9 +57,6 @@ class AltinGunuApplication: Application() {
         prefs.edit().putString("language_code", languageCode).apply()
     }
 
-    fun updateCurrentLanguage(languageCode: String) {
-        setCurrentLanguage(languageCode)
-    }
 }
 
 

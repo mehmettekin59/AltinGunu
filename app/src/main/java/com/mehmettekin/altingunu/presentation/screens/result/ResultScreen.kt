@@ -42,6 +42,7 @@ import com.mehmettekin.altingunu.utils.Constraints
 import com.mehmettekin.altingunu.utils.ResultState
 import com.mehmettekin.altingunu.utils.UiText
 import com.mehmettekin.altingunu.utils.ValueFormatter
+import com.mehmettekin.altingunu.utils.convertNumerals
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -607,7 +608,7 @@ private fun ResultsTable(
                             )
                     ) {
                         Text(
-                            text = "${index + 1}",
+                            text = "${index + 1}".convertNumerals(),
                             style = MaterialTheme.typography.bodyMedium,
                             color = Color.DarkGray,
                             modifier = Modifier.weight(0.15f)

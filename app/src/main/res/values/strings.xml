@@ -22,7 +22,7 @@
     <!-- Notification Settings -->
     <string name="notification_settings">Hatırlatma Ayarları</string>
     <string name="gold_day_reminders">Altın Günü Hatırlatmaları</string>
-    <string name="gold_day_reminder_description">Ödeme tarihlerinden önce hatırlatma bildirimler</string>
+    <string name="gold_day_reminder_description">Hatırlatmalar Açık.</string>
     <string name="reminder_days_before">Kaç gün önceden hatırlatılsın?</string>
     <string name="reminder_enabled">Hatırlatmaları Etkinleştir</string>
     <string name="reminder_disabled">Hatırlatmalar Kapalı</string>
@@ -30,8 +30,8 @@
     <string name="test_notification_sent">Test bildirimi başarıyla gönderildi!</string>
     <string name="notification_permission_required">Hatırlatmalar için bildirim izni gerekli</string>
     <string name="notification_permission_denied">Bildirim izni reddedildi. Ayarlardan açabilirsiniz.</string>
-    <string name="exact_alarm_permission_required">Kesin zamanında hatırlatma için ek izin gerekli</string>
-    <string name="exact_alarm_permission_denied">Kesin zamanında alarm izni verilmedi. Ayarlardan etkinleştirebilirsiniz.</string>
+    <string name="exact_alarm_permission_required">Hatırlatma için ek izin gerekli</string>
+    <string name="exact_alarm_permission_denied">Alarm izni verilmedi. Ayarlardan etkinleştirebilirsiniz.</string>
     <string name="select_day">Gün Seçiniz</string>
     <string name="request_permissions">izin talebi</string>
 

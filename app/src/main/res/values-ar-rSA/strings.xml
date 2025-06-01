@@ -20,6 +20,39 @@
     <string name="title_default_settings">الإعدادات الافتراضية</string>
     <string name="error_returning_to_default_settings">الإعدادات الافتراضية</string>
 
+    <string name="notification_settings">إعدادات التذكير</string>
+    <string name="gold_day_reminders">تذكيرات يوم الذهب</string>
+    <string name="gold_day_reminder_description">التذكيرات مفعّلة.</string>
+    <string name="reminder_days_before">كم يومًا قبل الموعد يجب إرسال التذكير؟</string>
+    <string name="reminder_enabled">تفعيل التذكيرات</string>
+    <string name="reminder_disabled">التذكيرات غير مفعّلة</string>
+    <string name="test_notification">إرسال إشعار تجريبي</string>
+    <string name="test_notification_sent">تم إرسال الإشعار التجريبي بنجاح!</string>
+    <string name="notification_permission_required">مطلوب إذن الإشعارات من أجل التذكيرات</string>
+    <string name="notification_permission_denied">تم رفض إذن الإشعارات. يمكنك تفعيله من الإعدادات.</string>
+    <string name="exact_alarm_permission_required">مطلوب إذن إضافي للتذكير في الوقت المحدد</string>
+    <string name="exact_alarm_permission_denied">لم يتم منح إذن التنبيه الدقيق. يمكنك تفعيله من الإعدادات.</string>
+    <string name="select_day">اختر اليوم</string>
+    <string name="request_permissions">طلب الأذونات</string>
+
+    <!-- Notification Content -->
+    <string name="gold_day_reminder_title">🪙 تذكير بيوم الذهب</string>
+    <string name="gold_day_reminder_text">تاريخ دفع مبلغ %2$s للشخص %1$s: %3$s</string>
+    <string name="gold_day_reminder_big_text">مرحبًا!
+غدًا (%3$s) هو يوم دفع مبلغ %2$s للشخص %1$s.
+لا تنسَ إكمال استعداداتك!</string>
+
+    <!-- Settings Options -->
+    <string name="reminder_1_day">قبل يوم واحد</string>
+    <string name="reminder_2_days">قبل يومين</string>
+    <string name="reminder_3_days">قبل 3 أيام</string>
+    <string name="reminder_1_week">قبل أسبوع</string>
+
+    <!-- Results with Date -->
+    <string name="payment_date">تاريخ الدفع</string>
+    <string name="next_payment_date">الدفع التالي: %1$s</string>
+
+
     <string name="error_min_participants">مطلوب مشاركين اثنين على الأقل للسحب</string>
     <string name="error_duplicate_names">لا يمكن وجود أكثر من مشارك بنفس الاسم</string>
     <string name="error_empty_names">لا يمكن ترك أسماء المشاركين فارغة</string>
@@ -54,7 +87,7 @@
     <string name="restart">إعادة البدء</string>
     <string name="winner">الفائز</string>
     <string name="winner_celebration">الفائز:🎉✨ %1$s ✨🎉</string>
-    <string name="the_last_winner_celebration">The Last Winner:\n🎉✨ %1$s ✨🎉</string>
+    <string name="the_last_winner_celebration">الفائز الأخير:\n🎉✨ %1$s ✨🎉</string>
     <string name="remaining_participants">المشاركون المتبقون</string>
     <string name="remaining_participants_special">المشاركون المتبقون: (%1$d)</string>
     <string name="winners">الفائزون</string>

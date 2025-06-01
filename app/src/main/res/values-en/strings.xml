@@ -9,6 +9,7 @@
     <string name="delete">Delete</string>
     <string name="what_is_the_app_name">Gold Day</string>
 
+
     <string name="data_source_info">Data Source Information</string>
     <string name="api_info">This application fetches currency and gold data from "Kapalıçarşı Döviz Kurları Web API | Grand Bazaar API"</string>
     <string name="ok">OK</string>
@@ -20,6 +21,38 @@
     <string name="title_settings">Settings</string>
     <string name="title_default_settings">Default Settings</string>
     <string name="error_returning_to_default_settings">Default Settings</string>
+
+    <string name="notification_settings">Reminder Settings</string>
+    <string name="gold_day_reminders">Gold Day Reminders</string>
+    <string name="gold_day_reminder_description">Reminders are On.</string>
+    <string name="reminder_days_before">How many days in advance should the reminder be sent?</string>
+    <string name="reminder_enabled">Enable Reminders</string>
+    <string name="reminder_disabled">Reminders are Off</string>
+    <string name="test_notification">Send Test Notification</string>
+    <string name="test_notification_sent">Test notification sent successfully!</string>
+    <string name="notification_permission_required">Notification permission is required for reminders</string>
+    <string name="notification_permission_denied">Notification permission denied. You can enable it from settings.</string>
+    <string name="exact_alarm_permission_required">Additional permission is required for reminders</string>
+    <string name="exact_alarm_permission_denied">Alarm permission not granted. You can enable it from settings.</string>
+    <string name="select_day">Select Day</string>
+    <string name="request_permissions">Permission Request</string>
+
+    <!-- Notification Content -->
+    <string name="gold_day_reminder_title">🪙 Gold Day Reminder</string>
+    <string name="gold_day_reminder_text">Payment of %2$s is due on %3$s for %1$s</string>
+    <string name="gold_day_reminder_big_text">Hello!
+Tomorrow (%3$s) is the day to make a payment of %2$s to %1$s.
+Do not forget to complete your preparations!</string>
+
+    <!-- Settings Options -->
+    <string name="reminder_1_day">1 day before</string>
+    <string name="reminder_2_days">2 days before</string>
+    <string name="reminder_3_days">3 days before</string>
+    <string name="reminder_1_week">1 week before</string>
+
+    <!-- Results with Date -->
+    <string name="payment_date">Payment Date</string>
+    <string name="next_payment_date">Next Payment: %1$s</string>
 
     <string name="error_min_participants">At least 2 participants are required for the raffle</string>
     <string name="error_duplicate_names">There cannot be multiple participants with the same name</string>

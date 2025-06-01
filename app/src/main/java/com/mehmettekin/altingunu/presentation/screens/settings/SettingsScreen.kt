@@ -22,10 +22,13 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -40,7 +43,6 @@ import com.mehmettekin.altingunu.utils.UiText
 import com.mehmettekin.altingunu.R
 import com.mehmettekin.altingunu.notification.NotificationSettingsCard
 
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsScreen(
@@ -50,6 +52,9 @@ fun SettingsScreen(
     val state by viewModel.state.collectAsStateWithLifecycle()
     val context = LocalContext.current
     val snackbarHostState = remember { SnackbarHostState() }
+
+    // Tab seçimi için state
+    var selectedTab by remember { mutableStateOf(SettingsTab.NOTIFICATIONS) }
 
     // ✅ YENİ: İzin isteme launcher'ları
     val requestNotificationPermissionLauncher = rememberLauncherForActivityResult(
@@ -83,7 +88,6 @@ fun SettingsScreen(
                 addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK)
             }
             context.startActivity(intent)
-
 
             if (context is Activity) {
                 context.finish()
@@ -126,75 +130,170 @@ fun SettingsScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
-                .padding(16.dp)
-                .verticalScroll(rememberScrollState()),
+                .verticalScroll(rememberScrollState())
+                .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            // Language settings
+            // Language settings - Her zaman göster
             LanguageSettingsCard(
                 selectedLanguage = state.selectedLanguage,
                 onLanguageChange = { viewModel.onEvent(SettingsEvent.OnLanguageChange(it)) }
             )
 
-            // ✅ Güncellenmiş NotificationSettingsCard
-            NotificationSettingsCard(
-                isReminderEnabled = state.isReminderEnabled,
-                reminderDaysBefore = state.reminderDaysBefore,
-                onReminderToggle = { viewModel.onEvent(SettingsEvent.OnReminderToggle(it)) },
-                onReminderDaysChange = { viewModel.onEvent(SettingsEvent.OnReminderDaysChange(it)) },
-                onTestNotification = { viewModel.onEvent(SettingsEvent.OnTestNotification) },
-                onRequestPermissions = { // ✅ YENİ callback
-                    // Notification permission check ve istek
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                        val hasNotificationPermission = ContextCompat.checkSelfPermission(
-                            context,
-                            Manifest.permission.POST_NOTIFICATIONS
-                        ) == PackageManager.PERMISSION_GRANTED
+            // Tab Selector
+            SettingsTabSelector(
+                selectedTab = selectedTab,
+                onTabSelected = { selectedTab = it }
+            )
 
-                        if (!hasNotificationPermission) {
-                            requestNotificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
-                            return@NotificationSettingsCard
-                        }
-                    }
+            // Selected content based on tab
+            when (selectedTab) {
+                SettingsTab.NOTIFICATIONS -> {
+                    NotificationSettingsCard(
+                        isReminderEnabled = state.isReminderEnabled,
+                        reminderDaysBefore = state.reminderDaysBefore,
+                        onReminderToggle = { viewModel.onEvent(SettingsEvent.OnReminderToggle(it)) },
+                        onReminderDaysChange = { viewModel.onEvent(SettingsEvent.OnReminderDaysChange(it)) },
+                        onTestNotification = { viewModel.onEvent(SettingsEvent.OnTestNotification) },
+                        onRequestPermissions = {
+                            // İzin isteme logic'i NotificationSettingsCard içinde zaten mevcut
+                            // Sadece launcher'ı burada çağırıyoruz
+                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                                val hasNotificationPermission = ContextCompat.checkSelfPermission(
+                                    context,
+                                    Manifest.permission.POST_NOTIFICATIONS
+                                ) == PackageManager.PERMISSION_GRANTED
 
-                    // Exact alarm permission check ve settings'e yönlendirme
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                        val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
-                        if (!alarmManager.canScheduleExactAlarms()) {
-                            try {
-                                val intent = Intent().apply {
-                                    action = android.provider.Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM
-                                    data = android.net.Uri.parse("package:${context.packageName}")
+                                if (!hasNotificationPermission) {
+                                    requestNotificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+                                    return@NotificationSettingsCard
                                 }
-                                context.startActivity(intent)
-                            } catch (e: Exception) {
-                                // Fallback: genel ayarlar sayfasına yönlendir
-                                val intent = Intent().apply {
-                                    action = android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS
-                                    data = android.net.Uri.parse("package:${context.packageName}")
+                            }
+
+                            // Exact alarm için settings'e yönlendirme
+                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                                val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+                                if (!alarmManager.canScheduleExactAlarms()) {
+                                    try {
+                                        val intent = Intent().apply {
+                                            action = android.provider.Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM
+                                            data = android.net.Uri.parse("package:${context.packageName}")
+                                        }
+                                        context.startActivity(intent)
+                                    } catch (e: Exception) {
+                                        val intent = Intent().apply {
+                                            action = android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS
+                                            data = android.net.Uri.parse("package:${context.packageName}")
+                                        }
+                                        context.startActivity(intent)
+                                    }
                                 }
-                                context.startActivity(intent)
                             }
                         }
-                    }
+                    )
                 }
-            )
 
-            // API Update Interval Settings
-            UpdateIntervalSettingsCard(
-                currentInterval = state.apiUpdateInterval,
-                onIntervalChange = { viewModel.onEvent(SettingsEvent.OnApiUpdateIntervalChange(it)) }
-            )
+                SettingsTab.DATA_UPDATE -> {
+                    UpdateIntervalSettingsCard(
+                        currentInterval = state.apiUpdateInterval,
+                        onIntervalChange = { viewModel.onEvent(SettingsEvent.OnApiUpdateIntervalChange(it)) }
+                    )
+                }
+            }
 
-            // App version info
+            // App version info - Her zaman göster
             AppInfoCard(appVersion = appVersion.toString())
 
-            // Reset to defaults button - Toolbar'a taşındığı için kaldırıldı
+            // Alt boşluk
             Spacer(modifier = Modifier.height(16.dp))
         }
     }
 }
 
+// Tab enum'ı
+enum class SettingsTab {
+    NOTIFICATIONS,
+    DATA_UPDATE
+}
+
+@Composable
+fun SettingsTabSelector(
+    selectedTab: SettingsTab,
+    onTabSelected: (SettingsTab) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val tabs = listOf(
+        SettingsTab.NOTIFICATIONS to R.string.notification_settings,
+        SettingsTab.DATA_UPDATE to R.string.data_update_frequency
+    )
+
+    Card(
+        modifier = modifier.fillMaxWidth(),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(4.dp),
+            horizontalArrangement = Arrangement.spacedBy(4.dp)
+        ) {
+            tabs.forEach { (tab, titleRes) ->
+                val isSelected = selectedTab == tab
+
+                Surface(
+                    modifier = Modifier
+                        .weight(1f)
+                        .clip(RoundedCornerShape(8.dp))
+                        .clickable { onTabSelected(tab) },
+                    color = if (isSelected) {
+                        when (tab) {
+                            SettingsTab.NOTIFICATIONS -> MaterialTheme.colorScheme.primary
+                            SettingsTab.DATA_UPDATE -> MaterialTheme.colorScheme.secondary
+                        }
+                    } else {
+                        Color.Transparent
+                    },
+                    border = if (isSelected) null else BorderStroke(
+                        1.dp,
+                        Color.Gray.copy(alpha = 0.3f)
+                    )
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .padding(vertical = 12.dp, horizontal = 8.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            Icon(
+                                imageVector = when (tab) {
+                                    SettingsTab.NOTIFICATIONS -> Icons.Default.Notifications
+                                    SettingsTab.DATA_UPDATE -> Icons.Default.Speed
+                                },
+                                contentDescription = null,
+                                tint = if (isSelected) White else Color.Gray,
+                                modifier = Modifier.size(18.dp)
+                            )
+
+                            Text(
+                                text = UiText.stringResource(titleRes).asString(),
+                                color = if (isSelected) White else Color.Gray,
+                                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
+                                style = MaterialTheme.typography.bodyMedium,
+                                textAlign = TextAlign.Center,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis
+                            )
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
 
 @Composable
 fun LanguageSettingsCard(

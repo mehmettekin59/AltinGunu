@@ -26,6 +26,7 @@ import com.mehmettekin.altingunu.utils.Constraints
 import com.mehmettekin.altingunu.utils.ResultState
 import com.mehmettekin.altingunu.utils.UiText
 import com.mehmettekin.altingunu.utils.ValueFormatter
+import com.mehmettekin.altingunu.utils.convertNumerals
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -213,7 +214,7 @@ class ResultsViewModel @Inject constructor(
         currentY += 20
 
         canvas.drawText(UiText.stringResource(R.string.participant_count).asString(context), 50f, currentY, paint)
-        canvas.drawText("${settings.participantCount}", 250f, currentY, paint) // Adjust X position
+        canvas.drawText("${settings.participantCount}".convertNumerals(), 250f, currentY, paint) // Adjust X position
         currentY += 20
 
         // Add Current Unit Price if applicable <-- NEW
@@ -245,7 +246,7 @@ class ResultsViewModel @Inject constructor(
         // Format current date
         val currentDate = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(Date())
         canvas.drawText(UiText.stringResource(R.string.creation_date).asString(context), 50f, currentY, paint)
-        canvas.drawText(currentDate, 250f, currentY, paint) // Adjust X position
+        canvas.drawText(currentDate.convertNumerals(), 250f, currentY, paint) // Adjust X position
         currentY += 40 // Add extra space before the table
 
         // Draw table header
@@ -290,7 +291,7 @@ class ResultsViewModel @Inject constructor(
             }
 
             // Adjusted X positions for table content
-            canvas.drawText("${index + 1}", 50f, y, paint)
+            canvas.drawText("${index + 1}".convertNumerals(), 50f, y, paint)
             canvas.drawText(result.participantName, 100f, y, paint)
             canvas.drawText(result.month, 350f, y, paint)
             // Use result.amount which is the stored monthly value
