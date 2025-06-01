@@ -1,5 +1,7 @@
 package com.mehmettekin.altingunu.utils
 
+
+
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.MaterialTheme
@@ -28,11 +30,10 @@ fun NumeralTextField(
     keyboardType: KeyboardType = KeyboardType.Decimal,
     leadingIcon: @Composable (() -> Unit)? = null
 ) {
-    var displayValue by remember(value) {
-        mutableStateOf(value.convertNumerals())
-    }
+    // Display value - kullanıcının gördüğü değer
+    var displayValue by remember { mutableStateOf("") }
 
-    // Value değiştiğinde display value'yu güncelle
+    // Value değiştiğinde display value'yu dil ayarına göre güncelle
     LaunchedEffect(value) {
         displayValue = value.convertNumerals()
     }
@@ -45,8 +46,10 @@ fun NumeralTextField(
 
             // Sayı formatını kontrol et
             if (normalizedValue.isEmpty() || normalizedValue.toDoubleOrNull() != null) {
-                displayValue = newDisplayValue
-                onValueChange(normalizedValue) // Normalize edilmiş değeri geri döndür
+                // Display value'yu güncelle - anında görsel değişiklik için
+                displayValue = normalizedValue.convertNumerals()
+                // Normalize edilmiş değeri geri döndür (state'e kaydedilecek)
+                onValueChange(normalizedValue)
             }
         },
         label = {

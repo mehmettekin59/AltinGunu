@@ -24,8 +24,9 @@ class AltinGunuApplication: Application() {
 
     override fun onCreate() {
         super.onCreate()
-        // ✅ WorkManager kaldırıldı - sorun yok!
-        android.util.Log.d("AltinGunuApp", "Application started successfully")
+        NumeralHelper.setLanguage(currentLanguage)
+        RTLHelper.setLanguage(currentLanguage)
+        Constraints.setLanguage(currentLanguage) // ✅ EKSIK OLAN SATIR
     }
 
     private fun loadLanguageSync(context: Context): String {
@@ -51,6 +52,9 @@ class AltinGunuApplication: Application() {
 
         // RTLHelper'a da dili bildir
         RTLHelper.setLanguage(languageCode)
+
+        // ✅ EKSIK OLAN SATIR
+        Constraints.setLanguage(languageCode)
 
         // SharedPreferences'a da kaydet
         val prefs = getSharedPreferences("app_prefs", Context.MODE_PRIVATE)

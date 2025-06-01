@@ -3,7 +3,6 @@ package com.mehmettekin.altingunu
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -17,11 +16,13 @@ import androidx.navigation.compose.rememberNavController
 import com.mehmettekin.altingunu.domain.repository.UserPreferencesRepository
 import com.mehmettekin.altingunu.presentation.navigation.SetupNavGraph
 import com.mehmettekin.altingunu.ui.theme.AltinGunuTheme
+import com.mehmettekin.altingunu.utils.Constraints
 import com.mehmettekin.altingunu.utils.LocaleHelper
+import com.mehmettekin.altingunu.utils.NumeralHelper
+import com.mehmettekin.altingunu.utils.RTLHelper
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
-import org.bouncycastle.oer.its.EndEntityType.app
 import javax.inject.Inject
 
 
@@ -64,7 +65,9 @@ class MainActivity : ComponentActivity() {
                 userPreferencesRepository.setLanguage(detectedLanguage)
                 altinGunuApp.setCurrentLanguage(detectedLanguage)
                 userPreferencesRepository.setFirstLaunchCompleted()
-
+                NumeralHelper.setLanguage(detectedLanguage)
+                RTLHelper.setLanguage(detectedLanguage)
+                Constraints.setLanguage(detectedLanguage) // ✅ EKSIK OLAN SATIR
                 // Aktiviteyi yeniden başlat
                 recreateActivity()
                 return@launch
@@ -74,9 +77,15 @@ class MainActivity : ComponentActivity() {
             val storedLanguage = userPreferencesRepository.getLanguage().first()
             if (altinGunuApp.currentLanguage != storedLanguage) {
                 altinGunuApp.setCurrentLanguage(storedLanguage)
+                NumeralHelper.setLanguage(storedLanguage)
+                RTLHelper.setLanguage(storedLanguage)
+                Constraints.setLanguage(storedLanguage)
                 recreateActivity()
                 return@launch
             }
+            NumeralHelper.setLanguage(altinGunuApp.currentLanguage)
+            RTLHelper.setLanguage(altinGunuApp.currentLanguage)
+            Constraints.setLanguage(altinGunuApp.currentLanguage)
 
             // Her şey tutarlıysa UI'ı göster
             keepSplashScreen = false

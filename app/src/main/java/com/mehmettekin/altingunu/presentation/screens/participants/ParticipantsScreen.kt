@@ -669,7 +669,7 @@ fun ModernDateSelector(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = yearFormat.format(displayCalendar.time),
+                    text = yearFormat.format(displayCalendar.time).convertNumerals(),
                     fontWeight = FontWeight.Medium,
                     color = if (isSystemInDarkTheme()) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.onTertiary
                 )
@@ -797,7 +797,7 @@ fun ModernDateSelector(
 
         DateSelectorDialog(
             title = UiText.stringResource(R.string.select_year).asString(),
-            options = yearOptions.map { it.toString() },
+            options = yearOptions.map { it.toString().convertNumerals() },
             selectedIndex = yearOptions.indexOf(selectedYear),
             onOptionSelected = { index ->
                 val newYear = yearOptions[index]
@@ -1095,7 +1095,7 @@ fun ConfirmationDialog(
 
                     ConfirmationItem(
                         label = UiText.stringResource(R.string.starting_date).asString(),
-                        value = "${state.startDay}/${state.startMonth}/${state.startYear}"
+                        value = "${state.startDay}/${state.startMonth}/${state.startYear}".convertNumerals()
                     )
                 }
             },
