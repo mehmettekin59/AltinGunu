@@ -29,7 +29,7 @@ fun NumeralTextField(
     leadingIcon: @Composable (() -> Unit)? = null
 ) {
     var displayValue by remember(value) {
-        mutableStateOf(NumeralHelper.formatForDisplay(value))
+        mutableStateOf(value.convertNumerals())
     }
 
     // Value değiştiğinde display value'yu güncelle
