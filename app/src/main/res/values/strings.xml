@@ -52,6 +52,14 @@ Hazırlıklarınızı tamamlamayı unutmayın!</string>
     <string name="payment_date">Ödeme Tarihi</string>
     <string name="next_payment_date">Sonraki Ödeme: %1$s</string>
 
+    <!-- Settings Options -->
+    <string name="time_15_seconds">15 San</string>
+    <string name="time_30_seconds">30 San</string>
+    <string name="time_1_minutes">1 Dk</string>
+    <string name="time_2_minutes">2 Dk</string>
+    <string name="time_5_minutes">5 Dk</string>
+    <string name="time_10_minutes">10 Dk</string>
+
 
 
 

@@ -24,12 +24,6 @@ data class ParticipantsScreenWholeInformation(
         }
     }
 
-    // ✅ YENİ: Tam tarih string'i döndüren helper
-    fun getStartDateString(): String {
-        return String.format("%02d/%02d/%d", startDay, startMonth, startYear)
-    }
-
-    // ✅ YENİ: Bir sonraki ödeme tarihini hesaplayan helper
     fun getNextPaymentDate(monthOffset: Int = 0): Triple<Int, Int, Int> {
         val calendar = java.util.Calendar.getInstance()
         calendar.set(startYear, startMonth - 1, startDay) // 0-based month

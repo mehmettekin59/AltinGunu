@@ -415,12 +415,12 @@ fun UpdateIntervalSettingsCard(
 ) {
     // Önceden tanımlanmış yenileme aralığı seçenekleri
     val updateOptions = listOf(
-        15 to "15 sn",
-        30 to "30 sn",
-        60 to "1 dk",
-        120 to "2 dk",
-        300 to "5 dk",
-        600 to "10 dk"
+        15 to UiText.stringResource(R.string.time_15_seconds).asString(),
+        30 to UiText.stringResource(R.string.time_30_seconds).asString(),
+        60 to UiText.stringResource(R.string.time_1_minutes).asString(),
+        120 to UiText.stringResource(R.string.time_2_minutes).asString(),
+        300 to UiText.stringResource(R.string.time_5_minutes).asString(),
+        600 to UiText.stringResource(R.string.time_10_minutes).asString(),
     )
 
     Card(

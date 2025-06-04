@@ -3,10 +3,13 @@ package com.mehmettekin.altingunu.di
 import android.content.Context
 import com.mehmettekin.altingunu.AltinGunuApplication
 import com.mehmettekin.altingunu.data.remote.KapaliCarsiApi
+import com.mehmettekin.altingunu.data.repository.DrawGroupRepositoryImpl
 import com.mehmettekin.altingunu.data.repository.DrawRepositoryImpl
 import com.mehmettekin.altingunu.data.repository.KapaliCarsiRepositoryImpl
 import com.mehmettekin.altingunu.data.repository.UserPreferencesRepositoryImpl
+import com.mehmettekin.altingunu.domain.repository.DrawGroupRepository
 import com.mehmettekin.altingunu.domain.repository.DrawRepository
+import com.mehmettekin.altingunu.domain.repository.FcmRepository
 import com.mehmettekin.altingunu.domain.repository.KapaliCarsiRepository
 import com.mehmettekin.altingunu.domain.repository.UserPreferencesRepository
 import com.squareup.moshi.Moshi
@@ -23,7 +26,7 @@ import retrofit2.converter.moshi.MoshiConverterFactory
 import javax.inject.Singleton
 import androidx.lifecycle.ProcessLifecycleOwner
 import androidx.lifecycle.lifecycleScope
-import com.mehmettekin.altingunu.notification.GoldDayNotificationManager
+import com.mehmettekin.altingunu.data.local.FcmRepositoryImpl
 
 @Module
 @InstallIn(SingletonComponent::class)
@@ -37,6 +40,14 @@ abstract class ApplicationModule {
 
     @Binds
     abstract fun bindUserPreferencesRepository(impl: UserPreferencesRepositoryImpl): UserPreferencesRepository
+
+    // ✅ YENİ: DrawGroup Repository
+    @Binds
+    abstract fun bindDrawGroupRepository(impl: DrawGroupRepositoryImpl): DrawGroupRepository
+
+    // ✅ YENİ: FCM Repository
+    @Binds
+    abstract fun bindFcmRepository(impl: FcmRepositoryImpl): FcmRepository
 
     companion object {
         @Provides
@@ -69,13 +80,7 @@ abstract class ApplicationModule {
             return context.applicationContext as AltinGunuApplication
         }
 
-        @Provides
-        @Singleton
-        fun provideGoldDayNotificationManager(
-            @ApplicationContext context: Context
-        ): GoldDayNotificationManager {
-            return GoldDayNotificationManager(context)
-        }
+        // ✅ KALDIRILDI: GoldDayNotificationManager provider'ı silindi
+        // ✅ YENİ: FCM Service için gerekli provider'lar eklenebilir
     }
 }
-

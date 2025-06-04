@@ -50,6 +50,13 @@ Do not forget to complete your preparations!</string>
     <string name="reminder_3_days">3 days before</string>
     <string name="reminder_1_week">1 week before</string>
 
+    <string name="time_15_seconds">15 sec</string>
+    <string name="time_30_seconds">30 sec</string>
+    <string name="time_1_minutes">1 min</string>
+    <string name="time_2_minutes">2 min</string>
+    <string name="time_5_minutes">5 min</string>
+    <string name="time_10_minutes">10 min</string>
+
     <!-- Results with Date -->
     <string name="payment_date">Payment Date</string>
     <string name="next_payment_date">Next Payment: %1$s</string>

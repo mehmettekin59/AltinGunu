@@ -48,6 +48,13 @@
     <string name="reminder_3_days">قبل 3 أيام</string>
     <string name="reminder_1_week">قبل أسبوع</string>
 
+    <string name="time_15_seconds">١٥ ثانية</string>
+    <string name="time_30_seconds">٣٠ ثانية</string>
+    <string name="time_1_minutes">١ دقيقة</string>
+    <string name="time_2_minutes">٢ دقيقة</string>
+    <string name="time_5_minutes">٥ دقائق</string>
+    <string name="time_10_minutes">١٠ دقائق</string>
+
     <!-- Results with Date -->
     <string name="payment_date">تاريخ الدفع</string>
     <string name="next_payment_date">الدفع التالي: %1$s</string>

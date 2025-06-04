@@ -7,6 +7,7 @@ import androidx.datastore.preferences.core.PreferenceDataStoreFactory
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.emptyPreferences
 import androidx.datastore.preferences.preferencesDataStoreFile
+import com.mehmettekin.altingunu.data.local.DrawGroupsDataStore
 import com.mehmettekin.altingunu.data.local.DrawResultsDataStore
 import com.mehmettekin.altingunu.data.local.SettingsDataStore
 import com.squareup.moshi.Moshi
@@ -30,6 +31,10 @@ annotation class SettingsDataStoreQualifier
 @Retention(AnnotationRetention.BINARY)
 annotation class DrawResultsDataStoreQualifier
 
+@Qualifier
+@Retention(AnnotationRetention.BINARY)
+annotation class DrawGroupsDataStoreQualifier
+
 @Module
 @InstallIn(SingletonComponent::class)
 object DataStoreModule {
@@ -46,6 +51,14 @@ object DataStoreModule {
     @DrawResultsDataStoreQualifier
     fun provideDrawResultsDataStore(@ApplicationContext context: Context): DataStore<Preferences> {
         return createDataStore(context, "draw_results_datastore")
+    }
+
+
+    @Singleton
+    @Provides
+    @DrawGroupsDataStoreQualifier
+    fun provideDrawGroupsDataStore(@ApplicationContext context: Context): DataStore<Preferences> {
+        return createDataStore(context, "draw_groups_datastore")
     }
 
     private fun createDataStore(context: Context, fileName: String): DataStore<Preferences> {
@@ -73,5 +86,15 @@ object DataStoreModule {
         moshi: Moshi
     ): DrawResultsDataStore {
         return DrawResultsDataStore(dataStore, moshi)
+    }
+
+
+    @Singleton
+    @Provides
+    fun provideDrawGroupsDataStoreImpl(
+        @DrawGroupsDataStoreQualifier dataStore: DataStore<Preferences>,
+        moshi: Moshi
+    ): DrawGroupsDataStore {
+        return DrawGroupsDataStore(dataStore, moshi)
     }
 }

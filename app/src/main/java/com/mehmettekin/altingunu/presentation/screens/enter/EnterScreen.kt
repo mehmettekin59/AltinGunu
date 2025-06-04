@@ -255,7 +255,7 @@ fun EnterScreen(
             Spacer(modifier = Modifier.height(32.dp))
 
             GoldDayLotteryCard(
-                onClick = { navController.navigate(Screen.Participants.route) }
+                onClick = { navController.navigate(Screen.DrawGroups.route) }
             )
         }
     }

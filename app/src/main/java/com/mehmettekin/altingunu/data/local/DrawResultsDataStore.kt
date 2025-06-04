@@ -52,11 +52,6 @@ class DrawResultsDataStore @Inject constructor(
         }.first()
     }
 
-    suspend fun clearDrawResults() {
-        dataStore.edit { preferences ->
-            preferences[drawResultsKey] = "[]"
-        }
-    }
 
     // Participants operations
     suspend fun saveParticipants(participants: List<Participant>) {
@@ -76,6 +71,12 @@ class DrawResultsDataStore @Inject constructor(
     suspend fun saveDrawSettings(settings: ParticipantsScreenWholeInformation) {
         dataStore.edit { preferences ->
             preferences[drawSettingsKey] = drawSettingsAdapter.toJson(settings)
+        }
+    }
+
+    suspend fun clearDrawResults() {
+        dataStore.edit { preferences ->
+            preferences[drawResultsKey] = "[]"
         }
     }
 
