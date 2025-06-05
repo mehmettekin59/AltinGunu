@@ -1,17 +1,7 @@
 package com.mehmettekin.altingunu.presentation.screens.settings
 
-import android.Manifest
-import android.app.Activity
-import android.app.AlarmManager
-import android.content.Context
-import android.content.Intent
-import android.content.pm.PackageManager
-import android.os.Build
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -22,26 +12,20 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.core.content.ContextCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.mehmettekin.altingunu.MainActivity
 import com.mehmettekin.altingunu.presentation.screens.common.CommonTopAppBar
 import com.mehmettekin.altingunu.ui.theme.Gold
-import com.mehmettekin.altingunu.ui.theme.NavyBlue
-import com.mehmettekin.altingunu.ui.theme.White
 import com.mehmettekin.altingunu.utils.UiText
 import com.mehmettekin.altingunu.R
-import com.mehmettekin.altingunu.notification.NotificationSettingsCard
+import com.mehmettekin.altingunu.ui.theme.White
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -53,247 +37,100 @@ fun SettingsScreen(
     val context = LocalContext.current
     val snackbarHostState = remember { SnackbarHostState() }
 
-    // Tab seçimi için state
-    var selectedTab by remember { mutableStateOf(SettingsTab.NOTIFICATIONS) }
-
-    // ✅ YENİ: İzin isteme launcher'ları
-    val requestNotificationPermissionLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.RequestPermission()
-    ) { isGranted ->
-        if (!isGranted) {
-            snackbarHostState.currentSnackbarData?.dismiss()
-            viewModel.onEvent(SettingsEvent.OnErrorDismiss)
-            viewModel.setError(UiText.stringResource(R.string.notification_permission_denied))
-        }
-    }
-
-    // ScrollBehavior için gerekli
-    val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
-
-    // Uygulama versiyon bilgisini al
-    val appVersion = remember {
-        try {
-            val pInfo = context.packageManager.getPackageInfo(context.packageName, 0)
-            pInfo.versionName
-        } catch (e: Exception) {
-            "1.0.0" // Hata durumunda varsayılan değer
-        }
-    }
-
-    // Dil değişikliği için LaunchedEffect
+    // Language change effect
     LaunchedEffect(state.languageChanged) {
         if (state.languageChanged) {
-            // Mevcut aktiviteyi yeniden başlat
-            val intent = Intent(context, MainActivity::class.java).apply {
-                addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK)
-            }
-            context.startActivity(intent)
-
-            if (context is Activity) {
-                context.finish()
-            }
-            // Bayrağı sıfırla
+            // Activity'yi yeniden başlat
+            (context as? MainActivity)?.recreate()
             viewModel.resetLanguageChanged()
         }
     }
 
-    // Handle error messages
+    // Error handling
     LaunchedEffect(state.error) {
         state.error?.let { error ->
-            snackbarHostState.showSnackbar(error.asString(context))
-            viewModel.onEvent(SettingsEvent.OnErrorDismiss)
+            snackbarHostState.showSnackbar(
+                message = error.asString(context),
+                duration = SnackbarDuration.Short
+            )
         }
     }
+
+    val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
 
     Scaffold(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
             CommonTopAppBar(
-                title = UiText.stringResource(R.string.title_settings).asString(),
-                navController = navController,
-                isSettingsScreen = true,
-                onBackPressed = { navController.navigateUp() },
-                actions = {
-                    IconButton(onClick = { viewModel.onEvent(SettingsEvent.OnDefaultsReset) }) {
-                        Icon(
-                            imageVector = Icons.Default.Refresh,
-                            contentDescription = UiText.stringResource(R.string.title_default_settings).asString(),
-                            tint = White
-                        )
-                    }
-                }
+                title = UiText.stringResource(R.string.settings),
+                onBackClick = { navController.navigateUp() },
+                scrollBehavior = scrollBehavior
             )
         },
         snackbarHost = { SnackbarHost(snackbarHostState) }
-    ) { paddingValues ->
+    ) { innerPadding ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(paddingValues)
+                .padding(innerPadding)
+                .background(MaterialTheme.colorScheme.background)
                 .verticalScroll(rememberScrollState())
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            // Language settings - Her zaman göster
+            // Language settings
             LanguageSettingsCard(
                 selectedLanguage = state.selectedLanguage,
                 onLanguageChange = { viewModel.onEvent(SettingsEvent.OnLanguageChange(it)) }
             )
 
-            // Tab Selector
-            SettingsTabSelector(
-                selectedTab = selectedTab,
-                onTabSelected = { selectedTab = it }
+            // Update interval settings
+            UpdateIntervalSettingsCard(
+                currentInterval = state.apiUpdateInterval,
+                onIntervalChange = { viewModel.onEvent(SettingsEvent.OnApiUpdateIntervalChange(it)) }
             )
 
-            // Selected content based on tab
-            when (selectedTab) {
-                SettingsTab.NOTIFICATIONS -> {
-                    NotificationSettingsCard(
-                        isReminderEnabled = state.isReminderEnabled,
-                        reminderDaysBefore = state.reminderDaysBefore,
-                        onReminderToggle = { viewModel.onEvent(SettingsEvent.OnReminderToggle(it)) },
-                        onReminderDaysChange = { viewModel.onEvent(SettingsEvent.OnReminderDaysChange(it)) },
-                        onTestNotification = { viewModel.onEvent(SettingsEvent.OnTestNotification) },
-                        onRequestPermissions = {
-                            // İzin isteme logic'i NotificationSettingsCard içinde zaten mevcut
-                            // Sadece launcher'ı burada çağırıyoruz
-                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                                val hasNotificationPermission = ContextCompat.checkSelfPermission(
-                                    context,
-                                    Manifest.permission.POST_NOTIFICATIONS
-                                ) == PackageManager.PERMISSION_GRANTED
-
-                                if (!hasNotificationPermission) {
-                                    requestNotificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
-                                    return@NotificationSettingsCard
-                                }
-                            }
-
-                            // Exact alarm için settings'e yönlendirme
-                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                                val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
-                                if (!alarmManager.canScheduleExactAlarms()) {
-                                    try {
-                                        val intent = Intent().apply {
-                                            action = android.provider.Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM
-                                            data = android.net.Uri.parse("package:${context.packageName}")
-                                        }
-                                        context.startActivity(intent)
-                                    } catch (e: Exception) {
-                                        val intent = Intent().apply {
-                                            action = android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS
-                                            data = android.net.Uri.parse("package:${context.packageName}")
-                                        }
-                                        context.startActivity(intent)
-                                    }
-                                }
-                            }
-                        }
-                    )
-                }
-
-                SettingsTab.DATA_UPDATE -> {
-                    UpdateIntervalSettingsCard(
-                        currentInterval = state.apiUpdateInterval,
-                        onIntervalChange = { viewModel.onEvent(SettingsEvent.OnApiUpdateIntervalChange(it)) }
-                    )
-                }
-            }
-
-            // App version info - Her zaman göster
-            AppInfoCard(appVersion = appVersion.toString())
-
-            // Alt boşluk
-            Spacer(modifier = Modifier.height(16.dp))
-        }
-    }
-}
-
-// Tab enum'ı
-enum class SettingsTab {
-    NOTIFICATIONS,
-    DATA_UPDATE
-}
-
-@Composable
-fun SettingsTabSelector(
-    selectedTab: SettingsTab,
-    onTabSelected: (SettingsTab) -> Unit,
-    modifier: Modifier = Modifier
-) {
-    val tabs = listOf(
-        SettingsTab.NOTIFICATIONS to R.string.notification_settings,
-        SettingsTab.DATA_UPDATE to R.string.data_update_frequency
-    )
-
-    Card(
-        modifier = modifier.fillMaxWidth(),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(4.dp),
-            horizontalArrangement = Arrangement.spacedBy(4.dp)
-        ) {
-            tabs.forEach { (tab, titleRes) ->
-                val isSelected = selectedTab == tab
-
-                Surface(
+            // Reset to defaults button
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
+            ) {
+                Button(
+                    onClick = { viewModel.onEvent(SettingsEvent.OnDefaultsReset) },
                     modifier = Modifier
-                        .weight(1f)
-                        .clip(RoundedCornerShape(8.dp))
-                        .clickable { onTabSelected(tab) },
-                    color = if (isSelected) {
-                        when (tab) {
-                            SettingsTab.NOTIFICATIONS -> MaterialTheme.colorScheme.primary
-                            SettingsTab.DATA_UPDATE -> MaterialTheme.colorScheme.secondary
-                        }
-                    } else {
-                        Color.Transparent
-                    },
-                    border = if (isSelected) null else BorderStroke(
-                        1.dp,
-                        Color.Gray.copy(alpha = 0.3f)
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Gold
                     )
                 ) {
-                    Box(
-                        modifier = Modifier
-                            .padding(vertical = 12.dp, horizontal = 8.dp),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(8.dp)
-                        ) {
-                            Icon(
-                                imageVector = when (tab) {
-                                    SettingsTab.NOTIFICATIONS -> Icons.Default.Notifications
-                                    SettingsTab.DATA_UPDATE -> Icons.Default.Speed
-                                },
-                                contentDescription = null,
-                                tint = if (isSelected) White else Color.Gray,
-                                modifier = Modifier.size(18.dp)
-                            )
+                    Icon(
+                        imageVector = Icons.Default.RestartAlt,
+                        contentDescription = null,
+                        modifier = Modifier.size(20.dp)
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(text = UiText.stringResource(R.string.reset_to_defaults).asString())
+                }
+            }
 
-                            Text(
-                                text = UiText.stringResource(titleRes).asString(),
-                                color = if (isSelected) White else Color.Gray,
-                                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
-                                style = MaterialTheme.typography.bodyMedium,
-                                textAlign = TextAlign.Center,
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis
-                            )
-                        }
-                    }
+            // Loading indicator
+            if (state.isLoading) {
+                Box(
+                    modifier = Modifier.fillMaxWidth(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    CircularProgressIndicator(
+                        color = Gold,
+                        modifier = Modifier.size(24.dp)
+                    )
                 }
             }
         }
     }
 }
+
 
 @Composable
 fun LanguageSettingsCard(
