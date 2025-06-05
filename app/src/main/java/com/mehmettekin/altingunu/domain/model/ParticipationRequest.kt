@@ -4,12 +4,12 @@ import androidx.compose.runtime.Immutable
 
 @Immutable
 data class ParticipationRequest(
-    val id: String,
-    val drawGroupId: String,
-    val participantName: String,
-    val fcmToken: String,
-    val inviteCode: String,
+    val id: String = "",
+    val drawGroupId: String = "",
+    val participantName: String = "",
+    val fcmToken: String = "",
+    val inviteCode: String = "",
+    val status: String = "pending",
     val requestDate: Long = System.currentTimeMillis(),
-    val status: ParticipationStatus = ParticipationStatus.PENDING,
-    val deviceInfo: String = ""
+    val responseDate: Long? = null
 )

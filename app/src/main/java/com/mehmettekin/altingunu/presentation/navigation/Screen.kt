@@ -14,7 +14,14 @@ sealed class Screen(val route: String) {
         fun createRoute(groupId: String) = "results_screen/$groupId"
     }
     object Settings : Screen("settings_screen")
-    object InviteJoin : Screen("invite_join_screen/{inviteCode}") { // ✅ YENİ: Davet ekranı
-        fun createRoute(inviteCode: String) = "invite_join_screen/$inviteCode"
+
+    object InviteJoin : Screen("invite_join/{inviteCode}") {
+        fun createRoute(inviteCode: String) = "invite_join/$inviteCode"
     }
+
+    object DrawGroupDetail : Screen("draw_group_detail/{groupId}") {
+        fun createRoute(groupId: String) = "draw_group_detail/$groupId"
+    }
+
+    object DrawGroupList : Screen("draw_group_list")
 }

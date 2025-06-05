@@ -105,4 +105,10 @@ class SettingsDataStore @Inject constructor(
             preferences[reminderDaysBeforeKey] ?: Constraints.DefaultSettings.DEFAULT_REMINDER_DAYS_BEFORE
         }
     }
+
+    suspend fun getReminderEnabled(groupId: String): Boolean
+    suspend fun setReminderEnabled(groupId: String, enabled: Boolean)
+    suspend fun getReminderDaysBefore(groupId: String): Int
+    suspend fun setReminderDaysBefore(groupId: String, days: Int)
+
 }

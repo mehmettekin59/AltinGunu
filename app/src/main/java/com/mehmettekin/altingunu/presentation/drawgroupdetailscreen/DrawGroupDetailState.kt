@@ -1,0 +1,15 @@
+package com.mehmettekin.altingunu.presentation.drawgroupdetailscreen
+
+import com.mehmettekin.altingunu.domain.model.DrawGroup
+import com.mehmettekin.altingunu.domain.model.ParticipationRequest
+
+data class DrawGroupDetailState(
+    val drawGroup: DrawGroup? = null,
+    val pendingRequests: List<ParticipationRequest> = emptyList(),
+    val inviteCode: String? = null,
+    val isLoading: Boolean = false,
+    val message: String? = null,
+    val showReminderDialog: Boolean = false,
+    val isReminderEnabled: Boolean = true,
+    val reminderDaysBefore: Int = 1
+)

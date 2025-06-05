@@ -3,6 +3,8 @@ package com.mehmettekin.altingunu.presentation.screens.participants
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.mehmettekin.altingunu.R
+import com.mehmettekin.altingunu.domain.model.DrawGroup
+import com.mehmettekin.altingunu.domain.model.DrawInvitation
 import com.mehmettekin.altingunu.domain.model.ItemType
 import com.mehmettekin.altingunu.domain.model.Participant
 import com.mehmettekin.altingunu.domain.model.ParticipantsScreenWholeInformation
@@ -22,6 +24,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.time.YearMonth
+import java.util.UUID
 import javax.inject.Inject
 
 @HiltViewModel
@@ -258,6 +261,81 @@ class ParticipantsViewModel @Inject constructor(
 
             _navigationEvent.emit(Unit)
         }
+    }
+
+
+    private fun saveDrawGroup() {
+        viewModelScope.launch {
+            _state.update { it.copy(isLoading = true) }
+
+            val participantCount = _state.value.participantCount.toIntOrNull() ?: 0
+            val monthlyAmount = _state.value.monthlyAmount.toDoubleOrNull() ?: 0.0
+            val durationMonths = _state.value.durationMonths.toIntOrNull() ?: 0
+
+            val settings = ParticipantsScreenWholeInformation(
+                participantCount = participantCount,
+                participants = _state.value.participants,
+                itemType = _state.value.selectedItemType,
+                specificItem = _state.value.selectedSpecificItem,
+                monthlyAmount = monthlyAmount,
+                durationMonths = durationMonths,
+                startDay = _state.value.startDay,
+                startMonth = _state.value.startMonth,
+                startYear = _state.value.startYear
+            )
+
+            val drawGroup = DrawGroup(
+                id = _state.value.groupId,
+                name = _state.value.groupName,
+                description = _state.value.groupDescription,
+                settings = settings,
+                participants = _state.value.participants,
+                results = emptyList(),
+                fcmTokens = emptyList()
+            )
+
+            when (val result = drawGroupRepository.createDrawGroup(drawGroup)) {
+                is ResultState.Success -> {
+                    val groupId = result.data
+
+                    // Davet oluştur
+                    val invitation = DrawInvitation(
+                        id = UUID.randomUUID().toString(),
+                        drawGroupId = groupId,
+                        drawGroupName = drawGroup.name,
+                        inviterName = "Grup Yöneticisi", // Kullanıcı adı alınabilir
+                        inviteCode = generateInviteCode(),
+                        expirationDate = System.currentTimeMillis() + (7 * 24 * 60 * 60 * 1000) // 7 gün
+                    )
+
+                    fcmRepository.createInvitation(invitation)
+
+                    _state.update { it.copy(
+                        isLoading = false,
+                        savedGroupId = groupId,
+                        inviteCode = invitation.inviteCode
+                    ) }
+
+                    _navigationEvent.emit(ParticipantsNavigation.ToInviteScreen(invitation.inviteCode))
+                }
+                is ResultState.Error -> {
+                    _state.update { it.copy(
+                        isLoading = false,
+                        error = result.message
+                    ) }
+                }
+                else -> {
+                    _state.update { it.copy(isLoading = false) }
+                }
+            }
+        }
+    }
+
+    private fun generateInviteCode(): String {
+        val chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+        return (1..8)
+            .map { chars.random() }
+            .joinToString("")
     }
 
     private fun handleConfirmDialogDismiss() {
