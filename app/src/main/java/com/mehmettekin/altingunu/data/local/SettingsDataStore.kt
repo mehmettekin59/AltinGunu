@@ -93,18 +93,7 @@ class SettingsDataStore @Inject constructor(
         }
     }
 
-    // ✅ Flow versiyonları da eklenebilir (opsiyonel)
-    fun getReminderEnabledFlow(): Flow<Boolean> {
-        return dataStore.data.map { preferences ->
-            preferences[isReminderEnabledKey] ?: Constraints.DefaultSettings.DEFAULT_REMINDER_ENABLED
-        }
-    }
 
-    fun getReminderDaysBeforeFlow(): Flow<Int> {
-        return dataStore.data.map { preferences ->
-            preferences[reminderDaysBeforeKey] ?: Constraints.DefaultSettings.DEFAULT_REMINDER_DAYS_BEFORE
-        }
-    }
 
     suspend fun getReminderEnabled(groupId: String): Boolean
     suspend fun setReminderEnabled(groupId: String, enabled: Boolean)

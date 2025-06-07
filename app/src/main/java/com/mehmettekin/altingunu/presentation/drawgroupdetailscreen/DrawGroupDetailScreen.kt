@@ -1,5 +1,6 @@
 package com.mehmettekin.altingunu.presentation.drawgroupdetailscreen
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -20,7 +21,10 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.mehmettekin.altingunu.R
 import com.mehmettekin.altingunu.domain.model.DrawGroup
+import com.mehmettekin.altingunu.domain.model.DrawResult
 import com.mehmettekin.altingunu.domain.model.ItemType
+import com.mehmettekin.altingunu.domain.model.Participant
+import com.mehmettekin.altingunu.domain.model.ParticipationRequest
 import com.mehmettekin.altingunu.presentation.screens.common.CommonTopAppBar
 import com.mehmettekin.altingunu.ui.theme.Gold
 import com.mehmettekin.altingunu.ui.theme.NavyBlue
@@ -260,7 +264,7 @@ private fun GroupInfoCard(drawGroup: DrawGroup) {
 
             InfoRow(
                 label = "Süre",
-                value = "${drawGroup.settings.durationMonths} ay".convertNumerals()
+                value = "${drawGroup.settings.durationMonths}".convertNumerals()
             )
         }
     }

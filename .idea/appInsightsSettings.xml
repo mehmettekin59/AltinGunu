@@ -22,10 +22,10 @@
             <InsightsFilterSettings>
               <option name="connection">
                 <ConnectionSetting>
-                  <option name="appId" value="PLACEHOLDER" />
-                  <option name="mobileSdkAppId" value="" />
-                  <option name="projectId" value="" />
-                  <option name="projectNumber" value="" />
+                  <option name="appId" value="com.mehmettekin.altingunu" />
+                  <option name="mobileSdkAppId" value="1:980963249210:android:636074c2ec9ac123ca3903" />
+                  <option name="projectId" value="altin-gunu-7572d" />
+                  <option name="projectNumber" value="980963249210" />
                 </ConnectionSetting>
               </option>
               <option name="signal" value="SIGNAL_UNSPECIFIED" />
