@@ -1,0 +1,66 @@
+[debug] [2025-06-07T09:40:47.706Z] ----------------------------------------------------------------------
+[debug] [2025-06-07T09:40:47.707Z] Command:       /usr/local/bin/node /usr/local/bin/firebase init functions
+[debug] [2025-06-07T09:40:47.707Z] CLI Version:   14.6.0
+[debug] [2025-06-07T09:40:47.707Z] Platform:      darwin
+[debug] [2025-06-07T09:40:47.707Z] Node Version:  v22.16.0
+[debug] [2025-06-07T09:40:47.707Z] Time:          Sat Jun 07 2025 12:40:47 GMT+0300 (GMT+03:00)
+[debug] [2025-06-07T09:40:47.707Z] ----------------------------------------------------------------------
+[debug] 
+[debug] [2025-06-07T09:40:47.775Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2025-06-07T09:40:47.776Z] > authorizing via signed-in user (mehmettekin59@gmail.com)
+[info] 
+     ######## #### ########  ######## ########     ###     ######  ########
+     ##        ##  ##     ## ##       ##     ##  ##   ##  ##       ##
+     ######    ##  ########  ######   ########  #########  ######  ######
+     ##        ##  ##    ##  ##       ##     ## ##     ##       ## ##
+     ##       #### ##     ## ######## ########  ##     ##  ######  ########
+
+You're about to initialize a Firebase project in this directory:
+
+  /Users/mehmettekin/AndroidStudioProjects/AltinGunu
+
+Before we get started, keep in mind:
+
+  * You are initializing within an existing Firebase project directory
+
+[info] 
+=== Project Setup
+[info] 
+[info] First, let's associate this project directory with a Firebase project.
+[info] You can create multiple project aliases by running firebase use --add, 
+[info] but for now we'll just set up a default project.
+[info] 
+[debug] [2025-06-07T09:40:47.776Z] Using project from CLI flag: altin-gunu-7572d
+[debug] [2025-06-07T09:40:47.777Z] Checked if tokens are valid: true, expires at: 1749292302418
+[debug] [2025-06-07T09:40:47.777Z] Checked if tokens are valid: true, expires at: 1749292302418
+[debug] [2025-06-07T09:40:47.777Z] >>> [apiv2][query] GET https://firebase.googleapis.com/v1beta1/projects/altin-gunu-7572d [none]
+[debug] [2025-06-07T09:40:48.225Z] <<< [apiv2][status] GET https://firebase.googleapis.com/v1beta1/projects/altin-gunu-7572d 200
+[debug] [2025-06-07T09:40:48.225Z] <<< [apiv2][body] GET https://firebase.googleapis.com/v1beta1/projects/altin-gunu-7572d {"projectId":"altin-gunu-7572d","projectNumber":"980963249210","displayName":"altin-gunu","name":"projects/altin-gunu-7572d","resources":{"hostingSite":"altin-gunu-7572d"},"state":"ACTIVE","etag":"1_97121115-dba6-4cde-9c54-11ec0c32b398"}
+[info] i  Using project altin-gunu-7572d (altin-gunu) 
+[info] 
+=== Functions Setup
+[debug] [2025-06-07T09:40:48.233Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2025-06-07T09:40:48.233Z] > authorizing via signed-in user (mehmettekin59@gmail.com)
+[debug] [2025-06-07T09:40:48.233Z] [iam] checking project altin-gunu-7572d for permissions ["firebase.projects.get"]
+[debug] [2025-06-07T09:40:48.233Z] Checked if tokens are valid: true, expires at: 1749292302418
+[debug] [2025-06-07T09:40:48.233Z] Checked if tokens are valid: true, expires at: 1749292302418
+[debug] [2025-06-07T09:40:48.233Z] >>> [apiv2][query] POST https://cloudresourcemanager.googleapis.com/v1/projects/altin-gunu-7572d:testIamPermissions [none]
+[debug] [2025-06-07T09:40:48.233Z] >>> [apiv2][(partial)header] POST https://cloudresourcemanager.googleapis.com/v1/projects/altin-gunu-7572d:testIamPermissions x-goog-quota-user=projects/altin-gunu-7572d
+[debug] [2025-06-07T09:40:48.233Z] >>> [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/altin-gunu-7572d:testIamPermissions {"permissions":["firebase.projects.get"]}
+[debug] [2025-06-07T09:40:49.244Z] <<< [apiv2][status] POST https://cloudresourcemanager.googleapis.com/v1/projects/altin-gunu-7572d:testIamPermissions 200
+[debug] [2025-06-07T09:40:49.245Z] <<< [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/altin-gunu-7572d:testIamPermissions {"permissions":["firebase.projects.get"]}
+[debug] [2025-06-07T09:40:49.245Z] Checked if tokens are valid: true, expires at: 1749292302418
+[debug] [2025-06-07T09:40:49.245Z] Checked if tokens are valid: true, expires at: 1749292302418
+[debug] [2025-06-07T09:40:49.245Z] Checked if tokens are valid: true, expires at: 1749292302418
+[debug] [2025-06-07T09:40:49.245Z] Checked if tokens are valid: true, expires at: 1749292302418
+[debug] [2025-06-07T09:40:49.246Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/altin-gunu-7572d/services/cloudfunctions.googleapis.com [none]
+[debug] [2025-06-07T09:40:49.246Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/altin-gunu-7572d/services/cloudfunctions.googleapis.com x-goog-quota-user=projects/altin-gunu-7572d
+[debug] [2025-06-07T09:40:49.247Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/altin-gunu-7572d/services/runtimeconfig.googleapis.com [none]
+[debug] [2025-06-07T09:40:49.247Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/altin-gunu-7572d/services/runtimeconfig.googleapis.com x-goog-quota-user=projects/altin-gunu-7572d
+[debug] [2025-06-07T09:40:50.426Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/altin-gunu-7572d/services/cloudfunctions.googleapis.com 200
+[debug] [2025-06-07T09:40:50.426Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/altin-gunu-7572d/services/cloudfunctions.googleapis.com [omitted]
+[debug] [2025-06-07T09:40:50.432Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/altin-gunu-7572d/services/runtimeconfig.googleapis.com 200
+[debug] [2025-06-07T09:40:50.432Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/altin-gunu-7572d/services/runtimeconfig.googleapis.com [omitted]
+[info] 
+Detected existing codebase(s): default
+
