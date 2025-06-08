@@ -10,7 +10,6 @@ import com.mehmettekin.altingunu.domain.model.DrawResult
 import com.mehmettekin.altingunu.domain.model.Participant
 import com.mehmettekin.altingunu.domain.model.ParticipantsScreenWholeInformation
 import com.mehmettekin.altingunu.domain.repository.DrawRepository
-import com.mehmettekin.altingunu.notification.GoldDayNotificationManager
 import com.mehmettekin.altingunu.utils.ResultState
 import com.mehmettekin.altingunu.utils.ValueFormatter
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -26,7 +25,6 @@ import javax.inject.Inject
 @HiltViewModel
 class WheelViewModel @Inject constructor(
     private val drawRepository: DrawRepository,
-    private val notificationManager: GoldDayNotificationManager,
     private val settingsDataStore: SettingsDataStore
 ) : ViewModel() {
 
@@ -200,29 +198,30 @@ class WheelViewModel @Inject constructor(
         }
     }
 
-    // ✅ TEMİZLENDİ: WorkManager referansları kaldırıldı, sadece AlarmManager kullanıyor
     private suspend fun scheduleNotifications(
         settings: ParticipantsScreenWholeInformation,
         results: List<DrawResult>
     ) {
         try {
-            // Settings'ten reminder durumunu kontrol et
-            val isReminderEnabled = settingsDataStore.isReminderEnabled()
-
-            if (isReminderEnabled) {
-                val reminderDaysBefore = settingsDataStore.getReminderDaysBefore()
-
-                // ✅ AlarmManager ile scheduling
-                notificationManager.scheduleReminders(
-                    drawSettings = settings,
-                    results = results,
-                    reminderDaysBefore = reminderDaysBefore
+            // Firebase üzerinden hatırlatıcıları zamanla
+            val reminders = results.map { result ->
+                PaymentReminder(
+                    participantName = result.participantName,
+                    amount = result.amount,
+                    paymentDate = result.month,
+                    itemType = settings.itemType.name,
+                    specificItem = settings.specificItem
                 )
-
-                Log.d("WheelViewModel", "Notifications scheduled for ${results.size} payments")
             }
+
+            fcmRepository.schedulePaymentReminders(
+                groupId = "current_group_id", // Bu değeri state'den al
+                reminders = reminders
+            )
+
+            Log.d("WheelViewModel", "Hatırlatıcılar Firebase'de zamanlandı")
         } catch (e: Exception) {
-            Log.e("WheelViewModel", "Failed to schedule notifications", e)
+            Log.e("WheelViewModel", "Hatırlatıcı zamanlama hatası", e)
         }
     }
 

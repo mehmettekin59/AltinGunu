@@ -1,10 +1,8 @@
 package com.mehmettekin.altingunu.presentation.drawgroupdetailscreen
 
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
@@ -14,7 +12,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -25,6 +22,7 @@ import com.mehmettekin.altingunu.domain.model.DrawResult
 import com.mehmettekin.altingunu.domain.model.ItemType
 import com.mehmettekin.altingunu.domain.model.Participant
 import com.mehmettekin.altingunu.domain.model.ParticipationRequest
+import com.mehmettekin.altingunu.presentation.navigation.Screen
 import com.mehmettekin.altingunu.presentation.screens.common.CommonTopAppBar
 import com.mehmettekin.altingunu.ui.theme.Gold
 import com.mehmettekin.altingunu.ui.theme.NavyBlue
@@ -33,7 +31,6 @@ import com.mehmettekin.altingunu.utils.Constraints
 import com.mehmettekin.altingunu.utils.UiText
 import com.mehmettekin.altingunu.utils.ValueFormatter
 import com.mehmettekin.altingunu.utils.convertNumerals
-import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

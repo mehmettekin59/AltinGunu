@@ -21,14 +21,15 @@ exports.sendNotification = functions.firestore
             notification: {
                 title: notification.title,
                 body: notification.message,
-                icon: 'ic_notification' // Android'de gösterilecek ikon
+                icon: 'ic_notification'
             },
             data: notification.data || {},
             android: {
                 priority: 'high',
                 notification: {
                     sound: 'default',
-                    clickAction: 'FLUTTER_NOTIFICATION_CLICK'
+                    clickAction: 'FLUTTER_NOTIFICATION_CLICK',
+                    channelId: 'gold_day_notifications'
                 }
             }
         };
@@ -47,12 +48,13 @@ exports.sendNotification = functions.firestore
         } catch (error) {
             console.error('Bildirim gönderilemedi:', error);
 
-            // Hata durumunu kaydet
+            // Hata durumunu kaydet ve retry sayacını artır
             await snapshot.ref.update({
                 status: 'failed',
                 error: error.message,
                 errorCode: error.code,
-                failedAt: admin.firestore.FieldValue.serverTimestamp()
+                failedAt: admin.firestore.FieldValue.serverTimestamp(),
+                retryCount: admin.firestore.FieldValue.increment(1)
             });
         }
     });
@@ -69,7 +71,27 @@ exports.sendGroupNotification = functions.https.onCall(async (data, context) => 
         }
 
         const group = groupDoc.data();
-        const tokens = group.fcmTokens || [];
+        const participants = group.participants || [];
+
+        if (participants.length === 0) {
+            throw new functions.https.HttpsError('failed-precondition', 'Grupta katılımcı yok');
+        }
+
+        // Katılımcıların FCM token'larını al
+        const tokenPromises = participants.map(async (participant) => {
+            const tokenQuery = await db.collection('fcm_tokens')
+                .where('participantId', '==', participant.id)
+                .where('isActive', '==', true)
+                .limit(1)
+                .get();
+
+            if (!tokenQuery.empty) {
+                return tokenQuery.docs[0].data().token;
+            }
+            return null;
+        });
+
+        const tokens = (await Promise.all(tokenPromises)).filter(token => token !== null);
 
         if (tokens.length === 0) {
             throw new functions.https.HttpsError('failed-precondition', 'Grupta aktif kullanıcı yok');
@@ -87,7 +109,7 @@ exports.sendGroupNotification = functions.https.onCall(async (data, context) => 
             createdAt: admin.firestore.FieldValue.serverTimestamp()
         }));
 
-        // Bildirimleri Firestore'a toplu ekle
+        // Bildirimleri Firestore'a toplu ekle (bu sendNotification trigger'ını tetikleyecek)
         const batch = db.batch();
         notifications.forEach(notification => {
             const docRef = db.collection('notifications').doc();
@@ -107,53 +129,333 @@ exports.sendGroupNotification = functions.https.onCall(async (data, context) => 
     }
 });
 
-// Zamanlanmış hatırlatıcılar için (opsiyonel)
-exports.scheduledReminders = functions.pubsub
+// Zamanlanmış hatırlatıcıları işleme
+exports.processScheduledReminders = functions.firestore
+    .document('scheduled_reminders/{groupId}')
+    .onCreate(async (snapshot, context) => {
+        const groupId = context.params.groupId;
+        const reminderData = snapshot.data();
+        const reminders = reminderData.reminders || [];
+
+        console.log(`${groupId} grubu için ${reminders.length} hatırlatıcı zamanlanıyor`);
+
+        try {
+            // Her hatırlatıcı için zamanlanmış görev oluştur
+            const schedulePromises = reminders.map(async (reminder, index) => {
+                const paymentDate = new Date(reminder.paymentDate);
+                const reminderDate = new Date(paymentDate);
+                reminderDate.setDate(reminderDate.getDate() - 1); // 1 gün önce hatırlat
+
+                // Eğer hatırlatma tarihi gelecekte ise, zamanlanmış bildirim oluştur
+                if (reminderDate > new Date()) {
+                    const scheduledNotification = {
+                        groupId: groupId,
+                        participantName: reminder.participantName,
+                        amount: reminder.amount,
+                        paymentDate: reminder.paymentDate,
+                        itemType: reminder.itemType,
+                        specificItem: reminder.specificItem,
+                        scheduledFor: reminderDate,
+                        status: 'scheduled',
+                        createdAt: admin.firestore.FieldValue.serverTimestamp()
+                    };
+
+                    return db.collection('scheduled_notifications')
+                        .add(scheduledNotification);
+                }
+                return null;
+            });
+
+            await Promise.all(schedulePromises);
+
+            // Hatırlatıcı işlendiğini işaretle
+            await snapshot.ref.update({
+                status: 'processed',
+                processedAt: admin.firestore.FieldValue.serverTimestamp()
+            });
+
+        } catch (error) {
+            console.error('Hatırlatıcı işleme hatası:', error);
+            await snapshot.ref.update({
+                status: 'failed',
+                error: error.message,
+                failedAt: admin.firestore.FieldValue.serverTimestamp()
+            });
+        }
+    });
+
+// Günlük zamanlanmış hatırlatıcı kontrolü
+exports.dailyReminderCheck = functions.pubsub
     .schedule('every day 10:00')
     .timeZone('Europe/Istanbul')
     .onRun(async (context) => {
         console.log('Günlük hatırlatıcı kontrolü başladı');
 
         const today = new Date();
-        const tomorrow = new Date(today);
-        tomorrow.setDate(tomorrow.getDate() + 1);
+        const todayStart = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+        const todayEnd = new Date(todayStart);
+        todayEnd.setDate(todayEnd.getDate() + 1);
 
-        // Yarın ödemesi olan grupları bul
-        const groupsSnapshot = await db.collection('draw_groups')
+        try {
+            // Bugün gönderilmesi gereken hatırlatıcıları bul
+            const scheduledQuery = await db.collection('scheduled_notifications')
+                .where('scheduledFor', '>=', todayStart)
+                .where('scheduledFor', '<', todayEnd)
+                .where('status', '==', 'scheduled')
+                .get();
+
+            console.log(`${scheduledQuery.size} hatırlatıcı bugün gönderilecek`);
+
+            // Her hatırlatıcı için bildirim gönder
+            const sendPromises = scheduledQuery.docs.map(async (doc) => {
+                const reminder = doc.data();
+
+                try {
+                    // Grup bildirimini tetikle
+                    await exports.sendGroupNotification.run({
+                        groupId: reminder.groupId,
+                        title: '🪙 Altın Günü Hatırlatması',
+                        message: `${reminder.participantName} kişisi için ${reminder.amount} tutarında ödeme tarihi: ${reminder.paymentDate}`,
+                        extraData: {
+                            type: 'payment_reminder',
+                            participant_name: reminder.participantName,
+                            amount: reminder.amount,
+                            payment_date: reminder.paymentDate,
+                            item_type: reminder.itemType,
+                            specific_item: reminder.specificItem
+                        }
+                    });
+
+                    // Hatırlatıcıyı gönderildi olarak işaretle
+                    await doc.ref.update({
+                        status: 'sent',
+                        sentAt: admin.firestore.FieldValue.serverTimestamp()
+                    });
+
+                    console.log(`Hatırlatıcı gönderildi: ${reminder.participantName}`);
+                } catch (error) {
+                    console.error(`Hatırlatıcı gönderme hatası: ${reminder.participantName}`, error);
+                    await doc.ref.update({
+                        status: 'failed',
+                        error: error.message,
+                        failedAt: admin.firestore.FieldValue.serverTimestamp()
+                    });
+                }
+            });
+
+            await Promise.all(sendPromises);
+            console.log('Günlük hatırlatıcı kontrolü tamamlandı');
+
+        } catch (error) {
+            console.error('Günlük hatırlatıcı kontrolü hatası:', error);
+        }
+
+        return null;
+    });
+
+// Başarısız bildirimleri yeniden deneme
+exports.retryFailedNotifications = functions.pubsub
+    .schedule('every 30 minutes')
+    .onRun(async (context) => {
+        console.log('Başarısız bildirimler kontrol ediliyor');
+
+        const fifteenMinutesAgo = new Date();
+        fifteenMinutesAgo.setMinutes(fifteenMinutesAgo.getMinutes() - 15);
+
+        try {
+            // 15 dakika önce başarısız olan ve 3'ten az denenen bildirimleri bul
+            const failedQuery = await db.collection('notifications')
+                .where('status', '==', 'failed')
+                .where('failedAt', '<=', fifteenMinutesAgo)
+                .where('retryCount', '<', 3)
+                .limit(10)
+                .get();
+
+            console.log(`${failedQuery.size} başarısız bildirim yeniden denenecek`);
+
+            // Her başarısız bildirimi yeniden dene
+            const retryPromises = failedQuery.docs.map(async (doc) => {
+                const notification = doc.data();
+
+                // Bildirim mesajını yeniden hazırla
+                const message = {
+                    token: notification.token,
+                    notification: {
+                        title: notification.title,
+                        body: notification.message,
+                        icon: 'ic_notification'
+                    },
+                    data: notification.data || {},
+                    android: {
+                        priority: 'high',
+                        notification: {
+                            sound: 'default',
+                            clickAction: 'FLUTTER_NOTIFICATION_CLICK',
+                            channelId: 'gold_day_notifications'
+                        }
+                    }
+                };
+
+                try {
+                    const response = await messaging.send(message);
+                    console.log(`Yeniden deneme başarılı: ${response}`);
+
+                    await doc.ref.update({
+                        status: 'sent',
+                        sentAt: admin.firestore.FieldValue.serverTimestamp(),
+                        messageId: response,
+                        retriedAt: admin.firestore.FieldValue.serverTimestamp()
+                    });
+                } catch (error) {
+                    console.error(`Yeniden deneme başarısız: ${error.message}`);
+                    await doc.ref.update({
+                        retryCount: admin.firestore.FieldValue.increment(1),
+                        lastRetryAt: admin.firestore.FieldValue.serverTimestamp(),
+                        lastError: error.message
+                    });
+                }
+            });
+
+            await Promise.all(retryPromises);
+            console.log('Başarısız bildirim kontrolü tamamlandı');
+
+        } catch (error) {
+            console.error('Başarısız bildirim kontrolü hatası:', error);
+        }
+
+        return null;
+    });
+
+// FCM Token güncelleme fonksiyonu
+exports.updateFcmToken = functions.https.onCall(async (data, context) => {
+    const { participantId, token } = data;
+
+    if (!participantId || !token) {
+        throw new functions.https.HttpsError('invalid-argument', 'Katılımcı ID ve token gerekli');
+    }
+
+    try {
+        // Eski tokenları deaktif et
+        const oldTokensQuery = await db.collection('fcm_tokens')
+            .where('participantId', '==', participantId)
             .where('isActive', '==', true)
-            .where('nextPaymentDate', '>=', today)
-            .where('nextPaymentDate', '<=', tomorrow)
             .get();
 
-        const notifications = [];
+        const batch = db.batch();
 
-        groupsSnapshot.forEach(doc => {
-            const group = doc.data();
-            const tokens = group.fcmTokens || [];
-
-            tokens.forEach(token => {
-                notifications.push({
-                    token: token,
-                    title: '🪙 Altın Günü Hatırlatması',
-                    message: `Yarın ${group.nextPaymentPerson} için ödeme günü!`,
-                    data: {
-                        groupId: doc.id,
-                        type: 'reminder'
-                    },
-                    createdAt: admin.firestore.FieldValue.serverTimestamp()
-                });
-            });
+        oldTokensQuery.docs.forEach(doc => {
+            batch.update(doc.ref, { isActive: false });
         });
 
-        // Bildirimleri toplu ekle
-        if (notifications.length > 0) {
-            const batch = db.batch();
-            notifications.forEach(notification => {
-                const docRef = db.collection('notifications').doc();
-                batch.set(docRef, notification);
+        // Yeni token'ı ekle veya güncelle
+        const tokenRef = db.collection('fcm_tokens').doc(token);
+        batch.set(tokenRef, {
+            token: token,
+            participantId: participantId,
+            isActive: true,
+            updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+            createdAt: admin.firestore.FieldValue.serverTimestamp()
+        }, { merge: true });
+
+        await batch.commit();
+
+        return { success: true, message: 'Token güncellendi' };
+
+    } catch (error) {
+        console.error('Token güncelleme hatası:', error);
+        throw new functions.https.HttpsError('internal', error.message);
+    }
+});
+
+// Davet kodu doğrulama fonksiyonu
+exports.validateInviteCode = functions.https.onCall(async (data, context) => {
+    const { inviteCode } = data;
+
+    if (!inviteCode) {
+        throw new functions.https.HttpsError('invalid-argument', 'Davet kodu gerekli');
+    }
+
+    try {
+        const inviteQuery = await db.collection('invitations')
+            .where('inviteCode', '==', inviteCode)
+            .where('expirationDate', '>', Date.now())
+            .limit(1)
+            .get();
+
+        if (inviteQuery.empty) {
+            return {
+                valid: false,
+                message: 'Geçersiz veya süresi dolmuş davet kodu'
+            };
+        }
+
+        const invitation = inviteQuery.docs[0].data();
+
+        return {
+            valid: true,
+            invitation: invitation
+        };
+
+    } catch (error) {
+        console.error('Davet kodu doğrulama hatası:', error);
+        throw new functions.https.HttpsError('internal', error.message);
+    }
+});
+
+// Temizlik fonksiyonu - Eski verileri temizle
+exports.cleanupOldData = functions.pubsub
+    .schedule('every day 03:00')
+    .timeZone('Europe/Istanbul')
+    .onRun(async (context) => {
+        console.log('Eski veri temizliği başladı');
+
+        const thirtyDaysAgo = new Date();
+        thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
+        const batch = db.batch();
+        let deleteCount = 0;
+
+        try {
+            // Eski gönderilmiş bildirimleri sil
+            const oldNotifications = await db.collection('notifications')
+                .where('status', '==', 'sent')
+                .where('sentAt', '<', thirtyDaysAgo)
+                .limit(100)
+                .get();
+
+            oldNotifications.docs.forEach(doc => {
+                batch.delete(doc.ref);
+                deleteCount++;
             });
+
+            // Süresi dolmuş davetleri sil
+            const expiredInvites = await db.collection('invitations')
+                .where('expirationDate', '<', Date.now())
+                .limit(50)
+                .get();
+
+            expiredInvites.docs.forEach(doc => {
+                batch.delete(doc.ref);
+                deleteCount++;
+            });
+
+            // Eski işlenmiş hatırlatıcıları sil
+            const oldReminders = await db.collection('scheduled_reminders')
+                .where('status', '==', 'processed')
+                .where('processedAt', '<', thirtyDaysAgo)
+                .limit(50)
+                .get();
+
+            oldReminders.docs.forEach(doc => {
+                batch.delete(doc.ref);
+                deleteCount++;
+            });
+
             await batch.commit();
-            console.log(`${notifications.length} hatırlatıcı oluşturuldu`);
+            console.log(`Temizlik tamamlandı. ${deleteCount} kayıt silindi.`);
+
+        } catch (error) {
+            console.error('Temizlik hatası:', error);
         }
 
         return null;

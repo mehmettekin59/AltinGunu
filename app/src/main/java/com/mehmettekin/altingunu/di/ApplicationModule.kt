@@ -26,7 +26,7 @@ import retrofit2.converter.moshi.MoshiConverterFactory
 import javax.inject.Singleton
 import androidx.lifecycle.ProcessLifecycleOwner
 import androidx.lifecycle.lifecycleScope
-import com.mehmettekin.altingunu.data.local.FcmRepositoryImpl
+import com.mehmettekin.altingunu.data.repository.FcmRepositoryImpl
 
 @Module
 @InstallIn(SingletonComponent::class)
@@ -41,13 +41,14 @@ abstract class ApplicationModule {
     @Binds
     abstract fun bindUserPreferencesRepository(impl: UserPreferencesRepositoryImpl): UserPreferencesRepository
 
-    // ✅ YENİ: DrawGroup Repository
+
     @Binds
     abstract fun bindDrawGroupRepository(impl: DrawGroupRepositoryImpl): DrawGroupRepository
 
-    // ✅ YENİ: FCM Repository
+
     @Binds
     abstract fun bindFcmRepository(impl: FcmRepositoryImpl): FcmRepository
+
 
     companion object {
         @Provides
@@ -80,7 +81,5 @@ abstract class ApplicationModule {
             return context.applicationContext as AltinGunuApplication
         }
 
-        // ✅ KALDIRILDI: GoldDayNotificationManager provider'ı silindi
-        // ✅ YENİ: FCM Service için gerekli provider'lar eklenebilir
     }
 }
