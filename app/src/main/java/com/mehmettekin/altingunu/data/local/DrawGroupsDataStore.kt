@@ -22,20 +22,10 @@ class DrawGroupsDataStore @Inject constructor(
 
     // ============ KEYS ============
     private val drawGroupsKey = stringPreferencesKey("draw_groups")
-    private val fcmTokensKey = stringPreferencesKey("fcm_tokens")
-    private val invitationsKey = stringPreferencesKey("invitations")
-    private val participationRequestsKey = stringPreferencesKey("participation_requests")
 
     // ============ JSON ADAPTERS ============
     private val drawGroupsType = Types.newParameterizedType(List::class.java, DrawGroup::class.java)
-    private val fcmTokensType = Types.newParameterizedType(List::class.java, FcmToken::class.java)
-    private val invitationsType = Types.newParameterizedType(List::class.java, DrawInvitation::class.java)
-    private val participationRequestsType = Types.newParameterizedType(List::class.java, ParticipationRequest::class.java)
-
     private val drawGroupsAdapter: JsonAdapter<List<DrawGroup>> = moshi.adapter(drawGroupsType)
-    private val fcmTokensAdapter: JsonAdapter<List<FcmToken>> = moshi.adapter(fcmTokensType)
-    private val invitationsAdapter: JsonAdapter<List<DrawInvitation>> = moshi.adapter(invitationsType)
-    private val participationRequestsAdapter: JsonAdapter<List<ParticipationRequest>> = moshi.adapter(participationRequestsType)
 
     // ============ DRAW GROUPS ============
 
@@ -125,145 +115,6 @@ class DrawGroupsDataStore @Inject constructor(
         return getDrawGroups().filter { it.isCompleted }
     }
 
-    // ============ FCM TOKENS ============
-
-    /**
-     * FCM token'larını getirir
-     */
-    suspend fun getFcmTokens(): List<FcmToken> {
-        return dataStore.data.map { preferences ->
-            val json = preferences[fcmTokensKey] ?: "[]"
-            fcmTokensAdapter.fromJson(json) ?: emptyList()
-        }.first()
-    }
-
-    /**
-     * FCM token'larını kaydeder
-     */
-    suspend fun saveFcmTokens(tokens: List<FcmToken>) {
-        dataStore.edit { preferences ->
-            preferences[fcmTokensKey] = fcmTokensAdapter.toJson(tokens)
-        }
-    }
-
-    /**
-     * Yeni FCM token ekler
-     */
-    suspend fun addFcmToken(token: FcmToken) {
-        val currentTokens = getFcmTokens().toMutableList()
-
-        // Aynı participant için token varsa güncelle
-        val existingIndex = currentTokens.indexOfFirst { it.participantId == token.participantId }
-        if (existingIndex >= 0) {
-            currentTokens[existingIndex] = token
-        } else {
-            currentTokens.add(token)
-        }
-
-        saveFcmTokens(currentTokens)
-    }
-
-    /**
-     * Belirli bir grubun FCM token'larını getirir
-     */
-    suspend fun getGroupFcmTokens(groupId: String): List<FcmToken> {
-        val group = getDrawGroupById(groupId) ?: return emptyList()
-        val allTokens = getFcmTokens()
-
-        return allTokens.filter { token ->
-            group.participants.any { it.id == token.participantId }
-        }
-    }
-
-    // ============ INVITATIONS ============
-
-    /**
-     * Davetleri getirir
-     */
-    suspend fun getInvitations(): List<DrawInvitation> {
-        return dataStore.data.map { preferences ->
-            val json = preferences[invitationsKey] ?: "[]"
-            invitationsAdapter.fromJson(json) ?: emptyList()
-        }.first()
-    }
-
-    /**
-     * Davetleri kaydeder
-     */
-    suspend fun saveInvitations(invitations: List<DrawInvitation>) {
-        dataStore.edit { preferences ->
-            preferences[invitationsKey] = invitationsAdapter.toJson(invitations)
-        }
-    }
-
-    /**
-     * Yeni davet ekler
-     */
-    suspend fun addInvitation(invitation: DrawInvitation) {
-        val currentInvitations = getInvitations().toMutableList()
-        currentInvitations.add(invitation)
-        saveInvitations(currentInvitations)
-    }
-
-    /**
-     * Davet koduna göre davet getirir
-     */
-    suspend fun getInvitationByCode(inviteCode: String): DrawInvitation? {
-        return getInvitations().find { it.inviteCode == inviteCode && it.isValid() }
-    }
-
-    // ============ PARTICIPATION REQUESTS ============
-
-    /**
-     * Katılım taleplerini getirir
-     */
-    suspend fun getParticipationRequests(): List<ParticipationRequest> {
-        return dataStore.data.map { preferences ->
-            val json = preferences[participationRequestsKey] ?: "[]"
-            participationRequestsAdapter.fromJson(json) ?: emptyList()
-        }.first()
-    }
-
-    /**
-     * Katılım taleplerini kaydeder
-     */
-    suspend fun saveParticipationRequests(requests: List<ParticipationRequest>) {
-        dataStore.edit { preferences ->
-            preferences[participationRequestsKey] = participationRequestsAdapter.toJson(requests)
-        }
-    }
-
-    /**
-     * Yeni katılım talebi ekler
-     */
-    suspend fun addParticipationRequest(request: ParticipationRequest) {
-        val currentRequests = getParticipationRequests().toMutableList()
-        currentRequests.add(request)
-        saveParticipationRequests(currentRequests)
-    }
-
-    /**
-     * Bekleyen katılım taleplerini getirir
-     */
-    suspend fun getPendingRequests(groupId: String): List<ParticipationRequest> {
-        return getParticipationRequests().filter {
-            it.drawGroupId == groupId && it.status == ParticipationStatus.PENDING
-        }
-    }
-
-    /**
-     * Katılım talebini günceller
-     */
-    suspend fun updateParticipationRequest(requestId: String, status: ParticipationStatus) {
-        val currentRequests = getParticipationRequests().toMutableList()
-        val index = currentRequests.indexOfFirst { it.id == requestId }
-
-        if (index >= 0) {
-            currentRequests[index] = currentRequests[index].copy(status = status)
-            saveParticipationRequests(currentRequests)
-        }
-    }
-
     // ============ MIGRATION & CLEANUP ============
 
     /**
@@ -295,9 +146,6 @@ class DrawGroupsDataStore @Inject constructor(
     suspend fun clearAllData() {
         dataStore.edit { preferences ->
             preferences.remove(drawGroupsKey)
-            preferences.remove(fcmTokensKey)
-            preferences.remove(invitationsKey)
-            preferences.remove(participationRequestsKey)
         }
     }
 }

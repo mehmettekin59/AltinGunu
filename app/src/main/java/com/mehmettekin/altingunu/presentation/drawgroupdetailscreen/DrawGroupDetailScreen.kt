@@ -21,7 +21,6 @@ import com.mehmettekin.altingunu.domain.model.DrawGroup
 import com.mehmettekin.altingunu.domain.model.DrawResult
 import com.mehmettekin.altingunu.domain.model.ItemType
 import com.mehmettekin.altingunu.domain.model.Participant
-import com.mehmettekin.altingunu.domain.model.ParticipationRequest
 import com.mehmettekin.altingunu.presentation.navigation.Screen
 import com.mehmettekin.altingunu.presentation.screens.common.CommonTopAppBar
 import com.mehmettekin.altingunu.ui.theme.Gold

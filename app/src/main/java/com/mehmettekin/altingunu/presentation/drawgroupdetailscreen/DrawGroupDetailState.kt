@@ -1,7 +1,6 @@
 package com.mehmettekin.altingunu.presentation.drawgroupdetailscreen
 
 import com.mehmettekin.altingunu.domain.model.DrawGroup
-import com.mehmettekin.altingunu.domain.model.ParticipationRequest
 
 data class DrawGroupDetailState(
     val drawGroup: DrawGroup? = null,

@@ -18,3 +18,4 @@ data class DrawInvitation(
 
     fun isExpired(): Boolean = System.currentTimeMillis() > expirationDate
 }
+

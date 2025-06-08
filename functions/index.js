@@ -8,6 +8,12 @@ admin.initializeApp();
 const db = admin.firestore();
 const messaging = admin.messaging();
 
+// Davet kodu generate etme fonksiyonu - SERVER TARAFINDA YAPILIYOR
+function generateInviteCode() {
+    const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+    return Array.from({length: 8}, () => chars[Math.floor(Math.random() * chars.length)]).join('');
+}
+
 // Yeni bildirim dökümanı oluşturulduğunda tetiklenir
 exports.sendNotification = functions.firestore
     .document('notifications/{notificationId}')
@@ -58,6 +64,115 @@ exports.sendNotification = functions.firestore
             });
         }
     });
+
+// ✅ YENİ: Davet oluşturma fonksiyonu - SERVER TARAFINDA
+exports.createInvitation = functions.https.onCall(async (data, context) => {
+    const { drawGroupId, drawGroupName, inviterName } = data;
+
+    if (!drawGroupId || !drawGroupName) {
+        throw new functions.https.HttpsError('invalid-argument', 'DrawGroupId ve drawGroupName gerekli');
+    }
+
+    try {
+        const inviteCode = generateInviteCode();
+        const invitationId = db.collection('invitations').doc().id;
+
+        const invitation = {
+            id: invitationId,
+            drawGroupId: drawGroupId,
+            drawGroupName: drawGroupName,
+            inviterName: inviterName || 'Grup Yöneticisi',
+            inviteCode: inviteCode,
+            expirationDate: Date.now() + (7 * 24 * 60 * 60 * 1000), // 7 gün
+            createdDate: Date.now()
+        };
+
+        await db.collection('invitations').doc(invitationId).set(invitation);
+
+        return {
+            success: true,
+            inviteCode: inviteCode,
+            invitation: invitation
+        };
+
+    } catch (error) {
+        console.error('Davet oluşturma hatası:', error);
+        throw new functions.https.HttpsError('internal', error.message);
+    }
+});
+
+// ✅ YENİ: Katılım talebi gönderme - SERVER TARAFINDA
+exports.submitParticipationRequest = functions.https.onCall(async (data, context) => {
+    const { inviteCode, participantName, fcmToken } = data;
+
+    if (!inviteCode || !participantName || !fcmToken) {
+        throw new functions.https.HttpsError('invalid-argument', 'Tüm alanlar gerekli');
+    }
+
+    try {
+        // Davet kodunu doğrula
+        const inviteQuery = await db.collection('invitations')
+            .where('inviteCode', '==', inviteCode)
+            .where('expirationDate', '>', Date.now())
+            .limit(1)
+            .get();
+
+        if (inviteQuery.empty) {
+            throw new functions.https.HttpsError('not-found', 'Geçersiz veya süresi dolmuş davet kodu');
+        }
+
+        const invitation = inviteQuery.docs[0].data();
+        const requestId = db.collection('participation_requests').doc().id;
+
+        const participationRequest = {
+            id: requestId,
+            drawGroupId: invitation.drawGroupId,
+            participantName: participantName,
+            fcmToken: fcmToken,
+            inviteCode: inviteCode,
+            status: 'PENDING',
+            requestDate: Date.now()
+        };
+
+        await db.collection('participation_requests').doc(requestId).set(participationRequest);
+
+        return {
+            success: true,
+            message: 'Katılım talebi gönderildi'
+        };
+
+    } catch (error) {
+        console.error('Katılım talebi hatası:', error);
+        throw new functions.https.HttpsError('internal', error.message);
+    }
+});
+
+// ✅ YENİ: Katılım taleplerini onaylama/reddetme - SERVER TARAFINDA
+exports.approveParticipationRequest = functions.https.onCall(async (data, context) => {
+    const { requestId, approve } = data;
+
+    if (!requestId || approve === undefined) {
+        throw new functions.https.HttpsError('invalid-argument', 'RequestId ve approve değeri gerekli');
+    }
+
+    try {
+        const status = approve ? 'APPROVED' : 'REJECTED';
+
+        await db.collection('participation_requests').doc(requestId).update({
+            status: status,
+            responseDate: Date.now()
+        });
+
+        return {
+            success: true,
+            message: approve ? 'Katılım talebi onaylandı' : 'Katılım talebi reddedildi'
+        };
+
+    } catch (error) {
+        console.error('Katılım talebi işleme hatası:', error);
+        throw new functions.https.HttpsError('internal', error.message);
+    }
+});
 
 // Grup bildirimi gönderme fonksiyonu
 exports.sendGroupNotification = functions.https.onCall(async (data, context) => {
