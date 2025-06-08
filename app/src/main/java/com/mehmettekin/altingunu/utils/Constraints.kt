@@ -102,24 +102,21 @@ object Constraints {
     // Mevcut dil için global değişken
     private var currentLanguage: String = DEFAULT_LANGUAGE
 
-    /**
-     * Dil ayarını güncelle
-     */
+
     fun setLanguage(languageCode: String) {
         currentLanguage = languageCode
     }
 
-    /**
-     * Mevcut dile göre currency isimleri - İsim aynı kalıyor!
-     */
+
+    //Mevcut dile göre currency isimleri - İsim aynı kalıyor!
     val currencyCodeToName: Map<String, String>
         get() = currencyCodeToNameMultilingual[currentLanguage]
             ?: currencyCodeToNameMultilingual[DEFAULT_LANGUAGE]
             ?: emptyMap()
 
-    /**
-     * Mevcut dile göre gold isimleri - İsim aynı kalıyor!
-     */
+
+    //Mevcut dile göre gold isimleri - İsim aynı kalıyor!
+
     val goldCodeToName: Map<String, String>
         get() = goldCodeToNameMultilingual[currentLanguage]
             ?: goldCodeToNameMultilingual[DEFAULT_LANGUAGE]
@@ -138,9 +135,10 @@ object Constraints {
         const val API_UPDATE_INTERVAL = "api_update_interval"
         const val LANGUAGE_CODE = "language_code"
         const val IS_FIRST_LAUNCH = "is_first_launch"
-        const val IS_REMINDER_ENABLED = "is_reminder_enabled"
-        const val REMINDER_DAYS_BEFORE = "reminder_days_before"
     }
+
+    private const val DEFAULT_LANGUAGE = "tr"
+    val SUPPORTED_LANGUAGES = setOf("tr", "en", "ar")
 
     object DefaultSettings {
         const val DEFAULT_API_UPDATE_INTERVAL = 60 // saniye
@@ -149,8 +147,4 @@ object Constraints {
         const val DEFAULT_REMINDER_DAYS_BEFORE = 1
     }
 
-    // Sabit değer
-    private const val DEFAULT_LANGUAGE = "tr"
-
-    val SUPPORTED_LANGUAGES = setOf("tr", "en", "ar")
 }

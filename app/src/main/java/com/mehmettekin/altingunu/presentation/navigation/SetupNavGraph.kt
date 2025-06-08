@@ -14,6 +14,7 @@ import com.mehmettekin.altingunu.presentation.screens.result.ResultScreen
 import com.mehmettekin.altingunu.presentation.screens.settings.SettingsScreen
 import com.mehmettekin.altingunu.presentation.screens.splash.SplashScreen
 import com.mehmettekin.altingunu.presentation.screens.weel.WheelScreen
+import com.mehmettekin.altingunu.presentation.screens.invitejoinscreen.InviteJoinScreen
 
 
 @Composable
@@ -76,6 +77,7 @@ fun SetupNavGraph(modifier: Modifier,navController: NavHostController) {
             SettingsScreen(navController = navController)
         }
 
+
         // ✅ YENİ: Davet linki ekranı
         composable(
             route = Screen.InviteJoin.route,
@@ -84,7 +86,6 @@ fun SetupNavGraph(modifier: Modifier,navController: NavHostController) {
             val inviteCode = backStackEntry.arguments?.getString("inviteCode") ?: ""
             InviteJoinScreen(
                 navController = navController,
-                inviteCode = inviteCode
             )
         }
     }

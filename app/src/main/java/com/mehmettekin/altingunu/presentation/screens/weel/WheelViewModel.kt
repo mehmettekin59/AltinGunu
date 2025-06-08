@@ -10,6 +10,7 @@ import com.mehmettekin.altingunu.domain.model.DrawResult
 import com.mehmettekin.altingunu.domain.model.Participant
 import com.mehmettekin.altingunu.domain.model.ParticipantsScreenWholeInformation
 import com.mehmettekin.altingunu.domain.repository.DrawRepository
+import com.mehmettekin.altingunu.domain.repository.FcmRepository
 import com.mehmettekin.altingunu.utils.ResultState
 import com.mehmettekin.altingunu.utils.ValueFormatter
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -25,7 +26,8 @@ import javax.inject.Inject
 @HiltViewModel
 class WheelViewModel @Inject constructor(
     private val drawRepository: DrawRepository,
-    private val settingsDataStore: SettingsDataStore
+    private val settingsDataStore: SettingsDataStore,
+    private val fcmRepository: FcmRepository
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(WheelState())
@@ -184,7 +186,7 @@ class WheelViewModel @Inject constructor(
                     _state.update { currentState ->
                         currentState.copy(resultsSaved = true)
                     }
-                    scheduleNotifications(currentDrawSettings, results)
+
                 }
                 is ResultState.Error -> {
                     _state.update { currentState ->
@@ -198,32 +200,6 @@ class WheelViewModel @Inject constructor(
         }
     }
 
-    private suspend fun scheduleNotifications(
-        settings: ParticipantsScreenWholeInformation,
-        results: List<DrawResult>
-    ) {
-        try {
-            // Firebase üzerinden hatırlatıcıları zamanla
-            val reminders = results.map { result ->
-                PaymentReminder(
-                    participantName = result.participantName,
-                    amount = result.amount,
-                    paymentDate = result.month,
-                    itemType = settings.itemType.name,
-                    specificItem = settings.specificItem
-                )
-            }
-
-            fcmRepository.schedulePaymentReminders(
-                groupId = "current_group_id", // Bu değeri state'den al
-                reminders = reminders
-            )
-
-            Log.d("WheelViewModel", "Hatırlatıcılar Firebase'de zamanlandı")
-        } catch (e: Exception) {
-            Log.e("WheelViewModel", "Hatırlatıcı zamanlama hatası", e)
-        }
-    }
 
     private fun createDrawResults(
         winners: List<Participant>,

@@ -19,5 +19,10 @@ data class ParticipantsState(
     val isLoading: Boolean = false,
     val error: UiText? = null,
     val currencyOptions: List<String> = emptyList(),
-    val goldOptions: List<String> = emptyList()
+    val goldOptions: List<String> = emptyList(),
+    val groupId: String = "",
+    val groupName: String = "",
+    val groupDescription: String = "",
+    val savedGroupId: String? = null,
+    val inviteCode: String? = null
 )

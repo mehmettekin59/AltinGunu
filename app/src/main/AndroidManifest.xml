@@ -41,23 +41,6 @@
                 android:resource="@xml/file_paths" />
         </provider>
 
-        <!-- ✅ TAMAMEN DEVRE DIŞI BIRAK -->
-        <provider
-            android:name="androidx.startup.InitializationProvider"
-            android:authorities="${applicationId}.androidx-startup"
-            android:exported="false"
-            tools:node="remove" />
-
-        <!-- ✅ YENİ: Notification Receiver -->
-        <receiver
-            android:name=".notification.NotificationReceiver"
-            android:exported="false" />
-
-        <!-- ✅ WorkManager bileşenlerini tamamen devre dışı bırak -->
-        <receiver
-            android:name="androidx.work.impl.background.systemalarm.RescheduleReceiver"
-            android:exported="false"
-            tools:node="remove" />
 
         <receiver
             android:name="androidx.work.impl.background.systemalarm.ConstraintProxy$BatteryChargingProxy"

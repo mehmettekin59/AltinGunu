@@ -8,7 +8,9 @@ import com.mehmettekin.altingunu.domain.model.DrawInvitation
 import com.mehmettekin.altingunu.domain.model.ItemType
 import com.mehmettekin.altingunu.domain.model.Participant
 import com.mehmettekin.altingunu.domain.model.ParticipantsScreenWholeInformation
+import com.mehmettekin.altingunu.domain.repository.DrawGroupRepository
 import com.mehmettekin.altingunu.domain.repository.DrawRepository
+import com.mehmettekin.altingunu.domain.repository.FcmRepository
 import com.mehmettekin.altingunu.domain.usecase.ValidateDrawSettingsUseCase
 import com.mehmettekin.altingunu.domain.usecase.ValidateParticipantsUseCase
 import com.mehmettekin.altingunu.utils.Constraints
@@ -31,7 +33,9 @@ import javax.inject.Inject
 class ParticipantsViewModel @Inject constructor(
     private val drawRepository: DrawRepository,
     private val validateDrawSettingsUseCase: ValidateDrawSettingsUseCase,
-    private val validateParticipantsUseCase: ValidateParticipantsUseCase
+    private val validateParticipantsUseCase: ValidateParticipantsUseCase,
+    private val drawGroupRepository: DrawGroupRepository, // ✅ EKLE
+    private val fcmRepository: FcmRepository,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(ParticipantsState())
@@ -304,7 +308,6 @@ class ParticipantsViewModel @Inject constructor(
                         drawGroupId = groupId,
                         drawGroupName = drawGroup.name,
                         inviterName = "Grup Yöneticisi", // Kullanıcı adı alınabilir
-                        inviteCode = generateInviteCode(),
                         expirationDate = System.currentTimeMillis() + (7 * 24 * 60 * 60 * 1000) // 7 gün
                     )
 
@@ -331,12 +334,7 @@ class ParticipantsViewModel @Inject constructor(
         }
     }
 
-    private fun generateInviteCode(): String {
-        val chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
-        return (1..8)
-            .map { chars.random() }
-            .joinToString("")
-    }
+
 
     private fun handleConfirmDialogDismiss() {
         _state.update { it.copy(isShowingConfirmDialog = false) }

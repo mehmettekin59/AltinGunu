@@ -99,8 +99,8 @@ class DrawGroupDetailViewModel @Inject constructor(
     }
     private fun loadReminderSettings() {
         viewModelScope.launch {
-            val enabled = settingsDataStore.getReminderEnabled(groupId)
-            val daysBefore = settingsDataStore.getReminderDaysBefore(groupId)
+            val enabled = settingsDataStore.isReminderEnabled()
+            val daysBefore = settingsDataStore.getReminderDaysBefore()
 
             _state.value = _state.value.copy(
                 isReminderEnabled = enabled,
@@ -187,8 +187,8 @@ class DrawGroupDetailViewModel @Inject constructor(
 
     fun saveReminderSettings() {
         viewModelScope.launch {
-            settingsDataStore.setReminderEnabled(groupId, _state.value.isReminderEnabled)
-            settingsDataStore.setReminderDaysBefore(groupId, _state.value.reminderDaysBefore)
+            settingsDataStore.setReminderEnabled(_state.value.isReminderEnabled)
+            settingsDataStore.setReminderDaysBefore(_state.value.reminderDaysBefore)
 
             _state.value = _state.value.copy(
                 showReminderDialog = false,
