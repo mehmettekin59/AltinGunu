@@ -8,13 +8,14 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import com.mehmettekin.altingunu.presentation.drawgroupscreen.DrawGroupsScreen
+import com.mehmettekin.altingunu.presentation.navigation.Screen.ParticipantMethodScreen
 import com.mehmettekin.altingunu.presentation.screens.enter.EnterScreen
+import com.mehmettekin.altingunu.presentation.screens.participantmethodscreen.ParticipantMethodScreen
 import com.mehmettekin.altingunu.presentation.screens.participants.ParticipantsScreen
 import com.mehmettekin.altingunu.presentation.screens.result.ResultScreen
 import com.mehmettekin.altingunu.presentation.screens.settings.SettingsScreen
 import com.mehmettekin.altingunu.presentation.screens.splash.SplashScreen
 import com.mehmettekin.altingunu.presentation.screens.weel.WheelScreen
-import com.mehmettekin.altingunu.presentation.screens.invitejoinscreen.InviteJoinScreen
 
 
 @Composable
@@ -78,14 +79,20 @@ fun SetupNavGraph(modifier: Modifier,navController: NavHostController) {
         }
 
 
-        // ✅ YENİ: Davet linki ekranı
         composable(
-            route = Screen.InviteJoin.route,
-            arguments = listOf(navArgument("inviteCode") { type = NavType.StringType })
+            route = Screen.ParticipantMethodScreen.route,
+            arguments = listOf(
+                navArgument("groupName") { type = NavType.StringType },
+                navArgument("groupDescription") { type = NavType.StringType }
+            )
         ) { backStackEntry ->
-            val inviteCode = backStackEntry.arguments?.getString("inviteCode") ?: ""
-            InviteJoinScreen(
+            val groupName = backStackEntry.arguments?.getString("groupName") ?: ""
+            val groupDescription = backStackEntry.arguments?.getString("groupDescription") ?: ""
+
+            ParticipantMethodScreen(
                 navController = navController,
+                groupName = groupName,
+                groupDescription = groupDescription
             )
         }
     }

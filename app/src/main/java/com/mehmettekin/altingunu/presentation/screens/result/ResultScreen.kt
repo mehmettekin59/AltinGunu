@@ -49,6 +49,7 @@ import kotlinx.coroutines.launch
 @Composable
 fun ResultScreen(
     navController: NavController,
+    groupId: String? = "",
     viewModel: ResultsViewModel = hiltViewModel()
 ) {
     val context = LocalContext.current

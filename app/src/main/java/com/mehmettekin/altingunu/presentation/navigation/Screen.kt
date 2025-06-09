@@ -24,4 +24,5 @@ sealed class Screen(val route: String) {
     }
 
     object DrawGroupList : Screen("draw_group_list")
+    object ParticipantMethodScreen : Screen("draw_group_list")
 }

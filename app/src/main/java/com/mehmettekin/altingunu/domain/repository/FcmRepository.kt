@@ -5,16 +5,16 @@ import com.mehmettekin.altingunu.domain.model.DrawInvitation
 import com.mehmettekin.altingunu.utils.ResultState
 
 interface FcmRepository {
-    // ✅ SADECE TOKEN YÖNETİMİ - APP TARAFINDA KALACAK
+    // ✅ ONLY TOKEN MANAGEMENT - APP SIDE
     suspend fun updateUserFcmToken(token: String): ResultState<Unit>
     suspend fun getUserFcmToken(): ResultState<String?>
 
-    // ✅ SERVER FONKSIYONLARI - Sadece server çağrıları
+    // ✅ SERVER FUNCTIONS - Only server calls
     suspend fun createInvitationOnServer(
         drawGroupId: String,
         drawGroupName: String,
         inviterName: String
-    ): ResultState<String>
+    ): ResultState<String> // Returns invite code
 
     suspend fun validateInviteCodeOnServer(inviteCode: String): ResultState<DrawInvitation?>
 
