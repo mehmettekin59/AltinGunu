@@ -7,8 +7,8 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
+import com.mehmettekin.altingunu.presentation.drawgroupdetailscreen.DrawGroupDetailScreen
 import com.mehmettekin.altingunu.presentation.drawgroupscreen.DrawGroupsScreen
-import com.mehmettekin.altingunu.presentation.navigation.Screen.ParticipantMethodScreen
 import com.mehmettekin.altingunu.presentation.screens.enter.EnterScreen
 import com.mehmettekin.altingunu.presentation.screens.participantmethodscreen.ParticipantMethodScreen
 import com.mehmettekin.altingunu.presentation.screens.participants.ParticipantsScreen
@@ -50,7 +50,7 @@ fun SetupNavGraph(modifier: Modifier,navController: NavHostController) {
             )
         }
 
-        // ✅ GÜNCELLENDİ: GroupId parametresi eklendi
+
         composable(
             route = Screen.Wheel.route,
             arguments = listOf(navArgument("groupId") { type = NavType.StringType })
@@ -62,7 +62,7 @@ fun SetupNavGraph(modifier: Modifier,navController: NavHostController) {
             )
         }
 
-        // ✅ GÜNCELLENDİ: GroupId parametresi eklendi
+
         composable(
             route = Screen.Results.route,
             arguments = listOf(navArgument("groupId") { type = NavType.StringType })
@@ -78,9 +78,18 @@ fun SetupNavGraph(modifier: Modifier,navController: NavHostController) {
             SettingsScreen(navController = navController)
         }
 
-
         composable(
-            route = Screen.ParticipantMethodScreen.route,
+            route = Screen.DrawGroupDetail.route,
+            arguments = listOf(navArgument("groupId") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val groupId = backStackEntry.arguments?.getString("groupId") ?: ""
+            DrawGroupDetailScreen(
+                navController = navController,
+                groupId = groupId
+            )
+        }
+        composable(
+            route = Screen.ParticipantMethod.route,
             arguments = listOf(
                 navArgument("groupName") { type = NavType.StringType },
                 navArgument("groupDescription") { type = NavType.StringType }

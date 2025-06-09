@@ -87,7 +87,7 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    // ✅ YENİ: İlk açılış dil ayarları
+    //  İlk açılış dil ayarları
     private suspend fun setupInitialLanguage() {
         val detectedLanguage = detectDeviceLanguage()
         userPreferencesRepository.setLanguage(detectedLanguage)
@@ -98,7 +98,7 @@ class MainActivity : ComponentActivity() {
         Constraints.setLanguage(detectedLanguage)
     }
 
-    // ✅ YENİ: İzin kontrolü (dil ayarlarından bağımsız)
+    //  İzin kontrolü (dil ayarlarından bağımsız)
     private fun checkNotificationPermission() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             val hasNotificationPermission = ContextCompat.checkSelfPermission(
