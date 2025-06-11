@@ -97,17 +97,7 @@ class DrawGroupDetailViewModel @Inject constructor(
             }
         }
     }
-    private fun loadReminderSettings() {
-        viewModelScope.launch {
-            val enabled = settingsDataStore.isReminderEnabled()
-            val daysBefore = settingsDataStore.getReminderDaysBefore()
 
-            _state.value = _state.value.copy(
-                isReminderEnabled = enabled,
-                reminderDaysBefore = daysBefore
-            )
-        }
-    }
 
     fun approveRequest(requestId: String, approve: Boolean) {
         viewModelScope.launch {
@@ -169,33 +159,7 @@ class DrawGroupDetailViewModel @Inject constructor(
         }
     }
 
-    fun onReminderSettingsClick() {
-        _state.value = _state.value.copy(showReminderDialog = true)
-    }
 
-    fun dismissReminderDialog() {
-        _state.value = _state.value.copy(showReminderDialog = false)
-    }
-
-    fun onReminderEnabledChange(enabled: Boolean) {
-        _state.value = _state.value.copy(isReminderEnabled = enabled)
-    }
-
-    fun onReminderDaysChange(days: Int) {
-        _state.value = _state.value.copy(reminderDaysBefore = days)
-    }
-
-    fun saveReminderSettings() {
-        viewModelScope.launch {
-            settingsDataStore.setReminderEnabled(_state.value.isReminderEnabled)
-            settingsDataStore.setReminderDaysBefore(_state.value.reminderDaysBefore)
-
-            _state.value = _state.value.copy(
-                showReminderDialog = false,
-                message = "Hatırlatıcı ayarları kaydedildi"
-            )
-        }
-    }
 
     fun clearMessage() {
         _state.value = _state.value.copy(message = null)

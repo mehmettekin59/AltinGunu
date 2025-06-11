@@ -10,8 +10,6 @@ class ParticipantMethodViewModel @Inject constructor(
     private val _state = MutableStateFlow(ParticipantMethodState())
     val state: StateFlow<ParticipantMethodState> = _state.asStateFlow()
 
-    private val _navigationEvent = MutableSharedFlow<ParticipantMethodNavigation>()
-    val navigationEvent: SharedFlow<ParticipantMethodNavigation> = _navigationEvent.asSharedFlow()
 
     fun initializeGroup(name: String, description: String) {
         _state.update {

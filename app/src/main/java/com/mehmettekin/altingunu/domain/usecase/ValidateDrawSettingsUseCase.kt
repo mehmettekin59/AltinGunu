@@ -14,10 +14,6 @@ class ValidateDrawSettingsUseCase @Inject constructor() {
             return ResultState.Error(UiText.stringResource(R.string.error_invalid_participant_count))
         }
 
-        // Check if actual participants count matches expected count
-        if (settings.participants.size != settings.participantCount) {
-            return ResultState.Error(UiText.stringResource(R.string.error_participant_count_mismatch))
-        }
 
         // Check if monthly amount is valid
         if (settings.monthlyAmount <= 0) {

@@ -17,19 +17,16 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.AttachMoney
 import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.CalendarToday
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.DateRange
-import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.rounded.ChevronRight
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
@@ -39,12 +36,9 @@ import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MenuDefaults
 import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -68,6 +62,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
@@ -77,7 +72,6 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.mehmettekin.altingunu.R
 import com.mehmettekin.altingunu.domain.model.ItemType
-import com.mehmettekin.altingunu.domain.model.Participant
 import com.mehmettekin.altingunu.presentation.navigation.Screen
 import com.mehmettekin.altingunu.presentation.screens.common.CommonTopAppBar
 import com.mehmettekin.altingunu.ui.theme.Gold
@@ -95,19 +89,21 @@ import java.util.Calendar
 @Composable
 fun ParticipantsScreen(
     navController: NavController,
+    groupId: String,
     viewModel: ParticipantsViewModel = hiltViewModel()
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
     val context = LocalContext.current
 
-    // Navigation and error handling
+    // Navigation handling
     LaunchedEffect(key1 = true) {
         viewModel.navigationEvent.collectLatest {
-            navController.navigate(Screen.Wheel.route)
+            navController.navigate(Screen.Wheel.createRoute(groupId))
         }
     }
 
+    // Error handling
     LaunchedEffect(key1 = state.error) {
         state.error?.let { error ->
             snackbarHostState.showSnackbar(error.asString(context))
@@ -119,21 +115,19 @@ fun ParticipantsScreen(
         snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
             CommonTopAppBar(
-                title = UiText.stringResource(R.string.add_participant).asString(),
+                title = UiText.stringResource(R.string.raffle_settings).asString(),
                 navController = navController,
                 onBackPressed = { navController.navigateUp() }
             )
         }
-
     ) { paddingValues ->
-
-            ParticipantsContent(
-                state = state,
-                onEvent = viewModel::onEvent,
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(paddingValues)
-            )
+        ParticipantsContent(
+            state = state,
+            onEvent = viewModel::onEvent,
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues)
+        )
 
         // Show confirmation dialog
         if (state.isShowingConfirmDialog) {
@@ -157,13 +151,48 @@ fun ParticipantsContent(
             .padding(8.dp)
             .verticalScroll(rememberScrollState())
     ) {
+        // Group info display
+        if (state.groupName.isNotEmpty()) {
+            Surface(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 16.dp),
+                shape = RoundedCornerShape(8.dp),
+                color = Gold.copy(alpha = 0.1f)
+            ) {
+                Column(
+                    modifier = Modifier.padding(16.dp)
+                ) {
+                    Text(
+                        text = state.groupName,
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = NavyBlue
+                    )
+                    if (state.groupDescription.isNotEmpty()) {
+                        Text(
+                            text = state.groupDescription,
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = Color.Gray
+                        )
+                    }
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(
+                        text = UiText.stringResource(R.string.participants_count_special, state.participants.size).asString(),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = NavyBlue
+                    )
+                }
+            }
+        }
+
         // Item type selection (TL, Currency, Gold)
         ItemTypeSelector(
             selectedItemType = state.selectedItemType,
             onItemTypeSelect = { onEvent(ParticipantsEvent.OnItemTypeSelect(it)) }
         )
 
-       Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(8.dp))
 
         // Specific currency or gold type selection when applicable
         if (state.selectedItemType == ItemType.CURRENCY || state.selectedItemType == ItemType.GOLD) {
@@ -197,7 +226,6 @@ fun ParticipantsContent(
             modifier = Modifier.fillMaxWidth()
         )
 
-
         Spacer(modifier = Modifier.height(6.dp))
 
         // Duration in months
@@ -218,11 +246,11 @@ fun ParticipantsContent(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Starting month and year
+        // Starting date
         Text(
             text = UiText.stringResource(R.string.starting_date).asString(),
             style = MaterialTheme.typography.titleMedium,
-            color =  if (isSystemInDarkTheme()) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.secondary,
+            color = if (isSystemInDarkTheme()) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.secondary,
             fontWeight = FontWeight.Bold
         )
 
@@ -232,18 +260,9 @@ fun ParticipantsContent(
             selectedDay = state.startDay,
             selectedMonth = state.startMonth,
             selectedYear = state.startYear,
-            onDaySelected = {onEvent(ParticipantsEvent.OnStartDaySelect(it))},
+            onDaySelected = { onEvent(ParticipantsEvent.OnStartDaySelect(it)) },
             onMonthSelected = { onEvent(ParticipantsEvent.OnStartMonthSelect(it)) },
             onYearSelected = { onEvent(ParticipantsEvent.OnStartYearSelect(it)) }
-        )
-
-        Spacer(modifier = Modifier.height(18.dp))
-
-        // Participants section
-        ParticipantsSection(
-            participants = state.participants,
-            onAddParticipant = { onEvent(ParticipantsEvent.OnAddParticipant(it)) },
-            onRemoveParticipant = { onEvent(ParticipantsEvent.OnRemoveParticipant(it)) }
         )
 
         Spacer(modifier = Modifier.height(18.dp))
@@ -273,9 +292,6 @@ fun ParticipantsContent(
     }
 }
 
-
-
-
 @Composable
 fun ItemTypeSelector(
     selectedItemType: ItemType,
@@ -292,24 +308,20 @@ fun ItemTypeSelector(
         Spacer(modifier = Modifier.height(8.dp))
 
         Row(
-            modifier = Modifier
-                .fillMaxWidth(),
+            modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(4.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-
             ItemType.entries.forEach { itemType ->
                 ItemSelectableChip(
                     text = itemType.displayName.asString(),
                     selected = itemType == selectedItemType,
                     onClick = { onItemTypeSelect(itemType) },
-                    modifier = Modifier
-                        .weight(1f),
+                    modifier = Modifier.weight(1f),
                     itemType = itemType
                 )
             }
         }
-
     }
 }
 
@@ -346,8 +358,7 @@ fun ItemSelectableChip(
         shape = shape
     ) {
         Box(
-            modifier = Modifier
-                .padding(vertical = 12.dp, horizontal = 4.dp),
+            modifier = Modifier.padding(vertical = 12.dp, horizontal = 4.dp),
             contentAlignment = Alignment.Center
         ) {
             Text(
@@ -363,7 +374,6 @@ fun ItemSelectableChip(
         }
     }
 }
-
 
 @Composable
 fun SpecificItemSelector(
@@ -386,7 +396,7 @@ fun SpecificItemSelector(
 
     val selectedValue = if (selectedSpecificItem.isNotEmpty()) {
         if (selectedItemType == ItemType.CURRENCY) {
-           Constraints.currencyCodeToName[selectedSpecificItem] ?: selectedSpecificItem
+            Constraints.currencyCodeToName[selectedSpecificItem] ?: selectedSpecificItem
         } else {
             Constraints.goldCodeToName[selectedSpecificItem] ?: selectedSpecificItem
         }
@@ -407,7 +417,6 @@ fun SpecificItemSelector(
                 .fillMaxWidth()
                 .clip(RoundedCornerShape(8.dp))
                 .clickable { expanded = true },
-
             border = BorderStroke(width = 1.dp, color = if (isSystemInDarkTheme()) MaterialTheme.colorScheme.primary.copy(alpha = 0.5f) else MaterialTheme.colorScheme.secondary.copy(alpha = 0.5f))
         ) {
             Row(
@@ -420,9 +429,11 @@ fun SpecificItemSelector(
                 Text(
                     text = selectedValue.ifEmpty { UiText.stringResource(R.string.select).asString() },
                     fontWeight = FontWeight.Bold,
-                    color = if (selectedValue.isEmpty()) {if (isSystemInDarkTheme()) MaterialTheme.colorScheme.primary.copy(alpha = 0.8f) else MaterialTheme.colorScheme.secondary.copy(alpha = 0.8f)}
-                    else{ if (isSystemInDarkTheme()) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.onTertiary }
-
+                    color = if (selectedValue.isEmpty()) {
+                        if (isSystemInDarkTheme()) MaterialTheme.colorScheme.primary.copy(alpha = 0.8f) else MaterialTheme.colorScheme.secondary.copy(alpha = 0.8f)
+                    } else {
+                        if (isSystemInDarkTheme()) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.onTertiary
+                    }
                 )
 
                 Icon(
@@ -444,7 +455,6 @@ fun SpecificItemSelector(
                 DropdownMenuItem(
                     text = { Text(option, fontSize = 16.sp) },
                     onClick = {
-                        // Find the code that corresponds to this display name
                         val code = if (selectedItemType == ItemType.CURRENCY) {
                             currencyOptions[index]
                         } else {
@@ -480,16 +490,14 @@ fun ModernDateSelector(
     val yearFormat = SimpleDateFormat("yyyy", locale)
     val dayFormat = SimpleDateFormat("dd", locale)
 
-    // Mevcut tarih bilgilerini al
     val currentCalendar = Calendar.getInstance()
-    val currentMonth = currentCalendar.get(Calendar.MONTH) + 1  // 0-based to 1-based
+    val currentMonth = currentCalendar.get(Calendar.MONTH) + 1
     val currentYear = currentCalendar.get(Calendar.YEAR)
     val currentDay = currentCalendar.get(Calendar.DAY_OF_MONTH)
 
-    // Seçili tarih için calendar oluştur (display için)
     val displayCalendar = Calendar.getInstance()
     displayCalendar.set(Calendar.YEAR, selectedYear)
-    displayCalendar.set(Calendar.MONTH, selectedMonth - 1) // 1-based to 0-based
+    displayCalendar.set(Calendar.MONTH, selectedMonth - 1)
     displayCalendar.set(Calendar.DAY_OF_MONTH, selectedDay)
 
     Row(
@@ -526,7 +534,6 @@ fun ModernDateSelector(
 
             // Day selection dialog
             if (showDayDialog) {
-                // Seçili ay için kaç gün olduğunu hesapla
                 val daysInMonth = Calendar.getInstance().apply {
                     set(Calendar.YEAR, selectedYear)
                     set(Calendar.MONTH, selectedMonth - 1)
@@ -534,13 +541,12 @@ fun ModernDateSelector(
 
                 val dayOptions = (1..daysInMonth).toList()
 
-                // Seçilebilir günleri belirle
                 val isSelectableDay = dayOptions.map { dayNumber ->
                     when {
-                        selectedYear > currentYear -> true // Gelecek yıllarda tüm günler seçilebilir
-                        selectedYear == currentYear && selectedMonth > currentMonth -> true // Gelecek aylarda tüm günler seçilebilir
-                        selectedYear == currentYear && selectedMonth == currentMonth -> dayNumber >= currentDay // Mevcut ayda bugün ve sonrası
-                        else -> false // Geçmiş tarihler seçilemez
+                        selectedYear > currentYear -> true
+                        selectedYear == currentYear && selectedMonth > currentMonth -> true
+                        selectedYear == currentYear && selectedMonth == currentMonth -> dayNumber >= currentDay
+                        else -> false
                     }
                 }
 
@@ -613,9 +619,7 @@ fun ModernDateSelector(
                     confirmButton = {
                         TextButton(
                             onClick = { showDayDialog = false },
-                            colors = ButtonDefaults.textButtonColors(
-                                contentColor = Gold
-                            )
+                            colors = ButtonDefaults.textButtonColors(contentColor = Gold)
                         ) {
                             Text(UiText.stringResource(R.string.close).asString())
                         }
@@ -687,21 +691,19 @@ fun ModernDateSelector(
     if (showMonthDialog) {
         val allMonths = (1..12).toList()
 
-        // Ay isimlerini oluştur - her ay için ayrı calendar
         val monthNames = allMonths.map { monthNumber ->
             val tempCalendar = Calendar.getInstance()
-            tempCalendar.set(Calendar.YEAR, 2025) // Sabit yıl kullan
+            tempCalendar.set(Calendar.YEAR, 2025)
             tempCalendar.set(Calendar.MONTH, monthNumber - 1)
-            tempCalendar.set(Calendar.DAY_OF_MONTH, 1) // Ayın ilk günü
+            tempCalendar.set(Calendar.DAY_OF_MONTH, 1)
             monthFormat.format(tempCalendar.time)
         }
 
-        // Seçilebilir ayları belirle
         val isMonthSelectable = allMonths.map { monthNumber ->
             when {
-                selectedYear > currentYear -> true // Gelecek yıllarda tüm aylar seçilebilir
-                selectedYear == currentYear -> monthNumber >= currentMonth // Mevcut yılda sadece mevcut ay ve sonrası
-                else -> false // Geçmiş yıllarda hiçbir ay seçilemez
+                selectedYear > currentYear -> true
+                selectedYear == currentYear -> monthNumber >= currentMonth
+                else -> false
             }
         }
 
@@ -735,12 +737,9 @@ fun ModernDateSelector(
                                     .clickable(enabled = isSelectable) {
                                         if (isSelectable) {
                                             onMonthSelected(monthNumber)
-
-                                            // Eğer mevcut ay seçildiyse ve seçili gün geçmişte kalıyorsa, bugünü seç
                                             if (selectedYear == currentYear && monthNumber == currentMonth && selectedDay < currentDay) {
                                                 onDaySelected(currentDay)
                                             }
-
                                             showMonthDialog = false
                                         }
                                     }
@@ -781,9 +780,7 @@ fun ModernDateSelector(
             confirmButton = {
                 TextButton(
                     onClick = { showMonthDialog = false },
-                    colors = ButtonDefaults.textButtonColors(
-                        contentColor = Gold
-                    )
+                    colors = ButtonDefaults.textButtonColors(contentColor = Gold)
                 ) {
                     Text(UiText.stringResource(R.string.close).asString())
                 }

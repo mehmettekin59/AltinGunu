@@ -66,9 +66,4 @@ class SettingsDataStore @Inject constructor(
     }
 
 
-    suspend fun isReminderEnabled(): Boolean
-    suspend fun setReminderEnabled(enabled: Boolean)
-    suspend fun getReminderDaysBefore(): Int
-    suspend fun setReminderDaysBefore(days: Int)
-
 }

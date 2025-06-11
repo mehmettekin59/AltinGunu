@@ -1,15 +1,12 @@
 package com.mehmettekin.altingunu.presentation.drawgroupscreen
 
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
@@ -35,7 +32,6 @@ import com.mehmettekin.altingunu.ui.theme.NavyBlue
 import com.mehmettekin.altingunu.ui.theme.White
 import com.mehmettekin.altingunu.utils.UiText
 import com.mehmettekin.altingunu.utils.convertNumerals
-import kotlinx.coroutines.flow.collectLatest
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -46,20 +42,6 @@ fun DrawGroupsScreen(
     val state by viewModel.state.collectAsStateWithLifecycle()
     val context = LocalContext.current
     val snackbarHostState = remember { SnackbarHostState() }
-
-    // Navigation handling
-    LaunchedEffect(key1 = true) {
-        viewModel.navigationEvent.collectLatest { navigation ->
-            when (navigation) {
-                is DrawGroupsNavigation.ToParticipants -> {
-                    navController.navigate(Screen.Participants.createRoute(navigation.groupId))
-                }
-                is DrawGroupsNavigation.ToCreateNewGroup -> {
-                    navController.navigate(Screen.Participants.createRoute("new"))
-                }
-            }
-        }
-    }
 
     // Error handling
     LaunchedEffect(state.error) {
@@ -86,19 +68,7 @@ fun DrawGroupsScreen(
                 }
             )
         },
-        snackbarHost = { SnackbarHost(snackbarHostState) },
-        floatingActionButton = {
-            FloatingActionButton(
-                onClick = { viewModel.onEvent(DrawGroupsEvent.OnShowCreateDialog) },
-                containerColor = Gold,
-                contentColor = NavyBlue
-            ) {
-                Icon(
-                    Icons.Default.Add,
-                    contentDescription = UiText.stringResource(R.string.add_participant).asString()
-                )
-            }
-        }
+        snackbarHost = { SnackbarHost(snackbarHostState) }
     ) { paddingValues ->
 
         if (state.isLoading) {
@@ -133,8 +103,7 @@ fun DrawGroupsScreen(
 
                 if (filteredGroups.isEmpty()) {
                     EmptyGroupsView(
-                        selectedTab = state.selectedTab,
-                        onCreateNew = { viewModel.onEvent(DrawGroupsEvent.OnShowCreateDialog) }
+                        selectedTab = state.selectedTab
                     )
                 } else {
                     LazyColumn(
@@ -143,32 +112,15 @@ fun DrawGroupsScreen(
                         items(filteredGroups) { group ->
                             DrawGroupCard(
                                 group = group,
-                                onClick = { viewModel.onEvent(DrawGroupsEvent.OnGroupClick(group)) },
+                                onClick = {
+                                    navController.navigate(Screen.DrawGroupDetail.createRoute(group.id))
+                                },
                                 onDelete = { viewModel.onEvent(DrawGroupsEvent.OnDeleteGroup(group)) }
                             )
                         }
                     }
                 }
             }
-        }
-
-        // Create Group Dialog
-        if (state.showCreateGroupDialog) {
-            CreateGroupDialog(
-                groupName = state.newGroupName,
-                groupDescription = state.newGroupDescription,
-                onGroupNameChanged = { viewModel.onEvent(DrawGroupsEvent.OnGroupNameChanged(it)) },
-                onGroupDescriptionChanged = { viewModel.onEvent(DrawGroupsEvent.OnGroupDescriptionChanged(it)) },
-                onConfirm = {
-                    viewModel.onEvent(
-                        DrawGroupsEvent.OnCreateNewGroup(
-                            state.newGroupName,
-                            state.newGroupDescription
-                        )
-                    )
-                },
-                onDismiss = { viewModel.onEvent(DrawGroupsEvent.OnHideCreateDialog) }
-            )
         }
 
         // Delete Confirmation Dialog
@@ -383,7 +335,6 @@ private fun DrawGroupCard(
 @Composable
 private fun EmptyGroupsView(
     selectedTab: DrawGroupTab,
-    onCreateNew: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -414,76 +365,9 @@ private fun EmptyGroupsView(
             color = Color.Gray,
             textAlign = TextAlign.Center
         )
-
-        if (selectedTab == DrawGroupTab.ACTIVE || selectedTab == DrawGroupTab.ALL) {
-            Spacer(modifier = Modifier.height(16.dp))
-
-            Button(
-                onClick = onCreateNew,
-                colors = ButtonDefaults.buttonColors(containerColor = NavyBlue)
-            ) {
-                Icon(Icons.Default.Add, contentDescription = null)
-                Spacer(modifier = Modifier.width(8.dp))
-                Text(UiText.stringResource(R.string.enter_the_participants).asString())
-            }
-        }
     }
 }
 
-@Composable
-private fun CreateGroupDialog(
-    groupName: String,
-    groupDescription: String,
-    onGroupNameChanged: (String) -> Unit,
-    onGroupDescriptionChanged: (String) -> Unit,
-    onConfirm: () -> Unit,
-    onDismiss: () -> Unit
-) {
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = {
-            Text(
-                text = "Yeni Çekiliş Grubu",
-                style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.Bold
-            )
-        },
-        text = {
-            Column {
-                OutlinedTextField(
-                    value = groupName,
-                    onValueChange = onGroupNameChanged,
-                    label = { Text("Grup Adı *") },
-                    modifier = Modifier.fillMaxWidth(),
-                    singleLine = true
-                )
-
-                Spacer(modifier = Modifier.height(12.dp))
-
-                OutlinedTextField(
-                    value = groupDescription,
-                    onValueChange = onGroupDescriptionChanged,
-                    label = { Text("Açıklama (Opsiyonel)") },
-                    modifier = Modifier.fillMaxWidth(),
-                    maxLines = 2
-                )
-            }
-        },
-        confirmButton = {
-            Button(
-                onClick = onConfirm,
-                enabled = groupName.isNotBlank()
-            ) {
-                Text(UiText.stringResource(R.string.continue_button).asString())
-            }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismiss) {
-                Text(UiText.stringResource(R.string.cancel).asString())
-            }
-        }
-    )
-}
 @Composable
 private fun DeleteGroupDialog(
     group: DrawGroup,

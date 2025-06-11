@@ -16,14 +16,6 @@ data class ParticipantsState(
     val startYear: Int = Calendar.getInstance().get(Calendar.YEAR),
     val participants: List<Participant> = emptyList(),
 
-    // New fields for hybrid system
-    val participantMethod: ParticipantMethod = ParticipantMethod.MANUAL,
-    val manualParticipants: List<Participant> = emptyList(),
-    val invitedParticipants: List<InvitedParticipant> = emptyList(),
-    val pendingInvitations: Int = 0,
-    val inviteCode: String? = null,
-    val showInviteDialog: Boolean = false,
-
     val isShowingConfirmDialog: Boolean = false,
     val isLoading: Boolean = false,
     val error: UiText? = null,
@@ -31,6 +23,5 @@ data class ParticipantsState(
     val goldOptions: List<String> = emptyList(),
     val groupId: String = "",
     val groupName: String = "",
-    val groupDescription: String = "",
-    val savedGroupId: String? = null
+    val groupDescription: String = ""
 )

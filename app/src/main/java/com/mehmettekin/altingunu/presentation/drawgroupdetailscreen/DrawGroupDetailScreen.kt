@@ -71,13 +71,6 @@ fun DrawGroupDetailScreen(
                             }
                         }
 
-                        IconButton(onClick = { viewModel.onReminderSettingsClick() }) {
-                            Icon(
-                                Icons.Default.Notifications,
-                                contentDescription = "Hatırlatıcı",
-                                tint = White
-                            )
-                        }
                     }
                 }
             )
@@ -181,18 +174,6 @@ fun DrawGroupDetailScreen(
                     )
                 }
             }
-        }
-
-        // Hatırlatıcı ayarları dialog
-        if (state.showReminderDialog) {
-            ReminderSettingsDialog(
-                isEnabled = state.isReminderEnabled,
-                daysBefore = state.reminderDaysBefore,
-                onEnabledChange = viewModel::onReminderEnabledChange,
-                onDaysBeforeChange = viewModel::onReminderDaysChange,
-                onDismiss = viewModel::dismissReminderDialog,
-                onSave = viewModel::saveReminderSettings
-            )
         }
     }
 }
@@ -678,75 +659,6 @@ private fun ActionsSection(
     }
 }
 
-@Composable
-private fun ReminderSettingsDialog(
-    isEnabled: Boolean,
-    daysBefore: Int,
-    onEnabledChange: (Boolean) -> Unit,
-    onDaysBeforeChange: (Int) -> Unit,
-    onDismiss: () -> Unit,
-    onSave: () -> Unit
-) {
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = {
-            Text(
-                text = "Hatırlatıcı Ayarları",
-                style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.Bold
-            )
-        },
-        text = {
-            Column {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text("Hatırlatıcılar")
-                    Switch(
-                        checked = isEnabled,
-                        onCheckedChange = onEnabledChange
-                    )
-                }
-
-                if (isEnabled) {
-                    Spacer(modifier = Modifier.height(16.dp))
-
-                    Text(
-                        text = "Kaç gün önceden hatırlatılsın?",
-                        style = MaterialTheme.typography.bodyMedium
-                    )
-
-                    Spacer(modifier = Modifier.height(8.dp))
-
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceEvenly
-                    ) {
-                        listOf(1, 2, 3, 7).forEach { days ->
-                            FilterChip(
-                                selected = daysBefore == days,
-                                onClick = { onDaysBeforeChange(days) },
-                                label = { Text("$days gün") }
-                            )
-                        }
-                    }
-                }
-            }
-        },
-        confirmButton = {
-            Button(onClick = onSave) {
-                Text("Kaydet")
-            }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismiss) {
-                Text("İptal")
-            }
-        }
-    )
-}
 
 @Composable
 private fun InfoRow(

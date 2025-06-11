@@ -143,8 +143,6 @@ object Constraints {
     object DefaultSettings {
         const val DEFAULT_API_UPDATE_INTERVAL = 60 // saniye
         const val DEFAULT_LANGUAGE = "tr"
-        const val DEFAULT_REMINDER_ENABLED = true
-        const val DEFAULT_REMINDER_DAYS_BEFORE = 1
     }
 
 }
