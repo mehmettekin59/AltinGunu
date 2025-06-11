@@ -1,6 +1,27 @@
 package com.mehmettekin.altingunu.presentation.screens.participantmethodscreen
 
 
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.mehmettekin.altingunu.R
+import com.mehmettekin.altingunu.domain.model.DrawGroup
+import com.mehmettekin.altingunu.domain.model.ItemType
+import com.mehmettekin.altingunu.domain.model.Participant
+import com.mehmettekin.altingunu.domain.model.ParticipantsScreenWholeInformation
+import com.mehmettekin.altingunu.domain.repository.DrawGroupRepository
+import com.mehmettekin.altingunu.domain.repository.FcmRepository
+import com.mehmettekin.altingunu.utils.ResultState
+import com.mehmettekin.altingunu.utils.UiText
+import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
+import java.util.Calendar
+import java.util.UUID
+import javax.inject.Inject
+
 @HiltViewModel
 class ParticipantMethodViewModel @Inject constructor(
     private val drawGroupRepository: DrawGroupRepository,
@@ -10,14 +31,12 @@ class ParticipantMethodViewModel @Inject constructor(
     private val _state = MutableStateFlow(ParticipantMethodState())
     val state: StateFlow<ParticipantMethodState> = _state.asStateFlow()
 
+    fun updateGroupName(name: String) {
+        _state.update { it.copy(groupName = name) }
+    }
 
-    fun initializeGroup(name: String, description: String) {
-        _state.update {
-            it.copy(
-                groupName = name,
-                groupDescription = description
-            )
-        }
+    fun updateGroupDescription(description: String) {
+        _state.update { it.copy(groupDescription = description) }
     }
 
     fun selectMethod(method: ParticipantMethod) {
@@ -27,7 +46,6 @@ class ParticipantMethodViewModel @Inject constructor(
     fun addManualParticipant(name: String) {
         if (name.isBlank()) return
 
-        // Check for duplicate names
         val isDuplicate = _state.value.manualParticipants.any {
             it.name.lowercase() == name.trim().lowercase()
         }
@@ -57,151 +75,19 @@ class ParticipantMethodViewModel @Inject constructor(
         }
     }
 
-    fun continueWithManualParticipants() {
-        viewModelScope.launch {
-            val participants = _state.value.manualParticipants
+    fun createGroup() {
+        // Yeni grup oluşturuluyor
+        val newGroup = DrawGroup(
+            id = UUID.randomUUID().toString(),
+            name = _state.value.groupName,
+            description = _state.value.groupDescription,
+            // ... diğer alanlar
+        )
 
-            if (participants.size < 2) {
-                _state.update { it.copy(error = UiText.stringResource(R.string.error_min_participants)) }
-                return@launch
-            }
-
-            _state.update { it.copy(isLoading = true) }
-
-            // Create group with manual participants
-            val currentDate = Calendar.getInstance()
-            val newGroup = DrawGroup(
-                id = UUID.randomUUID().toString(),
-                name = _state.value.groupName,
-                description = _state.value.groupDescription,
-                createdDate = System.currentTimeMillis(),
-                lastModifiedDate = System.currentTimeMillis(),
-                settings = ParticipantsScreenWholeInformation(
-                    participantCount = participants.size,
-                    participants = participants,
-                    itemType = ItemType.TL,
-                    specificItem = "",
-                    monthlyAmount = 0.0,
-                    durationMonths = 0,
-                    startDay = currentDate.get(Calendar.DAY_OF_MONTH),
-                    startMonth = currentDate.get(Calendar.MONTH) + 1,
-                    startYear = currentDate.get(Calendar.YEAR)
-                ),
-                participants = participants,
-                results = emptyList(),
-                isCompleted = false,
-                isActive = true,
-                fcmTokens = emptyList(), // Manual participants don't have FCM tokens
-                currentPaymentIndex = 0
-            )
-
-            when (val result = drawGroupRepository.createDrawGroup(newGroup)) {
-                is ResultState.Success -> {
-                    _state.update { it.copy(isLoading = false) }
-                    // Navigate to participants screen to complete the setup
-                    _navigationEvent.emit(
-                        ParticipantMethodNavigation.ToParticipantsScreen(result.data)
-                    )
-                }
-                is ResultState.Error -> {
-                    _state.update {
-                        it.copy(
-                            isLoading = false,
-                            error = result.message
-                        )
-                    }
-                }
-                else -> {
-                    _state.update { it.copy(isLoading = false) }
-                }
-            }
-        }
+        // Grup repository'ye kaydediliyor
+        drawGroupRepository.createDrawGroup(newGroup)
     }
 
-    fun createInviteLink() {
-        viewModelScope.launch {
-            _state.update { it.copy(isLoading = true) }
-
-            // First create the group
-            val currentDate = Calendar.getInstance()
-            val newGroup = DrawGroup(
-                id = UUID.randomUUID().toString(),
-                name = _state.value.groupName,
-                description = _state.value.groupDescription,
-                createdDate = System.currentTimeMillis(),
-                lastModifiedDate = System.currentTimeMillis(),
-                settings = ParticipantsScreenWholeInformation(
-                    participantCount = 0, // Will be updated as participants join
-                    participants = emptyList(),
-                    itemType = ItemType.TL,
-                    specificItem = "",
-                    monthlyAmount = 0.0,
-                    durationMonths = 0,
-                    startDay = currentDate.get(Calendar.DAY_OF_MONTH),
-                    startMonth = currentDate.get(Calendar.MONTH) + 1,
-                    startYear = currentDate.get(Calendar.YEAR)
-                ),
-                participants = emptyList(),
-                results = emptyList(),
-                isCompleted = false,
-                isActive = true,
-                fcmTokens = emptyList(),
-                currentPaymentIndex = 0
-            )
-
-            when (val groupResult = drawGroupRepository.createDrawGroup(newGroup)) {
-                is ResultState.Success -> {
-                    val groupId = groupResult.data
-
-                    // Create invitation
-                    when (val inviteResult = fcmRepository.createInvitationOnServer(
-                        drawGroupId = groupId,
-                        drawGroupName = _state.value.groupName,
-                        inviterName = "Grup Yöneticisi" // You can get actual user name if available
-                    )) {
-                        is ResultState.Success -> {
-                            val inviteCode = inviteResult.data
-                            val inviteUrl = "https://altingunu.app/invite/$inviteCode"
-
-                            _state.update { it.copy(isLoading = false) }
-
-                            // Share the invite link
-                            _navigationEvent.emit(
-                                ParticipantMethodNavigation.ShareInviteLink(inviteUrl)
-                            )
-
-                            // Then navigate to participants screen
-                            _navigationEvent.emit(
-                                ParticipantMethodNavigation.ToParticipantsScreen(groupId)
-                            )
-                        }
-                        is ResultState.Error -> {
-                            _state.update {
-                                it.copy(
-                                    isLoading = false,
-                                    error = inviteResult.message
-                                )
-                            }
-                        }
-                        else -> {
-                            _state.update { it.copy(isLoading = false) }
-                        }
-                    }
-                }
-                is ResultState.Error -> {
-                    _state.update {
-                        it.copy(
-                            isLoading = false,
-                            error = groupResult.message
-                        )
-                    }
-                }
-                else -> {
-                    _state.update { it.copy(isLoading = false) }
-                }
-            }
-        }
-    }
 
     fun clearError() {
         _state.update { it.copy(error = null) }

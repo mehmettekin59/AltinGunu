@@ -2,17 +2,12 @@ package com.mehmettekin.altingunu.presentation.drawgroupscreen
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.mehmettekin.altingunu.R
 import com.mehmettekin.altingunu.domain.model.DrawGroup
 import com.mehmettekin.altingunu.domain.repository.DrawGroupRepository
 import com.mehmettekin.altingunu.utils.ResultState
-import com.mehmettekin.altingunu.utils.UiText
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.update
@@ -27,8 +22,6 @@ class DrawGroupsViewModel @Inject constructor(
     private val _state = MutableStateFlow(DrawGroupsState())
     val state: StateFlow<DrawGroupsState> = _state.asStateFlow()
 
-    private val _navigationEvent = MutableSharedFlow<DrawGroupsNavigation>()
-    val navigationEvent: SharedFlow<DrawGroupsNavigation> = _navigationEvent.asSharedFlow()
 
     init {
         loadDrawGroups()
@@ -42,10 +35,7 @@ class DrawGroupsViewModel @Inject constructor(
             }
 
             is DrawGroupsEvent.OnGroupClick -> {
-                viewModelScope.launch {
-                    // Gruba tıklandığında participants ekranına git
-                    _navigationEvent.emit(DrawGroupsNavigation.ToParticipants(event.group.id))
-                }
+                // Navigation is handled in the Screen composable directly
             }
 
             is DrawGroupsEvent.OnDeleteGroup -> {
@@ -53,38 +43,6 @@ class DrawGroupsViewModel @Inject constructor(
                     it.copy(
                         showDeleteDialog = true,
                         groupToDelete = event.group
-                    )
-                }
-            }
-
-            is DrawGroupsEvent.OnCreateNewGroup -> {
-                createNewGroup(event.name, event.description)
-            }
-
-            is DrawGroupsEvent.OnGroupNameChanged -> {
-                _state.update { it.copy(newGroupName = event.name) }
-            }
-
-            is DrawGroupsEvent.OnGroupDescriptionChanged -> {
-                _state.update { it.copy(newGroupDescription = event.description) }
-            }
-
-            is DrawGroupsEvent.OnShowCreateDialog -> {
-                _state.update {
-                    it.copy(
-                        showCreateGroupDialog = true,
-                        newGroupName = "",
-                        newGroupDescription = ""
-                    )
-                }
-            }
-
-            is DrawGroupsEvent.OnHideCreateDialog -> {
-                _state.update {
-                    it.copy(
-                        showCreateGroupDialog = false,
-                        newGroupName = "",
-                        newGroupDescription = ""
                     )
                 }
             }
@@ -153,31 +111,6 @@ class DrawGroupsViewModel @Inject constructor(
         }
     }
 
-    private fun createNewGroup(name: String, description: String) {
-        if (name.isBlank()) {
-            _state.update {
-                it.copy(error = UiText.stringResource(R.string.error_empty_names))
-            }
-            return
-        }
-
-        viewModelScope.launch {
-            _state.update { it.copy(isLoading = true) }
-
-            // Yeni grup için participants ekranına git
-            _state.update {
-                it.copy(
-                    isLoading = false,
-                    showCreateGroupDialog = false,
-                    newGroupName = "",
-                    newGroupDescription = ""
-                )
-            }
-
-            _navigationEvent.emit(DrawGroupsNavigation.ToCreateNewGroup(name, description))
-        }
-    }
-
     private fun deleteGroup() {
         val groupToDelete = _state.value.groupToDelete ?: return
 
@@ -193,7 +126,8 @@ class DrawGroupsViewModel @Inject constructor(
                             groupToDelete = null
                         )
                     }
-                    // Silme başarılı olduğunda liste otomatik güncellenecek (Flow sayesinde)
+                    // Reload groups after successful deletion
+                    loadDrawGroups()
                 }
 
                 is ResultState.Error -> {
@@ -225,7 +159,7 @@ class DrawGroupsViewModel @Inject constructor(
             try {
                 drawGroupRepository.migrateLegacyData()
             } catch (e: Exception) {
-                // Migration hatası loglanabilir ama kullanıcıya gösterilmez
+                // Migration error can be logged but not shown to user
                 android.util.Log.e("DrawGroupsViewModel", "Migration error", e)
             }
         }

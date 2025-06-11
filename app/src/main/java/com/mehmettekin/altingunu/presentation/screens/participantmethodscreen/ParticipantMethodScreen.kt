@@ -38,42 +38,11 @@ import kotlinx.coroutines.flow.collectLatest
 @Composable
 fun ParticipantMethodScreen(
     navController: NavController,
-    groupName: String,
-    groupDescription: String,
     viewModel: ParticipantMethodViewModel = hiltViewModel()
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
     val context = LocalContext.current
-
-    // Initialize with group info on first composition
-    LaunchedEffect(Unit) {
-        viewModel.initializeGroup(groupName, groupDescription)
-    }
-
-    // Navigation handling
-    LaunchedEffect(key1 = true) {
-        viewModel.navigationEvent.collectLatest { navigation ->
-            when (navigation) {
-                is ParticipantMethodNavigation.ToParticipantsScreen -> {
-                    navController.navigate(
-                        Screen.Participants.createRoute(navigation.groupId)
-                    ) {
-                        popUpTo(Screen.DrawGroups.route) { inclusive = false }
-                    }
-                }
-                is ParticipantMethodNavigation.ShareInviteLink -> {
-                    // Share the invite link
-                    val shareIntent = android.content.Intent().apply {
-                        action = android.content.Intent.ACTION_SEND
-                        type = "text/plain"
-                        putExtra(android.content.Intent.EXTRA_TEXT, navigation.inviteUrl)
-                    }
-                    context.startActivity(android.content.Intent.createChooser(shareIntent, "Davet Linkini Paylaş"))
-                }
-            }
-        }
-    }
 
     // Error handling
     LaunchedEffect(state.error) {
@@ -102,34 +71,13 @@ fun ParticipantMethodScreen(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            // Group Info Card
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
-                colors = CardDefaults.cardColors(containerColor = Gold.copy(alpha = 0.1f))
-            ) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp)
-                ) {
-                    Text(
-                        text = groupName,
-                        style = MaterialTheme.typography.titleLarge,
-                        fontWeight = FontWeight.Bold,
-                        color = NavyBlue
-                    )
-
-                    if (groupDescription.isNotEmpty()) {
-                        Spacer(modifier = Modifier.height(4.dp))
-                        Text(
-                            text = groupDescription,
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = Color.Gray
-                        )
-                    }
-                }
-            }
+            // Grup Bilgileri Girişi
+            GroupInfoSection(
+                groupName = state.groupName,
+                groupDescription = state.groupDescription,
+                onGroupNameChange = { viewModel.updateGroupName(it) },
+                onGroupDescriptionChange = { viewModel.updateGroupDescription(it) }
+            )
 
             // Title
             Text(
@@ -139,8 +87,6 @@ fun ParticipantMethodScreen(
                 color = NavyBlue,
                 textAlign = TextAlign.Center
             )
-
-            Spacer(modifier = Modifier.height(16.dp))
 
             // Method Selection Cards
             MethodCard(
@@ -161,11 +107,9 @@ fun ParticipantMethodScreen(
                 onClick = { viewModel.selectMethod(ParticipantMethod.INVITE) }
             )
 
-            // Show manual participant entry if MANUAL method is selected
+            // Manual participants section
             if (state.selectedMethod == ParticipantMethod.MANUAL) {
                 Spacer(modifier = Modifier.height(16.dp))
-
-                // Participants Section for Manual Entry
                 ManualParticipantsSection(
                     participants = state.manualParticipants,
                     onAddParticipant = { viewModel.addManualParticipant(it) },
@@ -178,11 +122,21 @@ fun ParticipantMethodScreen(
             // Continue Button
             Button(
                 onClick = {
-                    if (state.selectedMethod == ParticipantMethod.MANUAL) {
-                        viewModel.continueWithManualParticipants()
-                    } else {
-                        viewModel.createInviteLink()
-                    }
+                    viewModel.createGroup(
+                        onSuccess = { groupId ->
+                            navController.navigate(Screen.Participants.createRoute(groupId)) {
+                                popUpTo(Screen.ParticipantMethod.route) { inclusive = true }
+                            }
+                        },
+                        onShareInvite = { inviteUrl ->
+                            val shareIntent = Intent().apply {
+                                action = Intent.ACTION_SEND
+                                type = "text/plain"
+                                putExtra(Intent.EXTRA_TEXT, "Altın Günü çekilişimize katılın! $inviteUrl")
+                            }
+                            context.startActivity(Intent.createChooser(shareIntent, "Davet Linkini Paylaş"))
+                        }
+                    )
                 },
                 modifier = Modifier
                     .fillMaxWidth()
@@ -192,10 +146,10 @@ fun ParticipantMethodScreen(
                     contentColor = White
                 ),
                 shape = RoundedCornerShape(8.dp),
-                enabled = !state.isLoading && (
-                        state.selectedMethod == ParticipantMethod.INVITE ||
-                                (state.selectedMethod == ParticipantMethod.MANUAL && state.manualParticipants.size >= 2)
-                        )
+                enabled = !state.isLoading &&
+                        state.groupName.isNotBlank() &&
+                        (state.selectedMethod == ParticipantMethod.INVITE ||
+                                (state.selectedMethod == ParticipantMethod.MANUAL && state.manualParticipants.size >= 2))
             ) {
                 if (state.isLoading) {
                     CircularProgressIndicator(
@@ -204,15 +158,13 @@ fun ParticipantMethodScreen(
                     )
                 } else {
                     Icon(
-                        imageVector = if (state.selectedMethod == ParticipantMethod.INVITE)
-                            Icons.Default.Share else Icons.Default.ArrowForward,
+                        imageVector = Icons.Default.ArrowForward,
                         contentDescription = null,
                         modifier = Modifier.size(24.dp)
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
-                        text = if (state.selectedMethod == ParticipantMethod.INVITE)
-                            "Davet Linki Oluştur" else UiText.stringResource(R.string.continue_button).asString(),
+                        text = UiText.stringResource(R.string.continue_button).asString(),
                         style = MaterialTheme.typography.titleMedium
                     )
                 }

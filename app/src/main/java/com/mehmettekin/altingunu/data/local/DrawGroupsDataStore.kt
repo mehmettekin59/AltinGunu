@@ -29,9 +29,9 @@ class DrawGroupsDataStore @Inject constructor(
 
     // ============ DRAW GROUPS ============
 
-    /**
-     * Tüm çekiliş gruplarını Flow olarak döndürür
-     */
+
+    //Tüm çekiliş gruplarını Flow olarak döndürür
+
     fun getDrawGroupsFlow(): Flow<List<DrawGroup>> {
         return dataStore.data.map { preferences ->
             val json = preferences[drawGroupsKey] ?: "[]"
@@ -39,32 +39,26 @@ class DrawGroupsDataStore @Inject constructor(
         }
     }
 
-    /**
-     * Tüm çekiliş gruplarını getirir
-     */
+     // Tüm çekiliş gruplarını getirir
     suspend fun getDrawGroups(): List<DrawGroup> {
         return getDrawGroupsFlow().first()
     }
 
-    /**
-     * Belirli bir çekiliş grubunu getirir
-     */
+
+     // Belirli bir çekiliş grubunu getirir
     suspend fun getDrawGroupById(id: String): DrawGroup? {
         return getDrawGroups().find { it.id == id }
     }
 
-    /**
-     * Çekiliş gruplarını kaydeder
-     */
+
+    //Çekiliş gruplarını kaydeder
     suspend fun saveDrawGroups(groups: List<DrawGroup>) {
         dataStore.edit { preferences ->
             preferences[drawGroupsKey] = drawGroupsAdapter.toJson(groups)
         }
     }
 
-    /**
-     * Yeni çekiliş grubu ekler
-     */
+    //Yeni çekiliş grubu ekler
     suspend fun addDrawGroup(group: DrawGroup) {
         val currentGroups = getDrawGroups().toMutableList()
 
@@ -79,9 +73,8 @@ class DrawGroupsDataStore @Inject constructor(
         saveDrawGroups(currentGroups)
     }
 
-    /**
-     * Çekiliş grubunu günceller
-     */
+
+    //Çekiliş grubunu günceller
     suspend fun updateDrawGroup(updatedGroup: DrawGroup) {
         val currentGroups = getDrawGroups().toMutableList()
         val index = currentGroups.indexOfFirst { it.id == updatedGroup.id }
@@ -92,34 +85,29 @@ class DrawGroupsDataStore @Inject constructor(
         }
     }
 
-    /**
-     * Çekiliş grubunu siler
-     */
+    //Çekiliş grubunu siler
     suspend fun deleteDrawGroup(id: String) {
         val currentGroups = getDrawGroups().toMutableList()
         currentGroups.removeAll { it.id == id }
         saveDrawGroups(currentGroups)
     }
 
-    /**
-     * Aktif çekiliş gruplarını getirir
-     */
+
+     //Aktif çekiliş gruplarını getirir
     suspend fun getActiveDrawGroups(): List<DrawGroup> {
         return getDrawGroups().filter { it.isActive && !it.isCompleted }
     }
 
-    /**
-     * Tamamlanmış çekiliş gruplarını getirir
-     */
+
+    //Tamamlanmış çekiliş gruplarını getirir
     suspend fun getCompletedDrawGroups(): List<DrawGroup> {
         return getDrawGroups().filter { it.isCompleted }
     }
 
     // ============ MIGRATION & CLEANUP ============
 
-    /**
-     * Eski çekiliş sisteminden veri migration
-     */
+
+    //Eski çekiliş sisteminden veri migration
     suspend fun migrateLegacyData(
         legacySettings: ParticipantsScreenWholeInformation?,
         legacyParticipants: List<Participant>,
@@ -140,9 +128,8 @@ class DrawGroupsDataStore @Inject constructor(
         }
     }
 
-    /**
-     * Tüm verileri temizler
-     */
+
+     //Tüm verileri temizler
     suspend fun clearAllData() {
         dataStore.edit { preferences ->
             preferences.remove(drawGroupsKey)
