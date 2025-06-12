@@ -123,7 +123,7 @@ class ParticipantMethodViewModel @Inject constructor(
         }
     }
 
-    // Basitleştirilmiş: Sadece server'dan gelen onaylı katılımcıları göster
+    // Sadece server'dan gelen onaylı katılımcıları göster
     fun refreshInvitedParticipants() {
         viewModelScope.launch {
             _state.value.tempGroupId?.let { groupId ->
