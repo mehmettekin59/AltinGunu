@@ -5,7 +5,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.mehmettekin.altingunu.R
 import com.mehmettekin.altingunu.domain.model.DrawGroup
-import com.mehmettekin.altingunu.domain.model.DrawInvitation
 import com.mehmettekin.altingunu.domain.model.InviteStatus
 import com.mehmettekin.altingunu.domain.model.ItemType
 import com.mehmettekin.altingunu.domain.model.Participant
@@ -39,39 +38,6 @@ class ParticipantMethodViewModel @Inject constructor(
 
     fun updateGroupDescription(description: String) {
         _state.update { it.copy(groupDescription = description) }
-    }
-
-    fun addManualParticipant(name: String) {
-        if (name.isBlank()) return
-
-        // Check for duplicate names only in manual participants
-        val isDuplicate = _state.value.manualParticipants.any {
-            it.name.lowercase() == name.trim().lowercase()
-        }
-
-        if (isDuplicate) {
-            _state.update { it.copy(error = UiText.stringResource(R.string.error_duplicate_names)) }
-            return
-        }
-
-        val newParticipant = Participant(
-            id = UUID.randomUUID().toString(),
-            name = name.trim()
-        )
-
-        _state.update { currentState ->
-            currentState.copy(
-                manualParticipants = currentState.manualParticipants + newParticipant
-            )
-        }
-    }
-
-    fun removeManualParticipant(participant: Participant) {
-        _state.update { currentState ->
-            currentState.copy(
-                manualParticipants = currentState.manualParticipants.filter { it.id != participant.id }
-            )
-        }
     }
 
     fun generateInviteCode() {
@@ -124,21 +90,18 @@ class ParticipantMethodViewModel @Inject constructor(
         }
     }
 
-    // Basitleştirilmiş: Sadece server'dan gelen onaylı katılımcıları göster
     fun refreshInvitedParticipants() {
         viewModelScope.launch {
             _state.value.tempGroupId?.let { groupId ->
                 // Server'dan sadece ACCEPTED olan katılımcıları çek
-                // Not: Bu endpoint implement edilmeli
                 when (val result = fcmRepository.getAcceptedParticipants(groupId)) {
                     is ResultState.Success -> {
                         val invitedParticipants = result.data.map { request ->
-                            DrawInvitation(
+                            InvitedParticipant(
                                 id = request.id,
-                                drawGroupId = request.drawGroupId,
-                                inviterName = request.participantName,
-                                status = InviteStatus.ACCEPTED, // Hepsi zaten onaylı
-                                inviteCode = request.fcmToken,
+                                name = request.participantName,
+                                status = InviteStatus.ACCEPTED,
+                                fcmToken = request.fcmToken,
                                 joinedAt = request.joinedAt
                             )
                         }
@@ -153,30 +116,55 @@ class ParticipantMethodViewModel @Inject constructor(
         }
     }
 
-    // Tüm katılımcıları birleştir
-    private fun combineAllParticipants(): Pair<List<Participant>, List<String>> {
-        val allParticipants = mutableListOf<Participant>()
-        val allFcmTokens = mutableListOf<String>()
+    fun approveInvitedParticipant(participantId: String) {
+        viewModelScope.launch {
+            _state.update { it.copy(isLoading = true) }
 
-        // Manuel katılımcıları ekle
-        allParticipants.addAll(_state.value.manualParticipants)
-
-        // Server'dan gelen (zaten onaylı) katılımcıları ekle
-        _state.value.invitedParticipants.forEach { invited ->
-            allParticipants.add(
-                Participant(
-                    id = invited.id,
-                    name = invited.name
-                )
-            )
-            invited.fcmToken?.let { allFcmTokens.add(it) }
+            when (val result = fcmRepository.approveParticipationRequestOnServer(participantId, true)) {
+                is ResultState.Success -> {
+                    _state.update { it.copy(isLoading = false) }
+                    refreshInvitedParticipants()
+                }
+                is ResultState.Error -> {
+                    _state.update {
+                        it.copy(
+                            isLoading = false,
+                            error = result.message
+                        )
+                    }
+                }
+                else -> {
+                    _state.update { it.copy(isLoading = false) }
+                }
+            }
         }
-
-        return Pair(allParticipants, allFcmTokens)
     }
 
-    // Grup oluştur
-    fun createGroup(onSuccess: (String) -> Unit) {
+    fun rejectInvitedParticipant(participantId: String) {
+        viewModelScope.launch {
+            _state.update { it.copy(isLoading = true) }
+
+            when (val result = fcmRepository.approveParticipationRequestOnServer(participantId, false)) {
+                is ResultState.Success -> {
+                    _state.update { it.copy(isLoading = false) }
+                    refreshInvitedParticipants()
+                }
+                is ResultState.Error -> {
+                    _state.update {
+                        it.copy(
+                            isLoading = false,
+                            error = result.message
+                        )
+                    }
+                }
+                else -> {
+                    _state.update { it.copy(isLoading = false) }
+                }
+            }
+        }
+    }
+
+    fun createGroupWithAllParticipants(onSuccess: (String) -> Unit) {
         viewModelScope.launch {
             val groupName = _state.value.groupName.trim()
 
@@ -187,8 +175,19 @@ class ParticipantMethodViewModel @Inject constructor(
 
             _state.update { it.copy(isLoading = true) }
 
-            // Tüm katılımcıları birleştir
-            val (allParticipants, allFcmTokens) = combineAllParticipants()
+            // Sadece davetli katılımcıları al
+            val allParticipants = _state.value.invitedParticipants
+                .filter { it.status == InviteStatus.ACCEPTED }
+                .map { invited ->
+                    Participant(
+                        id = invited.id,
+                        name = invited.name
+                    )
+                }
+
+            val allFcmTokens = _state.value.invitedParticipants
+                .filter { it.status == InviteStatus.ACCEPTED }
+                .mapNotNull { it.fcmToken }
 
             // Minimum 2 katılımcı kontrolü
             if (allParticipants.size < 2) {
@@ -255,7 +254,6 @@ class ParticipantMethodViewModel @Inject constructor(
     }
 
     fun getTotalParticipantCount(): Int {
-        return _state.value.manualParticipants.size + _state.value.invitedParticipants.size
+        return _state.value.invitedParticipants.count { it.status == InviteStatus.ACCEPTED }
     }
 }
-

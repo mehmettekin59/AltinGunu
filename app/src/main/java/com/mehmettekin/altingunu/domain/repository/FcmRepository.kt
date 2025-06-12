@@ -5,11 +5,11 @@ import com.mehmettekin.altingunu.domain.model.DrawInvitation
 import com.mehmettekin.altingunu.utils.ResultState
 
 interface FcmRepository {
-    // ✅ ONLY TOKEN MANAGEMENT - APP SIDE
+
     suspend fun updateUserFcmToken(token: String): ResultState<Unit>
     suspend fun getUserFcmToken(): ResultState<String?>
 
-    // ✅ SERVER FUNCTIONS - Only server calls
+    //SERVER FUNCTIONS - Only server calls
     suspend fun createInvitationOnServer(
         drawGroupId: String,
         drawGroupName: String,
@@ -35,4 +35,6 @@ interface FcmRepository {
         message: String,
         extraData: Map<String, String>
     ): ResultState<Unit>
+
+    suspend fun getAcceptedParticipants(groupId: String): ResultState<List<??????????>>
 }

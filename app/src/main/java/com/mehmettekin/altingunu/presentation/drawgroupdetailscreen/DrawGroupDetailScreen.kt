@@ -19,6 +19,7 @@ import androidx.navigation.NavController
 import com.mehmettekin.altingunu.R
 import com.mehmettekin.altingunu.domain.model.DrawGroup
 import com.mehmettekin.altingunu.domain.model.DrawResult
+import com.mehmettekin.altingunu.domain.model.InvitedParticipant
 import com.mehmettekin.altingunu.domain.model.ItemType
 import com.mehmettekin.altingunu.domain.model.Participant
 import com.mehmettekin.altingunu.presentation.navigation.Screen
@@ -40,7 +41,7 @@ fun DrawGroupDetailScreen(
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
-    val coroutineScope = rememberCoroutineScope()
+
 
     LaunchedEffect(groupId) {
         viewModel.loadDrawGroup(groupId)
@@ -151,11 +152,7 @@ fun DrawGroupDetailScreen(
                             },
                             onMarkCompleteClick = {
                                 viewModel.markAsCompleted()
-                            },
-                            onShareInviteClick = {
-                                viewModel.shareInviteLink()
-                            },
-                            inviteCode = state.inviteCode
+                            }
                         )
                     }
                 }
@@ -424,7 +421,7 @@ private fun ParticipantsCard(
 
 @Composable
 private fun PendingRequestsCard(
-    requests: List<ParticipationRequest>,
+    requests: List<InvitedParticipant>,
     onApprove: (String) -> Unit,
     onReject: (String) -> Unit
 ) {
@@ -486,12 +483,12 @@ private fun PendingRequestsCard(
                             modifier = Modifier.weight(1f)
                         ) {
                             Text(
-                                text = request.participantName,
+                                text = request.name,
                                 style = MaterialTheme.typography.bodyMedium,
                                 fontWeight = FontWeight.Bold
                             )
                             Text(
-                                text = formatDate(request.requestDate),
+                                text = formatDate(request.joinedAt),
                                 style = MaterialTheme.typography.bodySmall,
                                 color = Color.Gray
                             )
@@ -602,8 +599,6 @@ private fun ActionsSection(
     drawGroup: DrawGroup,
     onContinueDrawClick: () -> Unit,
     onMarkCompleteClick: () -> Unit,
-    onShareInviteClick: () -> Unit,
-    inviteCode: String?
 ) {
     Column(
         modifier = Modifier.fillMaxWidth(),
@@ -644,18 +639,6 @@ private fun ActionsSection(
             }
         }
 
-        if (inviteCode != null && !drawGroup.isCompleted) {
-            OutlinedButton(
-                onClick = onShareInviteClick,
-                modifier = Modifier.fillMaxWidth(),
-                colors = ButtonDefaults.outlinedButtonColors(contentColor = Gold),
-                border = BorderStroke(1.dp, Gold)
-            ) {
-                Icon(Icons.Default.Share, contentDescription = null)
-                Spacer(modifier = Modifier.width(8.dp))
-                Text("Davet Linkini Paylaş")
-            }
-        }
     }
 }
 

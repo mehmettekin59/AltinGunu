@@ -1,16 +1,15 @@
 package com.mehmettekin.altingunu.presentation.screens.participantmethodscreen
 
 
+
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
 import android.widget.Toast
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -30,25 +29,31 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.mehmettekin.altingunu.R
 import com.mehmettekin.altingunu.domain.model.InviteStatus
-import com.mehmettekin.altingunu.domain.model.Participant
 import com.mehmettekin.altingunu.presentation.navigation.Screen
 import com.mehmettekin.altingunu.presentation.screens.common.CommonTopAppBar
 import com.mehmettekin.altingunu.ui.theme.Gold
 import com.mehmettekin.altingunu.ui.theme.NavyBlue
 import com.mehmettekin.altingunu.ui.theme.White
 import com.mehmettekin.altingunu.utils.UiText
-import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ParticipantMethodScreen(
     navController: NavController,
+    groupName: String,
+    groupDescription: String,
     viewModel: ParticipantMethodViewModel = hiltViewModel()
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
+
+    // Initialize group info
+    LaunchedEffect(Unit) {
+        viewModel.updateGroupName(groupName)
+        viewModel.updateGroupDescription(groupDescription)
+    }
 
     // Error handling
     LaunchedEffect(state.error) {
@@ -96,19 +101,12 @@ fun ParticipantMethodScreen(
 
             // Title
             Text(
-                text = "Katılımcı Ekleme Yöntemleri",
+                text = "Katılımcı Ekleme",
                 style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.Bold,
                 color = NavyBlue,
                 textAlign = TextAlign.Center,
                 modifier = Modifier.fillMaxWidth()
-            )
-
-            // Manual Participants Card
-            ManualParticipantsCard(
-                participants = state.manualParticipants,
-                onAddParticipant = { viewModel.addManualParticipant(it) },
-                onRemoveParticipant = { viewModel.removeManualParticipant(it) }
             )
 
             // Invited Participants Card
@@ -140,7 +138,6 @@ fun ParticipantMethodScreen(
 
             // Total Participants Summary
             TotalParticipantsSummary(
-                manualCount = state.manualParticipants.size,
                 invitedCount = state.invitedParticipants.count { it.status == InviteStatus.ACCEPTED },
                 totalCount = viewModel.getTotalParticipantCount()
             )
@@ -264,125 +261,6 @@ fun GroupInfoSection(
 }
 
 @Composable
-fun ManualParticipantsCard(
-    participants: List<Participant>,
-    onAddParticipant: (String) -> Unit,
-    onRemoveParticipant: (Participant) -> Unit
-) {
-    var newParticipantName by remember { mutableStateOf("") }
-
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
-    ) {
-        Column(
-            modifier = Modifier.padding(16.dp)
-        ) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Icon(
-                    imageVector = Icons.Default.PersonAdd,
-                    contentDescription = null,
-                    tint = NavyBlue
-                )
-                Spacer(modifier = Modifier.width(8.dp))
-                Text(
-                    text = "Manuel Katılımcılar (${participants.size})",
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold,
-                    color = NavyBlue
-                )
-            }
-
-            Spacer(modifier = Modifier.height(12.dp))
-
-            Text(
-                text = "Bildirim gönderilemez",
-                style = MaterialTheme.typography.bodySmall,
-                color = Color.Gray
-            )
-
-            Spacer(modifier = Modifier.height(12.dp))
-
-            // Add participant input
-            OutlinedTextField(
-                value = newParticipantName,
-                onValueChange = { newParticipantName = it },
-                label = { Text("Katılımcı Adı") },
-                modifier = Modifier.fillMaxWidth(),
-                singleLine = true,
-                trailingIcon = {
-                    IconButton(
-                        onClick = {
-                            if (newParticipantName.isNotBlank()) {
-                                onAddParticipant(newParticipantName)
-                                newParticipantName = ""
-                            }
-                        },
-                        enabled = newParticipantName.isNotBlank()
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Add,
-                            contentDescription = "Ekle",
-                            tint = if (newParticipantName.isNotBlank()) Gold else Color.Gray
-                        )
-                    }
-                }
-            )
-
-            // Participants list
-            if (participants.isNotEmpty()) {
-                Spacer(modifier = Modifier.height(12.dp))
-
-                Surface(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .heightIn(max = 150.dp),
-                    shape = RoundedCornerShape(8.dp),
-                    border = BorderStroke(1.dp, Color.Gray.copy(alpha = 0.3f))
-                ) {
-                    LazyColumn {
-                        items(participants) { participant ->
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(horizontal = 12.dp, vertical = 8.dp),
-                                horizontalArrangement = Arrangement.SpaceBetween,
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Text(
-                                    text = participant.name,
-                                    style = MaterialTheme.typography.bodyMedium
-                                )
-
-                                IconButton(
-                                    onClick = { onRemoveParticipant(participant) }
-                                ) {
-                                    Icon(
-                                        imageVector = Icons.Default.Delete,
-                                        contentDescription = "Sil",
-                                        tint = Color.Red,
-                                        modifier = Modifier.size(20.dp)
-                                    )
-                                }
-                            }
-
-                            if (participant != participants.last()) {
-                                HorizontalDivider(
-                                    color = Color.Gray.copy(alpha = 0.2f),
-                                    thickness = 1.dp
-                                )
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-}
-
-@Composable
 fun InvitedParticipantsCard(
     inviteCode: String?,
     invitedParticipants: List<InvitedParticipant>,
@@ -420,7 +298,7 @@ fun InvitedParticipantsCard(
             Spacer(modifier = Modifier.height(12.dp))
 
             Text(
-                text = "Bildirim gönderilir",
+                text = "Davet linkiyle eklenen katılımcılara bildirim gönderilebilir",
                 style = MaterialTheme.typography.bodySmall,
                 color = Color.Green
             )
@@ -614,7 +492,6 @@ fun InvitedParticipantItem(
 
 @Composable
 fun TotalParticipantsSummary(
-    manualCount: Int,
     invitedCount: Int,
     totalCount: Int
 ) {
@@ -656,60 +533,27 @@ fun TotalParticipantsSummary(
 
                 Spacer(modifier = Modifier.height(12.dp))
 
-                Row(
+                Column(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceEvenly
+                    horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    Column(
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.PersonAdd,
-                            contentDescription = null,
-                            tint = Gold,
-                            modifier = Modifier.size(24.dp)
-                        )
-                        Text(
-                            text = "Manuel",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = White.copy(alpha = 0.8f)
-                        )
-                        Text(
-                            text = manualCount.toString(),
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.Bold,
-                            color = White
-                        )
-                    }
-
-                    Box(
-                        modifier = Modifier
-                            .width(1.dp)
-                            .height(50.dp)
-                            .background(White.copy(alpha = 0.3f))
+                    Icon(
+                        imageVector = Icons.Default.Share,
+                        contentDescription = null,
+                        tint = Gold,
+                        modifier = Modifier.size(24.dp)
                     )
-
-                    Column(
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Share,
-                            contentDescription = null,
-                            tint = Gold,
-                            modifier = Modifier.size(24.dp)
-                        )
-                        Text(
-                            text = "Davetli",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = White.copy(alpha = 0.8f)
-                        )
-                        Text(
-                            text = invitedCount.toString(),
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.Bold,
-                            color = White
-                        )
-                    }
+                    Text(
+                        text = "Davetli",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = White.copy(alpha = 0.8f)
+                    )
+                    Text(
+                        text = invitedCount.toString(),
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = White
+                    )
                 }
             }
 

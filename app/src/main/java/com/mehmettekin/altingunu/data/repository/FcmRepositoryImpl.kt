@@ -2,8 +2,9 @@ package com.mehmettekin.altingunu.data.repository
 
 import com.google.firebase.functions.FirebaseFunctions
 import com.google.firebase.messaging.FirebaseMessaging
+import com.mehmettekin.altingunu.domain.model.DrawInvitation
+import com.mehmettekin.altingunu.domain.model.InvitedParticipant
 import com.mehmettekin.altingunu.domain.repository.FcmRepository
-import com.mehmettekin.altingunu.domain.repository.InvitationData
 import com.mehmettekin.altingunu.utils.ResultState
 import com.mehmettekin.altingunu.utils.UiText
 import kotlinx.coroutines.tasks.await
@@ -21,7 +22,7 @@ class FcmRepositoryImpl @Inject constructor() : FcmRepository {
         return try {
             // Server'a token güncelleme isteği gönder
             val data = hashMapOf(
-                "participantId" to "current_user", // Gerçek kullanıcı ID'si kullanılacak
+                "participantId" to "current_user",
                 "token" to token
             )
 
@@ -53,7 +54,6 @@ class FcmRepositoryImpl @Inject constructor() : FcmRepository {
         return try {
             val data = hashMapOf(
                 "drawGroupId" to drawGroupId,
-                "drawGroupName" to drawGroupName,
                 "inviterName" to inviterName
             )
 
@@ -70,7 +70,7 @@ class FcmRepositoryImpl @Inject constructor() : FcmRepository {
         }
     }
 
-    override suspend fun validateInviteCodeOnServer(inviteCode: String): ResultState<InvitationData?> {
+    override suspend fun validateInviteCodeOnServer(inviteCode: String): ResultState<DrawInvitation?> {
         return try {
             val data = hashMapOf("inviteCode" to inviteCode)
 
@@ -83,7 +83,7 @@ class FcmRepositoryImpl @Inject constructor() : FcmRepository {
 
             if (isValid) {
                 val invitationMap = response["invitation"] as Map<String, Any>
-                val invitation = InvitationData(
+                val invitation = DrawInvitation(
                     id = invitationMap["id"] as String,
                     drawGroupId = invitationMap["drawGroupId"] as String,
                     drawGroupName = invitationMap["drawGroupName"] as String,
@@ -164,6 +164,34 @@ class FcmRepositoryImpl @Inject constructor() : FcmRepository {
             ResultState.Success(Unit)
         } catch (e: Exception) {
             ResultState.Error(UiText.dynamicString(e.message ?: "Bildirim gönderilemedi"))
+        }
+    }
+
+    override suspend fun getAcceptedParticipants(groupId: String): ResultState<List<InvitedParticipant>> {
+        return try {
+            val data = hashMapOf("groupId" to groupId)
+
+            val result = functions.getHttpsCallable("getAcceptedParticipants")
+                .call(data)
+                .await()
+
+            val response = result.data as Map<String, Any>
+            val participantsData = response["participants"] as List<Map<String, Any>>
+
+            val participants = participantsData.map { participantMap ->
+                InvitedParticipant(
+                    id = participantMap["id"] as String,
+                    drawGroupId = participantMap["drawGroupId"] as String,
+                    name = participantMap["participantName"] as String,
+                    fcmToken = participantMap["fcmToken"] as? String,
+                    status = participantMap["status"] as String,
+                    joinedAt = (participantMap["joinedAt"] as? Number)?.toLong()
+                )
+            }
+
+            ResultState.Success(participants)
+        } catch (e: Exception) {
+            ResultState.Error(UiText.dynamicString(e.message ?: "Katılımcılar alınamadı"))
         }
     }
 }

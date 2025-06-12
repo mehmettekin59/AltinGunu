@@ -24,7 +24,6 @@ class DrawGroupDetailViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     private val drawGroupRepository: DrawGroupRepository,
     private val fcmRepository: FcmRepository,
-    private val settingsDataStore: SettingsDataStore,
     @ApplicationContext private val context: Context
 ) : ViewModel() {
 
@@ -36,7 +35,6 @@ class DrawGroupDetailViewModel @Inject constructor(
     init {
         loadDrawGroup(groupId)
         loadPendingRequests()
-        loadReminderSettings()
     }
 
     fun loadDrawGroup(id: String) {
@@ -68,17 +66,13 @@ class DrawGroupDetailViewModel @Inject constructor(
 
     private fun loadInviteCode(groupId: String) {
         viewModelScope.launch {
-            // Mevcut davet kodunu kontrol et veya yeni oluştur
-            val invitation = DrawInvitation(
-                id = "",
-                drawGroupId = groupId,
-                drawGroupName = _state.value.drawGroup?.name ?: "",
-                inviterName = "Grup Yöneticisi",
-                inviteCode = "",
-                expirationDate = System.currentTimeMillis() + (7 * 24 * 60 * 60 * 1000)
-            )
+            val drawGroup = _state.value.drawGroup ?: return@launch
 
-            when (val result = fcmRepository.createInvitation(invitation)) {
+            when (val result = fcmRepository.createInvitationOnServer(
+                drawGroupId = groupId,
+                drawGroupName = drawGroup.name,
+                inviterName = "Grup Yöneticisi"
+            )) {
                 is ResultState.Success -> {
                     _state.value = _state.value.copy(inviteCode = result.data)
                 }
@@ -89,19 +83,15 @@ class DrawGroupDetailViewModel @Inject constructor(
 
     private fun loadPendingRequests() {
         viewModelScope.launch {
-            when (val result = fcmRepository.getPendingRequests(groupId)) {
-                is ResultState.Success -> {
-                    _state.value = _state.value.copy(pendingRequests = result.data)
-                }
-                else -> {}
-            }
+            // Firebase Functions'tan pending requestleri çek
+            // Bu özellik şu an için basitleştirildi
+            _state.value = _state.value.copy(pendingRequests = emptyList())
         }
     }
 
-
     fun approveRequest(requestId: String, approve: Boolean) {
         viewModelScope.launch {
-            when (val result = fcmRepository.approveParticipationRequest(requestId, approve)) {
+            when (val result = fcmRepository.approveParticipationRequestOnServer(requestId, approve)) {
                 is ResultState.Success -> {
                     _state.value = _state.value.copy(
                         message = if (approve) "Katılım talebi onaylandı" else "Katılım talebi reddedildi"
@@ -121,7 +111,7 @@ class DrawGroupDetailViewModel @Inject constructor(
 
     fun markAsCompleted() {
         viewModelScope.launch {
-            when (val result = drawGroupRepository.markDrawGroupAsCompleted(groupId)) {
+            when (val result = drawGroupRepository.markGroupAsCompleted(groupId)) {
                 is ResultState.Success -> {
                     _state.value = _state.value.copy(
                         message = "Çekiliş tamamlandı"
@@ -137,28 +127,6 @@ class DrawGroupDetailViewModel @Inject constructor(
             }
         }
     }
-
-    fun onInviteClick() {
-        shareInviteLink()
-    }
-
-    fun shareInviteLink() {
-        _state.value.inviteCode?.let { code ->
-            val inviteUrl = "https://altingunu.app/invite/$code"
-            val shareIntent = Intent().apply {
-                action = Intent.ACTION_SEND
-                type = "text/plain"
-                putExtra(Intent.EXTRA_TEXT, "Altın Günü çekilişimize katılın! $inviteUrl")
-            }
-
-            val chooser = Intent.createChooser(shareIntent, "Davet linkini paylaş")
-            if (chooser.resolveActivity(context.packageManager) != null) {
-                chooser.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                context.startActivity(chooser)
-            }
-        }
-    }
-
 
 
     fun clearMessage() {

@@ -65,7 +65,7 @@ exports.sendNotification = functions.firestore
         }
     });
 
-// ✅ YENİ: Davet oluşturma fonksiyonu - SERVER TARAFINDA
+// Davet oluşturma fonksiyonu - SERVER TARAFINDA
 exports.createInvitation = functions.https.onCall(async (data, context) => {
     const { drawGroupId, drawGroupName, inviterName } = data;
 
@@ -101,7 +101,7 @@ exports.createInvitation = functions.https.onCall(async (data, context) => {
     }
 });
 
-// ✅ YENİ: Katılım talebi gönderme - SERVER TARAFINDA
+// Katılım talebi gönderme - SERVER TARAFINDA
 exports.submitParticipationRequest = functions.https.onCall(async (data, context) => {
     const { inviteCode, participantName, fcmToken } = data;
 
@@ -513,6 +513,36 @@ exports.validateInviteCode = functions.https.onCall(async (data, context) => {
 
     } catch (error) {
         console.error('Davet kodu doğrulama hatası:', error);
+        throw new functions.https.HttpsError('internal', error.message);
+    }
+});
+
+// Onaylanmış katılımcıları getirme fonksiyonu
+exports.getAcceptedParticipants = functions.https.onCall(async (data, context) => {
+    const { groupId } = data;
+
+    if (!groupId) {
+        throw new functions.https.HttpsError('invalid-argument', 'Grup ID gerekli');
+    }
+
+    try {
+        const participantsQuery = await db.collection('participation_requests')
+            .where('drawGroupId', '==', groupId)
+            .where('status', '==', 'ACCEPTED')
+            .get();
+
+        const participants = participantsQuery.docs.map(doc => ({
+            id: doc.id,
+            ...doc.data()
+        }));
+
+        return {
+            success: true,
+            participants: participants
+        };
+
+    } catch (error) {
+        console.error('Katılımcıları getirme hatası:', error);
         throw new functions.https.HttpsError('internal', error.message);
     }
 });
