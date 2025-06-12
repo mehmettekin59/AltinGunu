@@ -82,7 +82,7 @@ class ParticipantMethodViewModel @Inject constructor(
 
             when (val result = fcmRepository.createInvitationOnServer(
                 drawGroupId = tempGroupId,
-                drawGroupName = _state.value.groupName.ifEmpty { "Yeni Altın Günü Grubu" },
+                drawGroupName = _state.value.groupName.ifEmpty { "Yeni Altın Günü Grubu-Today" },
                 inviterName = "Grup Yöneticisi"
             )) {
                 is ResultState.Success -> {
