@@ -1,98 +1,106 @@
 package com.mehmettekin.altingunu.presentation.screens.participants
 
-import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.mehmettekin.altingunu.R
 import com.mehmettekin.altingunu.domain.model.DrawGroup
+import com.mehmettekin.altingunu.domain.model.InvitedParticipant
 import com.mehmettekin.altingunu.domain.model.ItemType
+import com.mehmettekin.altingunu.domain.model.Participant
 import com.mehmettekin.altingunu.domain.model.ParticipantsScreenWholeInformation
 import com.mehmettekin.altingunu.domain.repository.DrawGroupRepository
-import com.mehmettekin.altingunu.domain.repository.DrawRepository
-import com.mehmettekin.altingunu.domain.usecase.ValidateDrawSettingsUseCase
-import com.mehmettekin.altingunu.utils.Constraints
+import com.mehmettekin.altingunu.domain.repository.FcmRepository
+import com.mehmettekin.altingunu.presentation.screens.participantmethodscreen.ParticipantMethodState
 import com.mehmettekin.altingunu.utils.ResultState
 import com.mehmettekin.altingunu.utils.UiText
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import java.time.YearMonth
+import java.util.Calendar
+import java.util.UUID
 import javax.inject.Inject
 
 @HiltViewModel
-class ParticipantsViewModel @Inject constructor(
-    savedStateHandle: SavedStateHandle,
-    private val drawRepository: DrawRepository,
-    private val validateDrawSettingsUseCase: ValidateDrawSettingsUseCase,
-    private val drawGroupRepository: DrawGroupRepository
+class ParticipantMethodViewModel @Inject constructor(
+    private val drawGroupRepository: DrawGroupRepository,
+    private val fcmRepository: FcmRepository
 ) : ViewModel() {
 
-    private val groupId: String = savedStateHandle.get<String>("groupId") ?: ""
+    private val _state = MutableStateFlow(ParticipantMethodState())
+    val state: StateFlow<ParticipantMethodState> = _state.asStateFlow()
 
-    private val _state = MutableStateFlow(ParticipantsState())
-    val state: StateFlow<ParticipantsState> = _state.asStateFlow()
-
-    private val _navigationEvent = MutableSharedFlow<Unit>()
-    val navigationEvent: SharedFlow<Unit> = _navigationEvent.asSharedFlow()
-
-    private var currentDrawGroup: DrawGroup? = null
-
-    init {
-        // Set current month and year as default
-        val currentDate = YearMonth.now()
-        _state.update { it.copy(
-            startMonth = currentDate.monthValue,
-            startYear = currentDate.year
-        ) }
-
-        // Set currency and gold options from Constants
-        _state.update { it.copy(
-            currencyOptions = Constraints.currencyCodeList,
-            goldOptions = Constraints.goldCodeList
-        ) }
-
-        // Load group data
-        loadDrawGroup()
+    fun updateGroupName(name: String) {
+        _state.update { it.copy(groupName = name) }
     }
 
-    private fun loadDrawGroup() {
+    fun updateGroupDescription(description: String) {
+        _state.update { it.copy(groupDescription = description) }
+    }
+
+    fun addManualParticipant(name: String) {
+        if (name.isBlank()) return
+
+        // Check for duplicate names only in manual participants
+        val isDuplicate = _state.value.manualParticipants.any {
+            it.name.lowercase() == name.trim().lowercase()
+        }
+
+        if (isDuplicate) {
+            _state.update { it.copy(error = UiText.stringResource(R.string.error_duplicate_names)) }
+            return
+        }
+
+        val newParticipant = Participant(
+            id = UUID.randomUUID().toString(),
+            name = name.trim()
+        )
+
+        _state.update { currentState ->
+            currentState.copy(
+                manualParticipants = currentState.manualParticipants + newParticipant
+            )
+        }
+    }
+
+    fun removeManualParticipant(participant: Participant) {
+        _state.update { currentState ->
+            currentState.copy(
+                manualParticipants = currentState.manualParticipants.filter { it.id != participant.id }
+            )
+        }
+    }
+
+    fun generateInviteCode() {
         viewModelScope.launch {
             _state.update { it.copy(isLoading = true) }
 
-            when (val result = drawGroupRepository.getDrawGroupById(groupId)) {
+            // Geçici bir grup ID oluştur
+            val tempGroupId = UUID.randomUUID().toString()
+
+            when (val result = fcmRepository.createInvitationOnServer(
+                drawGroupId = tempGroupId,
+                drawGroupName = _state.value.groupName.ifEmpty { "Yeni Altın Günü Grubu" },
+                inviterName = "Grup Yöneticisi"
+            )) {
                 is ResultState.Success -> {
-                    result.data?.let { group ->
-                        currentDrawGroup = group
-                        _state.update { currentState ->
-                            currentState.copy(
-                                isLoading = false,
-                                participants = group.participants,
-                                participantCount = group.participants.size.toString(),
-                                groupName = group.name,
-                                groupDescription = group.description,
-                                // Load existing settings if available
-                                selectedItemType = group.settings.itemType,
-                                selectedSpecificItem = group.settings.specificItem,
-                                monthlyAmount = group.settings.monthlyAmount.toString().ifEmpty { "" },
-                                durationMonths = group.settings.durationMonths.toString().ifEmpty { "" },
-                                startDay = group.settings.startDay,
-                                startMonth = group.settings.startMonth,
-                                startYear = group.settings.startYear
-                            )
-                        }
+                    _state.update {
+                        it.copy(
+                            isLoading = false,
+                            inviteCode = result.data,
+                            tempGroupId = tempGroupId
+                        )
                     }
                 }
                 is ResultState.Error -> {
-                    _state.update { it.copy(
-                        isLoading = false,
-                        error = result.message
-                    ) }
+                    _state.update {
+                        it.copy(
+                            isLoading = false,
+                            error = result.message
+                        )
+                    }
                 }
                 else -> {
                     _state.update { it.copy(isLoading = false) }
@@ -101,162 +109,150 @@ class ParticipantsViewModel @Inject constructor(
         }
     }
 
-    fun onEvent(event: ParticipantsEvent) {
-        when (event) {
-            is ParticipantsEvent.OnParticipantCountChange -> handleParticipantCountChange(event.count)
-            is ParticipantsEvent.OnItemTypeSelect -> handleItemTypeSelect(event.type)
-            is ParticipantsEvent.OnSpecificItemSelect -> handleSpecificItemSelect(event.item)
-            is ParticipantsEvent.OnMonthlyAmountChange -> handleMonthlyAmountChange(event.amount)
-            is ParticipantsEvent.OnDurationChange -> handleDurationChange(event.duration)
-            is ParticipantsEvent.OnStartDaySelect -> handleStartDaySelect(event.day)
-            is ParticipantsEvent.OnStartMonthSelect -> handleStartMonthSelect(event.month)
-            is ParticipantsEvent.OnStartYearSelect -> handleStartYearSelect(event.year)
-            is ParticipantsEvent.OnContinueClick -> handleContinueClick()
-            is ParticipantsEvent.OnConfirmDialogConfirm -> handleConfirmDialogConfirm()
-            is ParticipantsEvent.OnConfirmDialogDismiss -> handleConfirmDialogDismiss()
-            is ParticipantsEvent.OnErrorDismiss -> handleErrorDismiss()
-            // Removed: OnAddParticipant and OnRemoveParticipant events
+    fun shareInviteLink(onShare: (String) -> Unit) {
+        _state.value.inviteCode?.let { code ->
+            val inviteUrl = "https://altingunu.app/invite/$code"
+            onShare(inviteUrl)
         }
     }
 
-    private fun handleParticipantCountChange(count: String) {
-        // This is now read-only, participants are managed in ParticipantMethodScreen
-        // Do nothing or show a message that participants can't be changed here
-    }
-
-    private fun handleItemTypeSelect(type: ItemType) {
-        _state.update { it.copy(
-            selectedItemType = type,
-            selectedSpecificItem = ""
-        ) }
-    }
-
-    private fun handleSpecificItemSelect(item: String) {
-        _state.update { it.copy(selectedSpecificItem = item) }
-    }
-
-    private fun handleMonthlyAmountChange(amount: String) {
-        if (amount.isEmpty() || amount.toDoubleOrNull() != null) {
-            _state.update { it.copy(monthlyAmount = amount) }
+    fun copyInviteLink(onCopy: (String) -> Unit) {
+        _state.value.inviteCode?.let { code ->
+            val inviteUrl = "https://altingunu.app/invite/$code"
+            onCopy(inviteUrl)
         }
     }
 
-    private fun handleDurationChange(duration: String) {
-        if (duration.isEmpty() || duration.toIntOrNull() != null) {
-            _state.update { it.copy(durationMonths = duration) }
-        }
-    }
-
-    private fun handleStartDaySelect(day: Int) {
-        _state.update { it.copy(startDay = day) }
-    }
-
-    private fun handleStartMonthSelect(month: Int) {
-        _state.update { it.copy(startMonth = month) }
-    }
-
-    private fun handleStartYearSelect(year: Int) {
-        _state.update { it.copy(startYear = year) }
-    }
-
-    private fun handleContinueClick() {
+    // Basitleştirilmiş: Sadece server'dan gelen onaylı katılımcıları göster
+    fun refreshInvitedParticipants() {
         viewModelScope.launch {
-            _state.update { it.copy(isLoading = true) }
-
-            // Validate settings
-            val participantCount = _state.value.participants.size
-            val monthlyAmount = _state.value.monthlyAmount.toDoubleOrNull() ?: 0.0
-            val durationMonths = _state.value.durationMonths.toIntOrNull() ?: 0
-
-            val settings = ParticipantsScreenWholeInformation(
-                participantCount = participantCount,
-                participants = _state.value.participants,
-                itemType = _state.value.selectedItemType,
-                specificItem = _state.value.selectedSpecificItem,
-                monthlyAmount = monthlyAmount,
-                durationMonths = durationMonths,
-                startDay = _state.value.startDay,
-                startMonth = _state.value.startMonth,
-                startYear = _state.value.startYear
-            )
-
-            val settingsResult = validateDrawSettingsUseCase(settings)
-
-            if (settingsResult is ResultState.Error) {
-                _state.update { it.copy(
-                    isLoading = false,
-                    error = settingsResult.message
-                ) }
-                return@launch
-            }
-
-            // If validation successful, show confirmation dialog
-            _state.update { it.copy(
-                isLoading = false,
-                isShowingConfirmDialog = true
-            ) }
-        }
-    }
-
-    private fun handleConfirmDialogConfirm() {
-        viewModelScope.launch {
-            _state.update { it.copy(isLoading = true) }
-
-            currentDrawGroup?.let { group ->
-                // Update group with new settings
-                val monthlyAmount = _state.value.monthlyAmount.toDoubleOrNull() ?: 0.0
-                val durationMonths = _state.value.durationMonths.toIntOrNull() ?: 0
-
-                val updatedSettings = ParticipantsScreenWholeInformation(
-                    participantCount = group.participants.size,
-                    participants = group.participants,
-                    itemType = _state.value.selectedItemType,
-                    specificItem = _state.value.selectedSpecificItem,
-                    monthlyAmount = monthlyAmount,
-                    durationMonths = durationMonths,
-                    startDay = _state.value.startDay,
-                    startMonth = _state.value.startMonth,
-                    startYear = _state.value.startYear
-                )
-
-                val updatedGroup = group.copy(
-                    settings = updatedSettings,
-                    lastModifiedDate = System.currentTimeMillis()
-                )
-
-                when (val updateResult = drawGroupRepository.updateDrawGroup(updatedGroup)) {
+            _state.value.tempGroupId?.let { groupId ->
+                // Server'dan sadece ACCEPTED olan katılımcıları çek
+                // Not: Bu endpoint implement edilmeli
+                when (val result = fcmRepository.getAcceptedParticipants(groupId)) {
                     is ResultState.Success -> {
-                        // Also save to legacy draw repository for compatibility
-                        drawRepository.saveDrawSettings(updatedSettings)
-                        drawRepository.saveParticipants(group.participants)
+                        val invitedParticipants = result.data.map { request ->
+                            InvitedParticipant(
+                                id = request.id,
+                                name = request.participantName,
+                                status = InviteStatus.ACCEPTED, // Hepsi zaten onaylı
+                                fcmToken = request.fcmToken,
+                                joinedAt = request.joinedAt
+                            )
+                        }
 
-                        _state.update { it.copy(
-                            isLoading = false,
-                            isShowingConfirmDialog = false
-                        ) }
-
-                        _navigationEvent.emit(Unit)
+                        _state.update {
+                            it.copy(invitedParticipants = invitedParticipants)
+                        }
                     }
-                    is ResultState.Error -> {
-                        _state.update { it.copy(
-                            isLoading = false,
-                            error = updateResult.message,
-                            isShowingConfirmDialog = false
-                        ) }
-                    }
-                    else -> {
-                        _state.update { it.copy(isLoading = false) }
-                    }
+                    else -> {}
                 }
             }
         }
     }
 
-    private fun handleConfirmDialogDismiss() {
-        _state.update { it.copy(isShowingConfirmDialog = false) }
+    // Tüm katılımcıları birleştir
+    private fun combineAllParticipants(): Pair<List<Participant>, List<String>> {
+        val allParticipants = mutableListOf<Participant>()
+        val allFcmTokens = mutableListOf<String>()
+
+        // Manuel katılımcıları ekle
+        allParticipants.addAll(_state.value.manualParticipants)
+
+        // Server'dan gelen (zaten onaylı) katılımcıları ekle
+        _state.value.invitedParticipants.forEach { invited ->
+            allParticipants.add(
+                Participant(
+                    id = invited.id,
+                    name = invited.name
+                )
+            )
+            invited.fcmToken?.let { allFcmTokens.add(it) }
+        }
+
+        return Pair(allParticipants, allFcmTokens)
     }
 
-    private fun handleErrorDismiss() {
+    // Grup oluştur
+    fun createGroup(onSuccess: (String) -> Unit) {
+        viewModelScope.launch {
+            val groupName = _state.value.groupName.trim()
+
+            if (groupName.isBlank()) {
+                _state.update { it.copy(error = UiText.stringResource(R.string.error_empty_group_name)) }
+                return@launch
+            }
+
+            _state.update { it.copy(isLoading = true) }
+
+            // Tüm katılımcıları birleştir
+            val (allParticipants, allFcmTokens) = combineAllParticipants()
+
+            // Minimum 2 katılımcı kontrolü
+            if (allParticipants.size < 2) {
+                _state.update {
+                    it.copy(
+                        isLoading = false,
+                        error = UiText.stringResource(R.string.error_min_participants)
+                    )
+                }
+                return@launch
+            }
+
+            val currentDate = Calendar.getInstance()
+
+            // Yeni grup oluştur
+            val newGroup = DrawGroup(
+                id = _state.value.tempGroupId ?: UUID.randomUUID().toString(),
+                name = groupName,
+                description = _state.value.groupDescription,
+                createdDate = System.currentTimeMillis(),
+                lastModifiedDate = System.currentTimeMillis(),
+                settings = ParticipantsScreenWholeInformation(
+                    participantCount = allParticipants.size,
+                    participants = allParticipants,
+                    itemType = ItemType.TL,
+                    specificItem = "",
+                    monthlyAmount = 0.0,
+                    durationMonths = 0,
+                    startDay = currentDate.get(Calendar.DAY_OF_MONTH),
+                    startMonth = currentDate.get(Calendar.MONTH) + 1,
+                    startYear = currentDate.get(Calendar.YEAR)
+                ),
+                participants = allParticipants,
+                results = emptyList(),
+                isCompleted = false,
+                isActive = true,
+                fcmTokens = allFcmTokens,
+                currentPaymentIndex = 0
+            )
+
+            // Grubu kaydet
+            when (val result = drawGroupRepository.createDrawGroup(newGroup)) {
+                is ResultState.Success -> {
+                    _state.update { it.copy(isLoading = false) }
+                    onSuccess(result.data)
+                }
+                is ResultState.Error -> {
+                    _state.update {
+                        it.copy(
+                            isLoading = false,
+                            error = result.message
+                        )
+                    }
+                }
+                else -> {
+                    _state.update { it.copy(isLoading = false) }
+                }
+            }
+        }
+    }
+
+    fun clearError() {
         _state.update { it.copy(error = null) }
+    }
+
+    fun getTotalParticipantCount(): Int {
+        return _state.value.manualParticipants.size + _state.value.invitedParticipants.size
     }
 }

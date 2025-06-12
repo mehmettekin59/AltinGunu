@@ -1,11 +1,12 @@
 package com.mehmettekin.altingunu.domain.model
 
 import androidx.compose.runtime.Immutable
+import java.util.UUID
 
 
 @Immutable
 data class DrawGroup(
-    val id: String,
+    val id: String = UUID.randomUUID().toString(),
     val name: String, // "Aile Altın Günü", "İş Arkadaşları" vs
     val description: String = "", // Opsiyonel açıklama
     val createdDate: Long = System.currentTimeMillis(),
@@ -55,16 +56,13 @@ data class DrawGroup(
         }
     }
 
-
-     //Aktif katılımcı sayısını döndürür (FCM token'ı olan)
-
+    //Aktif katılımcı sayısını döndürür (FCM token'ı olan)
     fun getActiveParticipantCount(): Int {
         return fcmTokens.size
     }
 
 
-     // Çekilişin kısa özet bilgisini döndürür
-
+    // Çekilişin kısa özet bilgisini döndürür
     fun getSummary(): String {
         val itemTypeText = when (settings.itemType) {
             ItemType.TL -> "TL"
