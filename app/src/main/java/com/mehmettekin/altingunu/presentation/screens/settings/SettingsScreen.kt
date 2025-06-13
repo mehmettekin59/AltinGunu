@@ -34,6 +34,7 @@ import com.mehmettekin.altingunu.utils.UiText
 import com.mehmettekin.altingunu.R
 import com.mehmettekin.altingunu.ui.theme.NavyBlue
 import com.mehmettekin.altingunu.ui.theme.White
+import android.provider.Settings
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -96,7 +97,7 @@ fun SettingsScreen(
         topBar = {
             CommonTopAppBar(
                 title = UiText.stringResource(R.string.settings),
-                onBackClick = { navController.navigateUp() },
+                onBackPressed = { navController.navigateUp() },
                 scrollBehavior = scrollBehavior
             )
         },

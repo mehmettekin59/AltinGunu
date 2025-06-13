@@ -11,10 +11,7 @@ sealed class Screen(val route: String) {
         fun createRoute(groupId: String) = "draw_group_detail/$groupId"
     }
 
-    object ParticipantMethod : Screen("participant_method/{groupName}/{groupDescription}") {
-        fun createRoute(groupName: String, groupDescription: String) =
-            "participant_method/${Uri.encode(groupName)}/${Uri.encode(groupDescription)}"
-    }
+    object ParticipantMethod : Screen("participant_method")
 
     object Participants : Screen("participants_screen/{groupId}") {
         fun createRoute(groupId: String = "new") = "participants_screen/$groupId"

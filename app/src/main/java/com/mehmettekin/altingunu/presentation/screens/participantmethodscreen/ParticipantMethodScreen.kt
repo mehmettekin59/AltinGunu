@@ -29,6 +29,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.mehmettekin.altingunu.R
 import com.mehmettekin.altingunu.domain.model.InviteStatus
+import com.mehmettekin.altingunu.domain.model.InvitedParticipant
 import com.mehmettekin.altingunu.presentation.navigation.Screen
 import com.mehmettekin.altingunu.presentation.screens.common.CommonTopAppBar
 import com.mehmettekin.altingunu.ui.theme.Gold
@@ -47,7 +48,6 @@ fun ParticipantMethodScreen(
     val state by viewModel.state.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
     val context = LocalContext.current
-    val coroutineScope = rememberCoroutineScope()
 
     // Initialize group info
     LaunchedEffect(Unit) {
@@ -63,12 +63,12 @@ fun ParticipantMethodScreen(
         }
     }
 
-    // Refresh invited participants periodically
-    LaunchedEffect(state.inviteCode) {
-        if (state.inviteCode != null) {
+
+    LaunchedEffect(state.isGroupCreated) {
+        if (state.isGroupCreated && state.inviteCode != null) {
             while (true) {
                 viewModel.refreshInvitedParticipants()
-                kotlinx.coroutines.delay(5000) // Refresh every 5 seconds
+                kotlinx.coroutines.delay(15000) // Her 15 saniyede bir yenile
             }
         }
     }
@@ -91,13 +91,83 @@ fun ParticipantMethodScreen(
                 .verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            // Group Info Section
+            // Group Info Section - ✅ Grup oluşturulduktan sonra disabled olacak
             GroupInfoSection(
                 groupName = state.groupName,
                 groupDescription = state.groupDescription,
-                onGroupNameChange = { viewModel.updateGroupName(it) },
-                onGroupDescriptionChange = { viewModel.updateGroupDescription(it) }
+                onGroupNameChange = {
+                    if (!state.isGroupCreated) viewModel.updateGroupName(it)
+                },
+                onGroupDescriptionChange = {
+                    if (!state.isGroupCreated) viewModel.updateGroupDescription(it)
+                },
+                isEnabled = !state.isGroupCreated  // ✅ YENİ: Grup oluşturulduysa disabled
             )
+
+            // ✅ Grup oluşturma butonu (sadece grup oluşturulmadıysa göster)
+            if (!state.isGroupCreated) {
+                Button(
+                    onClick = { viewModel.createGroup() },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(56.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Gold,
+                        contentColor = NavyBlue
+                    ),
+                    shape = RoundedCornerShape(8.dp),
+                    enabled = !state.isLoading && state.groupName.isNotBlank()
+                ) {
+                    if (state.isLoading) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(24.dp),
+                            color = NavyBlue
+                        )
+                    } else {
+                        Icon(
+                            imageVector = Icons.Default.GroupAdd,
+                            contentDescription = null,
+                            modifier = Modifier.size(24.dp)
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(
+                            text = "Grup Oluştur",
+                            style = MaterialTheme.typography.titleMedium
+                        )
+                    }
+                }
+            }
+
+            // ✅ Grup oluşturulduysa başarı mesajı göster
+            if (state.isGroupCreated) {
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = CardDefaults.cardColors(
+                        containerColor = Color.Green.copy(alpha = 0.1f)
+                    )
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.CheckCircle,
+                            contentDescription = null,
+                            tint = Color.Green,
+                            modifier = Modifier.size(24.dp)
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(
+                            text = "Grup başarıyla oluşturuldu!",
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = Color.Green,
+                            fontWeight = FontWeight.Medium
+                        )
+                    }
+                }
+            }
 
             // Title
             Text(
@@ -109,90 +179,94 @@ fun ParticipantMethodScreen(
                 modifier = Modifier.fillMaxWidth()
             )
 
-            // Invited Participants Card
-            InvitedParticipantsCard(
-                inviteCode = state.inviteCode,
-                invitedParticipants = state.invitedParticipants,
-                onGenerateInvite = { viewModel.generateInviteCode() },
-                onShareInvite = {
-                    viewModel.shareInviteLink { url ->
-                        val shareIntent = Intent().apply {
-                            action = Intent.ACTION_SEND
-                            type = "text/plain"
-                            putExtra(Intent.EXTRA_TEXT, "Altın Günü çekilişimize katılın!\n$url")
+            // ✅ Davet kartı - Sadece grup oluşturulduysa göster
+            if (state.isGroupCreated) {
+                InvitedParticipantsCard(
+                    inviteCode = state.inviteCode,
+                    invitedParticipants = state.invitedParticipants,
+                    onGenerateInvite = { viewModel.generateInviteCode() },
+                    onShareInvite = {
+                        viewModel.shareInviteLink { url ->
+                            val shareIntent = Intent().apply {
+                                action = Intent.ACTION_SEND
+                                type = "text/plain"
+                                putExtra(Intent.EXTRA_TEXT, "Altın Günü çekilişimize katılın!\n$url")
+                            }
+                            context.startActivity(Intent.createChooser(shareIntent, "Davet Linkini Paylaş"))
                         }
-                        context.startActivity(Intent.createChooser(shareIntent, "Davet Linkini Paylaş"))
-                    }
-                },
-                onCopyInvite = {
-                    viewModel.copyInviteLink { url ->
-                        val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-                        val clip = ClipData.newPlainText("Davet Linki", url)
-                        clipboard.setPrimaryClip(clip)
-                        Toast.makeText(context, "Link kopyalandı", Toast.LENGTH_SHORT).show()
-                    }
-                },
-                onApproveParticipant = { viewModel.approveInvitedParticipant(it) },
-                onRejectParticipant = { viewModel.rejectInvitedParticipant(it) }
-            )
+                    },
+                    onCopyInvite = {
+                        viewModel.copyInviteLink { url ->
+                            val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+                            val clip = ClipData.newPlainText("Davet Linki", url)
+                            clipboard.setPrimaryClip(clip)
+                            Toast.makeText(context, "Link kopyalandı", Toast.LENGTH_SHORT).show()
+                        }
+                    },
+                    onApproveParticipant = { viewModel.approveInvitedParticipant(it) },
+                    onRejectParticipant = { viewModel.rejectInvitedParticipant(it) }
+                )
 
-            // Total Participants Summary
-            TotalParticipantsSummary(
-                invitedCount = state.invitedParticipants.count { it.status == InviteStatus.ACCEPTED },
-                totalCount = viewModel.getTotalParticipantCount()
-            )
+                // Total Participants Summary
+                TotalParticipantsSummary(
+                    invitedCount = state.invitedParticipants.count { it.status == InviteStatus.ACCEPTED },
+                    totalCount = viewModel.getTotalParticipantCount()
+                )
+            }
 
             Spacer(modifier = Modifier.weight(1f))
 
-            // Continue Button
-            Button(
-                onClick = {
-                    viewModel.createGroupWithAllParticipants { groupId ->
-                        navController.navigate(Screen.Participants.createRoute(groupId)) {
-                            popUpTo(Screen.ParticipantMethod.route) { inclusive = true }
+            // ✅ Continue Button - Sadece grup oluşturuldu ve yeterli katılımcı varsa
+            if (state.isGroupCreated) {
+                Button(
+                    onClick = {
+                        viewModel.proceedWithParticipants { groupId ->
+                            navController.navigate(Screen.Participants.createRoute(groupId)) {
+                                popUpTo(Screen.ParticipantMethod.route) { inclusive = true }
+                            }
                         }
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(56.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = NavyBlue,
+                        contentColor = White
+                    ),
+                    shape = RoundedCornerShape(8.dp),
+                    enabled = !state.isLoading && viewModel.getTotalParticipantCount() >= 2
+                ) {
+                    if (state.isLoading) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(24.dp),
+                            color = White
+                        )
+                    } else {
+                        Icon(
+                            imageVector = Icons.Default.ArrowForward,
+                            contentDescription = null,
+                            modifier = Modifier.size(24.dp)
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(
+                            text = UiText.stringResource(R.string.continue_button).asString(),
+                            style = MaterialTheme.typography.titleMedium
+                        )
                     }
-                },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(56.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = NavyBlue,
-                    contentColor = White
-                ),
-                shape = RoundedCornerShape(8.dp),
-                enabled = !state.isLoading &&
-                        state.groupName.isNotBlank() &&
-                        viewModel.getTotalParticipantCount() >= 2
-            ) {
-                if (state.isLoading) {
-                    CircularProgressIndicator(
-                        modifier = Modifier.size(24.dp),
-                        color = White
-                    )
-                } else {
-                    Icon(
-                        imageVector = Icons.Default.ArrowForward,
-                        contentDescription = null,
-                        modifier = Modifier.size(24.dp)
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text(
-                        text = UiText.stringResource(R.string.continue_button).asString(),
-                        style = MaterialTheme.typography.titleMedium
-                    )
                 }
             }
         }
     }
 }
 
+// ✅ GroupInfoSection'a isEnabled parametresi ekle
 @Composable
 fun GroupInfoSection(
     groupName: String,
     groupDescription: String,
     onGroupNameChange: (String) -> Unit,
-    onGroupDescriptionChange: (String) -> Unit
+    onGroupDescriptionChange: (String) -> Unit,
+    isEnabled: Boolean = true  // ✅ YENİ parametre
 ) {
     Card(
         modifier = Modifier.fillMaxWidth(),
@@ -224,6 +298,7 @@ fun GroupInfoSection(
                     cursorColor = Gold
                 ),
                 singleLine = true,
+                enabled = isEnabled,  // ✅ Kontrol ekle
                 leadingIcon = {
                     Icon(
                         imageVector = Icons.Default.Groups,
@@ -248,6 +323,7 @@ fun GroupInfoSection(
                 ),
                 minLines = 2,
                 maxLines = 3,
+                enabled = isEnabled,  // ✅ Kontrol ekle
                 leadingIcon = {
                     Icon(
                         imageVector = Icons.Default.Description,

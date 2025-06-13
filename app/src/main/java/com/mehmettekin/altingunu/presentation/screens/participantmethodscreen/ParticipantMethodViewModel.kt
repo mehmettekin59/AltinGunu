@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.mehmettekin.altingunu.R
 import com.mehmettekin.altingunu.domain.model.DrawGroup
 import com.mehmettekin.altingunu.domain.model.InviteStatus
+import com.mehmettekin.altingunu.domain.model.InvitedParticipant
 import com.mehmettekin.altingunu.domain.model.ItemType
 import com.mehmettekin.altingunu.domain.model.Participant
 import com.mehmettekin.altingunu.domain.model.ParticipantsScreenWholeInformation
@@ -22,6 +23,7 @@ import kotlinx.coroutines.launch
 import java.util.Calendar
 import java.util.UUID
 import javax.inject.Inject
+
 
 @HiltViewModel
 class ParticipantMethodViewModel @Inject constructor(
@@ -40,24 +42,98 @@ class ParticipantMethodViewModel @Inject constructor(
         _state.update { it.copy(groupDescription = description) }
     }
 
+    // ✅ YENİ: Grup oluşturma fonksiyonu
+    fun createGroup() {
+        viewModelScope.launch {
+            val groupName = _state.value.groupName.trim()
+
+            if (groupName.isBlank()) {
+                _state.update { it.copy(error = UiText.stringResource(R.string.error_empty_group_name)) }
+                return@launch
+            }
+
+            _state.update { it.copy(isLoading = true) }
+
+            try {
+                val currentDate = Calendar.getInstance()
+                val groupId = UUID.randomUUID().toString()
+
+                // Başlangıçta boş katılımcı listesi ile grup oluştur
+                val newGroup = DrawGroup(
+                    id = groupId,
+                    name = groupName,
+                    description = _state.value.groupDescription,
+                    createdDate = System.currentTimeMillis(),
+                    lastModifiedDate = System.currentTimeMillis(),
+                    settings = ParticipantsScreenWholeInformation(
+                        participantCount = 0,  // Başlangıçta 0
+                        participants = emptyList(),
+                        itemType = ItemType.TL,
+                        specificItem = "",
+                        monthlyAmount = 0.0,
+                        durationMonths = 0,
+                        startDay = currentDate.get(Calendar.DAY_OF_MONTH),
+                        startMonth = currentDate.get(Calendar.MONTH) + 1,
+                        startYear = currentDate.get(Calendar.YEAR)
+                    ),
+                    participants = emptyList(),
+                    results = emptyList(),
+                    isCompleted = false,
+                    isActive = true,
+                    fcmTokens = emptyList(),
+                    currentPaymentIndex = 0
+                )
+
+                when (val result = drawGroupRepository.createDrawGroup(newGroup)) {
+                    is ResultState.Success -> {
+                        _state.update {
+                            it.copy(
+                                isLoading = false,
+                                groupId = result.data,
+                                isGroupCreated = true
+                            )
+                        }
+                    }
+                    is ResultState.Error -> {
+                        _state.update {
+                            it.copy(
+                                isLoading = false,
+                                error = result.message
+                            )
+                        }
+                    }
+                    else -> {
+                        _state.update { it.copy(isLoading = false) }
+                    }
+                }
+            } catch (e: Exception) {
+                _state.update {
+                    it.copy(
+                        isLoading = false,
+                        error = UiText.dynamicString(e.message ?: "Beklenmeyen hata")
+                    )
+                }
+            }
+        }
+    }
+
+
     fun generateInviteCode() {
+        val groupId = _state.value.groupId ?: return  // Grup yoksa çık
+
         viewModelScope.launch {
             _state.update { it.copy(isLoading = true) }
 
-            // Geçici bir grup ID oluştur
-            val tempGroupId = UUID.randomUUID().toString()
-
             when (val result = fcmRepository.createInvitationOnServer(
-                drawGroupId = tempGroupId,
-                drawGroupName = _state.value.groupName.ifEmpty { "Yeni Altın Günü Grubu" },
+                drawGroupId = groupId,  // ✅ Gerçek groupId
+                drawGroupName = _state.value.groupName,
                 inviterName = "Grup Yöneticisi"
             )) {
                 is ResultState.Success -> {
                     _state.update {
                         it.copy(
                             isLoading = false,
-                            inviteCode = result.data,
-                            tempGroupId = tempGroupId
+                            inviteCode = result.data
                         )
                     }
                 }
@@ -90,16 +166,17 @@ class ParticipantMethodViewModel @Inject constructor(
         }
     }
 
+    /
     fun refreshInvitedParticipants() {
         viewModelScope.launch {
-            _state.value.tempGroupId?.let { groupId ->
-                // Server'dan sadece ACCEPTED olan katılımcıları çek
+            _state.value.groupId?.let { groupId ->
                 when (val result = fcmRepository.getAcceptedParticipants(groupId)) {
                     is ResultState.Success -> {
                         val invitedParticipants = result.data.map { request ->
                             InvitedParticipant(
                                 id = request.id,
-                                name = request.participantName,
+                                name = request.name,
+                                drawGroupId = groupId,
                                 status = InviteStatus.ACCEPTED,
                                 fcmToken = request.fcmToken,
                                 joinedAt = request.joinedAt
@@ -164,33 +241,18 @@ class ParticipantMethodViewModel @Inject constructor(
         }
     }
 
-    fun createGroupWithAllParticipants(onSuccess: (String) -> Unit) {
+    // ✅ YENİ: createGroupWithAllParticipants yerine proceedWithParticipants
+    fun proceedWithParticipants(onSuccess: (String) -> Unit) {
         viewModelScope.launch {
-            val groupName = _state.value.groupName.trim()
-
-            if (groupName.isBlank()) {
-                _state.update { it.copy(error = UiText.stringResource(R.string.error_empty_group_name)) }
-                return@launch
-            }
+            val groupId = _state.value.groupId ?: return@launch
 
             _state.update { it.copy(isLoading = true) }
 
             // Sadece davetli katılımcıları al
-            val allParticipants = _state.value.invitedParticipants
+            val invitedParticipants = _state.value.invitedParticipants
                 .filter { it.status == InviteStatus.ACCEPTED }
-                .map { invited ->
-                    Participant(
-                        id = invited.id,
-                        name = invited.name
-                    )
-                }
 
-            val allFcmTokens = _state.value.invitedParticipants
-                .filter { it.status == InviteStatus.ACCEPTED }
-                .mapNotNull { it.fcmToken }
-
-            // Minimum 2 katılımcı kontrolü
-            if (allParticipants.size < 2) {
+            if (invitedParticipants.size < 2) {
                 _state.update {
                     it.copy(
                         isLoading = false,
@@ -200,45 +262,54 @@ class ParticipantMethodViewModel @Inject constructor(
                 return@launch
             }
 
-            val currentDate = Calendar.getInstance()
+            // Grubu katılımcılarla güncelle
+            val participants = invitedParticipants.map { invited ->
+                Participant(
+                    id = invited.id,
+                    name = invited.name
+                )
+            }
 
-            // Yeni grup oluştur
-            val newGroup = DrawGroup(
-                id = _state.value.tempGroupId ?: UUID.randomUUID().toString(),
-                name = groupName,
-                description = _state.value.groupDescription,
-                createdDate = System.currentTimeMillis(),
-                lastModifiedDate = System.currentTimeMillis(),
-                settings = ParticipantsScreenWholeInformation(
-                    participantCount = allParticipants.size,
-                    participants = allParticipants,
-                    itemType = ItemType.TL,
-                    specificItem = "",
-                    monthlyAmount = 0.0,
-                    durationMonths = 0,
-                    startDay = currentDate.get(Calendar.DAY_OF_MONTH),
-                    startMonth = currentDate.get(Calendar.MONTH) + 1,
-                    startYear = currentDate.get(Calendar.YEAR)
-                ),
-                participants = allParticipants,
-                results = emptyList(),
-                isCompleted = false,
-                isActive = true,
-                fcmTokens = allFcmTokens,
-                currentPaymentIndex = 0
-            )
+            val fcmTokens = invitedParticipants.mapNotNull { it.fcmToken }
 
-            // Grubu kaydet
-            when (val result = drawGroupRepository.createDrawGroup(newGroup)) {
+            // Grup bilgilerini güncelle
+            when (val getResult = drawGroupRepository.getDrawGroupById(groupId)) {
                 is ResultState.Success -> {
-                    _state.update { it.copy(isLoading = false) }
-                    onSuccess(result.data)
+                    getResult.data?.let { existingGroup ->
+                        val updatedGroup = existingGroup.copy(
+                            participants = participants,
+                            fcmTokens = fcmTokens,
+                            settings = existingGroup.settings.copy(
+                                participantCount = participants.size,
+                                participants = participants
+                            ),
+                            lastModifiedDate = System.currentTimeMillis()
+                        )
+
+                        when (val updateResult = drawGroupRepository.updateDrawGroup(updatedGroup)) {
+                            is ResultState.Success -> {
+                                _state.update { it.copy(isLoading = false) }
+                                onSuccess(groupId)
+                            }
+                            is ResultState.Error -> {
+                                _state.update {
+                                    it.copy(
+                                        isLoading = false,
+                                        error = updateResult.message
+                                    )
+                                }
+                            }
+                            else -> {
+                                _state.update { it.copy(isLoading = false) }
+                            }
+                        }
+                    }
                 }
                 is ResultState.Error -> {
                     _state.update {
                         it.copy(
                             isLoading = false,
-                            error = result.message
+                            error = getResult.message
                         )
                     }
                 }

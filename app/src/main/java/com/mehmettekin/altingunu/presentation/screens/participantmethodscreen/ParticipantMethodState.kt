@@ -8,7 +8,8 @@ data class ParticipantMethodState(
     val groupDescription: String = "",
     val inviteCode: String? = null,
     val invitedParticipants: List<InvitedParticipant> = emptyList(),
-    val tempGroupId: String? = null,
+    val groupId: String? = null,
+    val isGroupCreated: Boolean = false,
     val showInviteDialog: Boolean = false,
     val isLoading: Boolean = false,
     val error: UiText? = null

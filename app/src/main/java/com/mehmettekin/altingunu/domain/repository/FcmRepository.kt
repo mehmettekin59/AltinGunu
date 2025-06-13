@@ -2,6 +2,7 @@ package com.mehmettekin.altingunu.domain.repository
 
 
 import com.mehmettekin.altingunu.domain.model.DrawInvitation
+import com.mehmettekin.altingunu.domain.model.InvitedParticipant
 import com.mehmettekin.altingunu.utils.ResultState
 
 interface FcmRepository {
@@ -36,5 +37,5 @@ interface FcmRepository {
         extraData: Map<String, String>
     ): ResultState<Unit>
 
-    suspend fun getAcceptedParticipants(groupId: String): ResultState<List<??????????>>
+    suspend fun getAcceptedParticipants(groupId: String): ResultState<List<InvitedParticipant>>
 }
