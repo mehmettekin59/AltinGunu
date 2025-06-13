@@ -41,8 +41,6 @@ import com.mehmettekin.altingunu.utils.UiText
 @Composable
 fun ParticipantMethodScreen(
     navController: NavController,
-    groupName: String,
-    groupDescription: String,
     viewModel: ParticipantMethodViewModel = hiltViewModel()
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()

@@ -9,6 +9,7 @@ import com.mehmettekin.altingunu.data.local.SettingsDataStore
 import com.mehmettekin.altingunu.domain.model.DrawResult
 import com.mehmettekin.altingunu.domain.model.Participant
 import com.mehmettekin.altingunu.domain.model.ParticipantsScreenWholeInformation
+import com.mehmettekin.altingunu.domain.model.ReminderData
 import com.mehmettekin.altingunu.domain.repository.DrawRepository
 import com.mehmettekin.altingunu.domain.repository.FcmRepository
 import com.mehmettekin.altingunu.utils.ResultState
@@ -183,10 +184,12 @@ class WheelViewModel @Inject constructor(
 
             when (val saveResult = drawRepository.saveDrawResults(results)) {
                 is ResultState.Success -> {
+                    // Hatırlatıcıları Firebase'e kaydet
+                    saveRemindersToFirebase(results, currentDrawSettings)
+
                     _state.update { currentState ->
                         currentState.copy(resultsSaved = true)
                     }
-
                 }
                 is ResultState.Error -> {
                     _state.update { currentState ->
@@ -199,6 +202,31 @@ class WheelViewModel @Inject constructor(
             }
         }
     }
+    private suspend fun saveRemindersToFirebase(
+        results: List<DrawResult>,
+        settings: ParticipantsScreenWholeInformation,
+        groupId: Int
+    ) {
+        try {
+
+            val reminders = results.map { result ->
+                ReminderData(
+                    participantName = result.participantName,
+                    amount = result.amount,
+                    paymentDate = result.month,
+                    itemType = settings.itemType.name,
+                    specificItem = settings.specificItem
+                )
+            }
+
+            firestoreService.saveScheduledReminders(groupId, reminders)
+
+            Log.d("WheelViewModel", "Hatırlatıcılar Firebase'e kaydedildi: $groupId")
+        } catch (e: Exception) {
+            Log.e("WheelViewModel", "Hatırlatıcı kaydetme hatası", e)
+        }
+    }
+}
 
 
     private fun createDrawResults(

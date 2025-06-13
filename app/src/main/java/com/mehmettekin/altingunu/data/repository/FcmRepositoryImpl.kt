@@ -3,6 +3,7 @@ package com.mehmettekin.altingunu.data.repository
 import com.google.firebase.functions.FirebaseFunctions
 import com.google.firebase.messaging.FirebaseMessaging
 import com.mehmettekin.altingunu.domain.model.DrawInvitation
+import com.mehmettekin.altingunu.domain.model.InviteStatus
 import com.mehmettekin.altingunu.domain.model.InvitedParticipant
 import com.mehmettekin.altingunu.domain.repository.FcmRepository
 import com.mehmettekin.altingunu.utils.ResultState
@@ -17,7 +18,7 @@ class FcmRepositoryImpl @Inject constructor() : FcmRepository {
     private val functions = FirebaseFunctions.getInstance()
     private val messaging = FirebaseMessaging.getInstance()
 
-    // ✅ TOKEN YÖNETİMİ - APP TARAFINDA
+
     override suspend fun updateUserFcmToken(token: String): ResultState<Unit> {
         return try {
             // Server'a token güncelleme isteği gönder
@@ -184,8 +185,13 @@ class FcmRepositoryImpl @Inject constructor() : FcmRepository {
                     drawGroupId = participantMap["drawGroupId"] as String,
                     name = participantMap["participantName"] as String,
                     fcmToken = participantMap["fcmToken"] as? String,
-                    status = participantMap["status"] as String,
-                    joinedAt = (participantMap["joinedAt"] as? Number)?.toLong()
+                    status = when(participantMap["status"] as String) {
+                        "ACCEPTED" -> InviteStatus.ACCEPTED
+                        "PENDING" -> InviteStatus.PENDING
+                        "REJECTED" -> InviteStatus.REJECTED
+                        else -> InviteStatus.PENDING
+                    },
+                    joinedAt = (participantMap["responseDate"] as? Number)?.toLong()
                 )
             }
 

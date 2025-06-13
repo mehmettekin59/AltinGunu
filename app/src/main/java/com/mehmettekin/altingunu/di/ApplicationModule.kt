@@ -27,6 +27,7 @@ import javax.inject.Singleton
 import androidx.lifecycle.ProcessLifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import com.mehmettekin.altingunu.data.repository.FcmRepositoryImpl
+import com.mehmettekin.altingunu.notification.FirestoreService
 
 @Module
 @InstallIn(SingletonComponent::class)
@@ -79,6 +80,12 @@ abstract class ApplicationModule {
         @Singleton
         fun provideApplication(@ApplicationContext context: Context): AltinGunuApplication {
             return context.applicationContext as AltinGunuApplication
+        }
+
+        @Provides
+        @Singleton
+        fun provideFirestoreService(): FirestoreService {
+            return FirestoreService()
         }
 
     }

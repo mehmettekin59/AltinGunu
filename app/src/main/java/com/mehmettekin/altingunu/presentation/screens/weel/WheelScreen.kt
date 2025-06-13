@@ -193,7 +193,7 @@ fun WheelScreen(
                         ) {
                             ParticipantsSection(
                                 modifier = Modifier.fillMaxWidth(),
-                                remainingParticipants = state.remainingParticipants.map { it.name }, // ✅ Explicit
+                                remainingParticipants = state.remainingParticipants.map { it.name },
                                 winners = state.winners,
                                 onSaveResults = { viewModel.saveResults() }
                             )
