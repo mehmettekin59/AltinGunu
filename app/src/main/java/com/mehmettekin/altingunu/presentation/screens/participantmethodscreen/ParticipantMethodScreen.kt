@@ -290,7 +290,7 @@ fun GroupInfoSection(
                 value = groupName,
                 onValueChange = onGroupNameChange,
                 label = { Text("Grup Adı *") },
-                placeholder = { Text("Örn: Aile Altın Günü") },
+                placeholder = { Text("Örn: İşyeri Altın Günü") },
                 modifier = Modifier.fillMaxWidth(),
                 colors = OutlinedTextFieldDefaults.colors(
                     focusedBorderColor = Gold,
@@ -374,7 +374,7 @@ fun InvitedParticipantsCard(
             Spacer(modifier = Modifier.height(12.dp))
 
             Text(
-                text = "Davet linkiyle eklenen katılımcılara bildirim gönderilebilir",
+                text = "Yanlızca uygulamayı yükleyen katılımcılar bildirim gönderilebilir",
                 style = MaterialTheme.typography.bodySmall,
                 color = Color.Green
             )

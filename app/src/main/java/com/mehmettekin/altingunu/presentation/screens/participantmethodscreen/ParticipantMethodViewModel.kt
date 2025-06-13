@@ -166,7 +166,6 @@ class ParticipantMethodViewModel @Inject constructor(
         }
     }
 
-    /
     fun refreshInvitedParticipants() {
         viewModelScope.launch {
             _state.value.groupId?.let { groupId ->
