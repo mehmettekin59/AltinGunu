@@ -28,7 +28,8 @@ import javax.inject.Inject
 class WheelViewModel @Inject constructor(
     private val drawRepository: DrawRepository,
     private val settingsDataStore: SettingsDataStore,
-    private val fcmRepository: FcmRepository
+    private val fcmRepository: FcmRepository,
+    private val groupId: Int
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(WheelState())
@@ -205,7 +206,6 @@ class WheelViewModel @Inject constructor(
     private suspend fun saveRemindersToFirebase(
         results: List<DrawResult>,
         settings: ParticipantsScreenWholeInformation,
-        groupId: Int
     ) {
         try {
 

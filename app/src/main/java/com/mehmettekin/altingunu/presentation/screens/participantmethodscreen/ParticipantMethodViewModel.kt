@@ -12,6 +12,7 @@ import com.mehmettekin.altingunu.domain.model.Participant
 import com.mehmettekin.altingunu.domain.model.ParticipantsScreenWholeInformation
 import com.mehmettekin.altingunu.domain.repository.DrawGroupRepository
 import com.mehmettekin.altingunu.domain.repository.FcmRepository
+import com.mehmettekin.altingunu.notification.FirestoreService
 import com.mehmettekin.altingunu.utils.ResultState
 import com.mehmettekin.altingunu.utils.UiText
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -28,7 +29,8 @@ import javax.inject.Inject
 @HiltViewModel
 class ParticipantMethodViewModel @Inject constructor(
     private val drawGroupRepository: DrawGroupRepository,
-    private val fcmRepository: FcmRepository
+    private val fcmRepository: FcmRepository,
+    private val firestoreService: FirestoreService
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(ParticipantMethodState())
@@ -317,6 +319,30 @@ class ParticipantMethodViewModel @Inject constructor(
                 }
             }
         }
+    }
+
+    private var participantListenerJob: Job? = null
+
+    fun startListeningToParticipants() {
+        _state.value.groupId?.let { groupId ->
+            // Önceki listener'ı iptal et
+            participantListenerJob?.cancel()
+
+            // Yeni listener başlat
+            participantListenerJob = viewModelScope.launch {
+                // Onaylanmış katılımcıları dinle
+                firestoreService.listenToAcceptedParticipants(groupId).collect { participants ->
+                    _state.update {
+                        it.copy(invitedParticipants = participants)
+                    }
+                }
+            }
+        }
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        participantListenerJob?.cancel()
     }
 
     fun clearError() {

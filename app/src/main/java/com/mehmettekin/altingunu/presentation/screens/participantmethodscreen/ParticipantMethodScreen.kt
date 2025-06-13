@@ -47,11 +47,6 @@ fun ParticipantMethodScreen(
     val snackbarHostState = remember { SnackbarHostState() }
     val context = LocalContext.current
 
-    // Initialize group info
-    LaunchedEffect(Unit) {
-        viewModel.updateGroupName(groupName)
-        viewModel.updateGroupDescription(groupDescription)
-    }
 
     // Error handling
     LaunchedEffect(state.error) {
@@ -61,13 +56,9 @@ fun ParticipantMethodScreen(
         }
     }
 
-
     LaunchedEffect(state.isGroupCreated) {
         if (state.isGroupCreated && state.inviteCode != null) {
-            while (true) {
-                viewModel.refreshInvitedParticipants()
-                kotlinx.coroutines.delay(15000) // Her 15 saniyede bir yenile
-            }
+            viewModel.startListeningToParticipants()
         }
     }
 
