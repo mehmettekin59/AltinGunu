@@ -123,14 +123,6 @@ fun DrawGroupsScreen(
             }
         }
 
-        // Delete Confirmation Dialog
-        if (state.showDeleteDialog && state.groupToDelete != null) {
-            DeleteGroupDialog(
-                group = state.groupToDelete,
-                onConfirm = { viewModel.onEvent(DrawGroupsEvent.OnConfirmDelete) },
-                onDismiss = { viewModel.onEvent(DrawGroupsEvent.OnCancelDelete) }
-            )
-        }
     }
 }
 

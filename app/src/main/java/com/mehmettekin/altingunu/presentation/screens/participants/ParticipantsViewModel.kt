@@ -23,7 +23,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-
 import javax.inject.Inject
 
 @HiltViewModel
@@ -129,15 +128,6 @@ class ParticipantsViewModel @Inject constructor(
                 }
             }
             is ParticipantsEvent.OnContinueClick -> {
-                val currentState = _state.value
-                val participantCount = currentState.participantCount.toIntOrNull() ?: 0
-                val participants = currentState.participants
-
-                if (participants.size != participantCount) {
-                    _state.update { it.copy(error = UiText.stringResource(R.string.participant_count_mismatch)) }
-                    return
-                }
-
                 _state.update { it.copy(isShowingConfirmDialog = true) }
             }
             is ParticipantsEvent.OnConfirmDialogConfirm -> {
@@ -226,7 +216,6 @@ class ParticipantsViewModel @Inject constructor(
                                         it.copy(
                                             isLoading = false,
                                             isShowingConfirmDialog = false,
-                                            navigationGroupId = groupId
                                         )
                                     }
                                 }

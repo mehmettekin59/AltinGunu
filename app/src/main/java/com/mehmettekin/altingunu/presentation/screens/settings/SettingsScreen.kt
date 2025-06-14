@@ -96,9 +96,9 @@ fun SettingsScreen(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
             CommonTopAppBar(
-                title = UiText.stringResource(R.string.settings),
+                title = UiText.stringResource(R.string.title_settings).asString(),
                 onBackPressed = { navController.navigateUp() },
-                scrollBehavior = scrollBehavior
+
             )
         },
         snackbarHost = { SnackbarHost(snackbarHostState) }

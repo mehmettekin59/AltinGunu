@@ -62,7 +62,7 @@ class FcmRepositoryImpl @Inject constructor() : FcmRepository {
                 .call(data)
                 .await()
 
-            val response = result.data as Map<String, Any>
+            val response = result.getData() as Map<String, Any>
             val inviteCode = response["inviteCode"] as String
 
             ResultState.Success(inviteCode)
@@ -79,7 +79,7 @@ class FcmRepositoryImpl @Inject constructor() : FcmRepository {
                 .call(data)
                 .await()
 
-            val response = result.data as Map<String, Any>
+            val response = result.getData() as Map<String, Any>
             val isValid = response["valid"] as Boolean
 
             if (isValid) {
@@ -176,7 +176,7 @@ class FcmRepositoryImpl @Inject constructor() : FcmRepository {
                 .call(data)
                 .await()
 
-            val response = result.data as Map<String, Any>
+            val response = result.getData() as Map<String, Any>
             val participantsData = response["participants"] as List<Map<String, Any>>
 
             val participants = participantsData.map { participantMap ->

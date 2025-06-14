@@ -63,7 +63,7 @@ fun DrawGroupDetailScreen(
                 actions = {
                     state.drawGroup?.let { group ->
                         if (!group.isCompleted) {
-                            IconButton(onClick = { viewModel.onInviteClick() }) {
+                            IconButton(onClick = { }) {
                                 Icon(
                                     Icons.Default.PersonAdd,
                                     contentDescription = "Davet et",
@@ -91,6 +91,7 @@ fun DrawGroupDetailScreen(
             }
 
             state.drawGroup != null -> {
+                val drawGroup = state.drawGroup!!
                 LazyColumn(
                     modifier = Modifier
                         .fillMaxSize()
@@ -100,19 +101,19 @@ fun DrawGroupDetailScreen(
                 ) {
                     // Grup bilgileri
                     item {
-                        GroupInfoCard(drawGroup = state.drawGroup)
+                        GroupInfoCard(drawGroup = drawGroup)
                     }
 
                     // İlerleme durumu
                     item {
-                        ProgressCard(drawGroup = state.drawGroup)
+                        ProgressCard(drawGroup = drawGroup)
                     }
 
                     // Katılımcılar
                     item {
                         ParticipantsCard(
-                            participants = state.drawGroup.participants,
-                            activeTokenCount = state.drawGroup.getActiveParticipantCount()
+                            participants = drawGroup.participants,
+                            activeTokenCount = drawGroup.getActiveParticipantCount()
                         )
                     }
 
@@ -132,10 +133,10 @@ fun DrawGroupDetailScreen(
                     }
 
                     // Sonuçlar
-                    if (state.drawGroup.results.isNotEmpty()) {
+                    if (drawGroup.results.isNotEmpty()) {
                         item {
                             ResultsCard(
-                                results = state.drawGroup.results,
+                                results = drawGroup.results,
                                 onShowFullResults = {
                                     navController.navigate(Screen.Results.createRoute(groupId))
                                 }
@@ -146,7 +147,7 @@ fun DrawGroupDetailScreen(
                     // Aksiyonlar
                     item {
                         ActionsSection(
-                            drawGroup = state.drawGroup,
+                            drawGroup = drawGroup,
                             onContinueDrawClick = {
                                 navController.navigate(Screen.Wheel.createRoute(groupId))
                             },
@@ -488,7 +489,7 @@ private fun PendingRequestsCard(
                                 fontWeight = FontWeight.Bold
                             )
                             Text(
-                                text = formatDate(request.joinedAt),
+                                text = request.joinedAt?.let { formatDate(it) } ?: "Tarih bilinmiyor",
                                 style = MaterialTheme.typography.bodySmall,
                                 color = Color.Gray
                             )

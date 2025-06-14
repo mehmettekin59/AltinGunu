@@ -10,6 +10,7 @@ import android.widget.Toast
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -445,14 +446,15 @@ fun InvitedParticipantsCard(
                         border = BorderStroke(1.dp, Color.Gray.copy(alpha = 0.3f))
                     ) {
                         LazyColumn {
-                            items(invitedParticipants) { invited ->
+                            itemsIndexed(invitedParticipants) { index, invited ->
                                 InvitedParticipantItem(
                                     participant = invited,
                                     onApprove = { onApproveParticipant(invited.id) },
                                     onReject = { onRejectParticipant(invited.id) }
                                 )
 
-                                if (invited != invitedParticipants.last()) {
+                                // ✅ Son item değilse divider göster
+                                if (index < invitedParticipants.size - 1) {
                                     HorizontalDivider(
                                         color = Color.Gray.copy(alpha = 0.2f),
                                         thickness = 1.dp
