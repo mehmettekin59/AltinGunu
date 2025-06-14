@@ -1,5 +1,6 @@
 package com.mehmettekin.altingunu.data.repository
 
+import android.content.Context
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
@@ -25,7 +26,10 @@ class UserPreferencesRepositoryImpl @Inject constructor(
         dataStore.edit { preferences ->
             preferences[languageCodeKey] = languageCode
         }
-        // Uygulama seviyesinde dil ayarını da güncelle
+
+        val prefs = application.getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
+        prefs.edit().putString("language_code", languageCode).apply()
+
         application.setCurrentLanguage(languageCode)
     }
 
@@ -34,6 +38,7 @@ class UserPreferencesRepositoryImpl @Inject constructor(
             preferences[languageCodeKey] ?: Constraints.DefaultSettings.DEFAULT_LANGUAGE
         }
     }
+
 
     override suspend fun setFirstLaunchCompleted() {
         dataStore.edit { preferences ->

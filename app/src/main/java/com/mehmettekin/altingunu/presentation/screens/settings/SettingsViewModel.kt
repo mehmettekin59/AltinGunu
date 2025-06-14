@@ -146,11 +146,9 @@ class SettingsViewModel @Inject constructor(
     }
 
     private fun updateApplicationLocale(languageCode: String) {
-        // This will force the application to apply the language change at the system level
         val locale = Locale(languageCode)
         Locale.setDefault(locale)
 
-        // Using application context to update resources globally
         val resources = application.resources
         val configuration = Configuration(resources.configuration)
         configuration.setLocale(locale)

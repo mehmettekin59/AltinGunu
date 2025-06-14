@@ -7,6 +7,8 @@ import androidx.datastore.preferences.core.PreferenceDataStoreFactory
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.emptyPreferences
 import androidx.datastore.preferences.preferencesDataStoreFile
+import androidx.lifecycle.ProcessLifecycleOwner
+import androidx.lifecycle.lifecycleScope
 import com.mehmettekin.altingunu.data.local.DrawGroupsDataStore
 import com.mehmettekin.altingunu.data.local.DrawResultsDataStore
 import com.mehmettekin.altingunu.data.local.SettingsDataStore
@@ -16,9 +18,6 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
 import javax.inject.Qualifier
 import javax.inject.Singleton
 
@@ -67,7 +66,7 @@ object DataStoreModule {
                 produceNewData = { emptyPreferences() }
             ),
             produceFile = { context.preferencesDataStoreFile(fileName) },
-            scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
+            scope = ProcessLifecycleOwner.get().lifecycleScope
         )
     }
 

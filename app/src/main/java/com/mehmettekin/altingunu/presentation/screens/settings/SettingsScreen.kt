@@ -35,6 +35,7 @@ import com.mehmettekin.altingunu.R
 import com.mehmettekin.altingunu.ui.theme.NavyBlue
 import com.mehmettekin.altingunu.ui.theme.White
 import android.provider.Settings
+import androidx.compose.foundation.clickable
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -71,10 +72,8 @@ fun SettingsScreen(
         }
     }
 
-    // Language change effect
     LaunchedEffect(state.languageChanged) {
         if (state.languageChanged) {
-            // Activity'yi yeniden başlat
             (context as? MainActivity)?.recreate()
             viewModel.resetLanguageChanged()
         }

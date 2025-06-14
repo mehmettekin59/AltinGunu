@@ -28,6 +28,7 @@ import com.mehmettekin.altingunu.utils.RTLHelper
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import java.util.Locale
 import javax.inject.Inject
 
 
@@ -52,9 +53,20 @@ class MainActivity : ComponentActivity() {
 
     override fun attachBaseContext(newBase: Context?) {
         if (newBase != null) {
-            val app = newBase.applicationContext as AltinGunuApplication
-            val languageCode = app.currentLanguage
-            super.attachBaseContext(LocaleHelper.updateLocale(newBase, languageCode))
+            // Önce kayıtlı dili kontrol et
+            val prefs = newBase.getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
+            val savedLanguage = prefs.getString("language_code", null)
+
+            val targetLang = if (savedLanguage != null) {
+                // Kullanıcı dil seçimi yapmış, onu kullan
+                savedLanguage
+            } else {
+                // İlk açılış, cihaz dilini kullan
+                val deviceLang = Locale.getDefault().language
+                if (deviceLang in Constraints.SUPPORTED_LANGUAGES) deviceLang else "tr"
+            }
+
+            super.attachBaseContext(LocaleHelper.updateLocale(newBase, targetLang))
         } else {
             super.attachBaseContext(newBase)
         }
@@ -72,18 +84,11 @@ class MainActivity : ComponentActivity() {
             val isFirstLaunch = userPreferencesRepository.isFirstLaunch().first()
 
             if (isFirstLaunch) {
-                // İlk açılışta önce dil ayarlarını yap
                 setupInitialLanguage()
-
-                // Sonra izin kontrolü yap
                 checkNotificationPermission()
-
-                // NOT: recreateActivity() artık izin kontrolünden sonra çağrılacak
-                return@launch
+            } else {
+                handleNormalStartup()
             }
-
-            // İlk açılış değilse, normal startup süreci
-            handleNormalStartup()
         }
     }
 
@@ -92,7 +97,6 @@ class MainActivity : ComponentActivity() {
         val detectedLanguage = detectDeviceLanguage()
         userPreferencesRepository.setLanguage(detectedLanguage)
         altinGunuApp.setCurrentLanguage(detectedLanguage)
-        userPreferencesRepository.setFirstLaunchCompleted()
         NumeralHelper.setLanguage(detectedLanguage)
         RTLHelper.setLanguage(detectedLanguage)
         Constraints.setLanguage(detectedLanguage)
@@ -119,26 +123,27 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    // ✅ YENİ: İzin kontrolünden sonra uygulama başlatma
     private fun startAppAfterPermissionCheck() {
         lifecycleScope.launch {
-            val isFirstLaunch = userPreferencesRepository.isFirstLaunch().first()
 
-            if (isFirstLaunch) {
-                // İlk açılış tamamlandı, aktiviteyi yeniden başlat
-                recreateActivity()
-            } else {
-                // Normal startup devam et
-                handleNormalStartup()
+            userPreferencesRepository.setFirstLaunchCompleted()
+
+            keepSplashScreen = false
+            setContent {
+                AltinGunuTheme {
+                    // ... UI kodu
+                }
             }
         }
     }
 
-    // ✅ YENİ: Normal startup süreci
     private suspend fun handleNormalStartup() {
-        // İlk açılış değilse, DataStore'dan dili kontrol et
+        // DataStore'dan kayıtlı dili al
         val storedLanguage = userPreferencesRepository.getLanguage().first()
+
+        // Application state ile karşılaştır
         if (altinGunuApp.currentLanguage != storedLanguage) {
+            // Tutarsızlık var, düzelt
             altinGunuApp.setCurrentLanguage(storedLanguage)
             NumeralHelper.setLanguage(storedLanguage)
             RTLHelper.setLanguage(storedLanguage)
@@ -147,11 +152,12 @@ class MainActivity : ComponentActivity() {
             return
         }
 
-        NumeralHelper.setLanguage(altinGunuApp.currentLanguage)
-        RTLHelper.setLanguage(altinGunuApp.currentLanguage)
-        Constraints.setLanguage(altinGunuApp.currentLanguage)
+        // Helper'ları her zaman güncelle (güvenlik için)
+        NumeralHelper.setLanguage(storedLanguage)
+        RTLHelper.setLanguage(storedLanguage)
+        Constraints.setLanguage(storedLanguage)
 
-        // Her şey tutarlıysa UI'ı göster
+
         keepSplashScreen = false
         setContent {
             AltinGunuTheme {
@@ -169,9 +175,9 @@ class MainActivity : ComponentActivity() {
     private fun detectDeviceLanguage(): String {
         val deviceLanguage = java.util.Locale.getDefault().language
         return when {
-            deviceLanguage in com.mehmettekin.altingunu.utils.Constraints.SUPPORTED_LANGUAGES -> deviceLanguage
-            "en" in com.mehmettekin.altingunu.utils.Constraints.SUPPORTED_LANGUAGES -> "en"
-            else -> com.mehmettekin.altingunu.utils.Constraints.DefaultSettings.DEFAULT_LANGUAGE
+            deviceLanguage in Constraints.SUPPORTED_LANGUAGES -> deviceLanguage
+            "en" in Constraints.SUPPORTED_LANGUAGES -> "en"
+            else -> Constraints.DefaultSettings.DEFAULT_LANGUAGE
         }
     }
 

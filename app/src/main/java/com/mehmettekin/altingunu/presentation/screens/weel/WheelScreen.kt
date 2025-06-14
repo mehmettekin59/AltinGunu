@@ -129,7 +129,7 @@ fun WheelScreen(
     // ✅ Navigate to results screen when results are saved - StateFlow kullanarak
     LaunchedEffect(state.resultsSaved) {
         if (state.resultsSaved) {
-            navController.navigate(Screen.Results.route) {
+            navController.navigate(Screen.Results.createRoute(groupId)) {
                 popUpTo(Screen.Wheel.route) { inclusive = false }
             }
         }

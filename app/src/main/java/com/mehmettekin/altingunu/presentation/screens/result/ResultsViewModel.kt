@@ -142,6 +142,7 @@ class ResultsViewModel @Inject constructor(
     }
 
 
+
     fun createPdf(context: Context): Uri? {
         val results = _state.value.results
         val settings = _state.value.drawSettings
@@ -317,7 +318,7 @@ class ResultsViewModel @Inject constructor(
             )
 
             return uri // Return the URI for viewing/sharing
-        } catch (e: Exception) {
+         } catch (e: Exception) {
             _state.value = _state.value.copy(
                 error = UiText.stringResource(R.string.error_when_create_pdf, e.message ?: "")
             )

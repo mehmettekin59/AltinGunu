@@ -66,6 +66,7 @@ Hazırlıklarınızı tamamlamayı unutmayın!</string>
 
     <string name="error_min_participants">Çekiliş için en az 2 katılımcı gereklidir</string>
     <string name="error_empty_group_name">Grup adı boş olamaz</string>
+    <string name="reset_to_defaults">Default ayarları uygula</string>
     <string name="error_duplicate_names">Aynı isimde birden fazla katılımcı olamaz</string>
     <string name="error_empty_names">Katılımcı isimleri boş olamaz</string>
     <string name="error_invalid_participant_count">Geçersiz katılımcı sayısı</string>
