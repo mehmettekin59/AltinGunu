@@ -90,18 +90,9 @@ fun SetupNavGraph(modifier: Modifier,navController: NavHostController) {
         }
         composable(
             route = Screen.ParticipantMethod.route,
-            arguments = listOf(
-                navArgument("groupName") { type = NavType.StringType },
-                navArgument("groupDescription") { type = NavType.StringType }
-            )
         ) { backStackEntry ->
-            val groupName = backStackEntry.arguments?.getString("groupName") ?: ""
-            val groupDescription = backStackEntry.arguments?.getString("groupDescription") ?: ""
-
             ParticipantMethodScreen(
                 navController = navController,
-                groupName = groupName,
-                groupDescription = groupDescription
             )
         }
     }

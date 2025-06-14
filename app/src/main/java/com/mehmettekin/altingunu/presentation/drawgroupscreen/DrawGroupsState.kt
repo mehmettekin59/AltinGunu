@@ -12,9 +12,6 @@ data class DrawGroupsState(
     val selectedTab: DrawGroupTab = DrawGroupTab.ACTIVE,
     val showDeleteDialog: Boolean = false,
     val groupToDelete: DrawGroup? = null,
-    val showCreateGroupDialog: Boolean = false,
-    val newGroupName: String = "",
-    val newGroupDescription: String = ""
 )
 enum class DrawGroupTab {
     ACTIVE,     // Aktif çekilişler

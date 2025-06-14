@@ -1,14 +1,12 @@
 package com.mehmettekin.altingunu.presentation.drawgroupdetailscreen
 
 import android.content.Context
-import android.content.Intent
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.mehmettekin.altingunu.data.local.SettingsDataStore
-import com.mehmettekin.altingunu.domain.model.DrawInvitation
 import com.mehmettekin.altingunu.domain.repository.DrawGroupRepository
 import com.mehmettekin.altingunu.domain.repository.FcmRepository
+import com.mehmettekin.altingunu.notification.FirestoreService
 import com.mehmettekin.altingunu.utils.ResultState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -24,6 +22,7 @@ class DrawGroupDetailViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     private val drawGroupRepository: DrawGroupRepository,
     private val fcmRepository: FcmRepository,
+    private val firestoreService: FirestoreService,
     @ApplicationContext private val context: Context
 ) : ViewModel() {
 
@@ -34,7 +33,7 @@ class DrawGroupDetailViewModel @Inject constructor(
 
     init {
         loadDrawGroup(groupId)
-        loadPendingRequests()
+        listenToPendingRequests()
     }
 
     fun loadDrawGroup(id: String) {
@@ -81,13 +80,6 @@ class DrawGroupDetailViewModel @Inject constructor(
         }
     }
 
-    private fun loadPendingRequests() {
-        viewModelScope.launch {
-            // Firebase Functions'tan pending requestleri çek
-            // Bu özellik şu an için basitleştirildi
-            _state.value = _state.value.copy(pendingRequests = emptyList())
-        }
-    }
 
     fun approveRequest(requestId: String, approve: Boolean) {
         viewModelScope.launch {
@@ -96,7 +88,7 @@ class DrawGroupDetailViewModel @Inject constructor(
                     _state.value = _state.value.copy(
                         message = if (approve) "Katılım talebi onaylandı" else "Katılım talebi reddedildi"
                     )
-                    loadPendingRequests()
+                    listenToPendingRequests()
                     loadDrawGroup(groupId)
                 }
                 is ResultState.Error -> {
@@ -128,6 +120,15 @@ class DrawGroupDetailViewModel @Inject constructor(
         }
     }
 
+    private fun listenToPendingRequests() {
+        viewModelScope.launch {
+            firestoreService.listenToPendingRequests(groupId).collect { pendingRequests ->
+                _state.update {
+                    it.copy(pendingRequests = pendingRequests)
+                }
+            }
+        }
+    }
 
     fun clearMessage() {
         _state.value = _state.value.copy(message = null)
