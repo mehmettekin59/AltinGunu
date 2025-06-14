@@ -75,6 +75,7 @@ enum class ParticipantListType {
 @Composable
 fun WheelScreen(
     navController: NavController,
+    groupId: String,
     viewModel: WheelViewModel = hiltViewModel()
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -338,7 +339,7 @@ fun WheelScreen(
 @Composable
 private fun WheelSection(
     modifier: Modifier,
-    remainingParticipants: List<Participant>, // ✅ Explicit naming
+    remainingParticipants: List<Participant>,
     rotation: Float,
     currentWinner: String?,
     winners: List<String>,
@@ -364,7 +365,7 @@ private fun WheelSection(
             ) {
                 // Always draw wheel, using a default list if participants is empty
                 val displayParticipants = if (remainingParticipants.isNotEmpty()) {
-                    remainingParticipants.map { it.name } // ✅ Name'leri extract et
+                    remainingParticipants.map { it.name }
                 } else if (winners.isNotEmpty()) {
                     // Show the winners on the wheel when participants list is empty
                     winners

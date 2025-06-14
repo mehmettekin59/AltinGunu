@@ -62,7 +62,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
@@ -72,7 +71,6 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.mehmettekin.altingunu.R
 import com.mehmettekin.altingunu.domain.model.ItemType
-import com.mehmettekin.altingunu.presentation.navigation.Screen
 import com.mehmettekin.altingunu.presentation.screens.common.CommonTopAppBar
 import com.mehmettekin.altingunu.ui.theme.Gold
 import com.mehmettekin.altingunu.ui.theme.NavyBlue
@@ -81,7 +79,6 @@ import com.mehmettekin.altingunu.utils.Constraints
 import com.mehmettekin.altingunu.utils.NumeralTextField
 import com.mehmettekin.altingunu.utils.UiText
 import com.mehmettekin.altingunu.utils.convertNumerals
-import kotlinx.coroutines.flow.collectLatest
 import java.text.SimpleDateFormat
 import java.util.Calendar
 
@@ -96,12 +93,6 @@ fun ParticipantsScreen(
     val snackbarHostState = remember { SnackbarHostState() }
     val context = LocalContext.current
 
-    // Navigation handling
-    LaunchedEffect(key1 = true) {
-        viewModel.navigationEvent.collectLatest {
-            navController.navigate(Screen.Wheel.createRoute(groupId))
-        }
-    }
 
     // Error handling
     LaunchedEffect(key1 = state.error) {
@@ -115,7 +106,7 @@ fun ParticipantsScreen(
         snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
             CommonTopAppBar(
-                title = UiText.stringResource(R.string.raffle_settings).asString(),
+                title = UiText.stringResource(R.string.title_settings).asString(),
                 navController = navController,
                 onBackPressed = { navController.navigateUp() }
             )
@@ -913,6 +904,8 @@ fun DateSelectorDialog(
     )
 }
 
+//Burada Artık participantsection kullanılayacak
+/*
 @Composable
 fun ParticipantsSection(
     participants: List<Participant>,
@@ -1020,7 +1013,7 @@ fun ParticipantsSection(
             }
         }
     }
-}
+} */
 
 
 @Composable

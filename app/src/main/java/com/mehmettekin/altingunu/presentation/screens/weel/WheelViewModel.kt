@@ -3,6 +3,7 @@ package com.mehmettekin.altingunu.presentation.screens.weel
 
 
 import android.util.Log
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.mehmettekin.altingunu.data.local.SettingsDataStore
@@ -10,8 +11,10 @@ import com.mehmettekin.altingunu.domain.model.DrawResult
 import com.mehmettekin.altingunu.domain.model.Participant
 import com.mehmettekin.altingunu.domain.model.ParticipantsScreenWholeInformation
 import com.mehmettekin.altingunu.domain.model.ReminderData
+import com.mehmettekin.altingunu.domain.repository.DrawGroupRepository
 import com.mehmettekin.altingunu.domain.repository.DrawRepository
 import com.mehmettekin.altingunu.domain.repository.FcmRepository
+import com.mehmettekin.altingunu.notification.FirestoreService
 import com.mehmettekin.altingunu.utils.ResultState
 import com.mehmettekin.altingunu.utils.ValueFormatter
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -26,34 +29,39 @@ import javax.inject.Inject
 
 @HiltViewModel
 class WheelViewModel @Inject constructor(
+    savedStateHandle: SavedStateHandle,
     private val drawRepository: DrawRepository,
-    private val settingsDataStore: SettingsDataStore,
-    private val fcmRepository: FcmRepository,
-    private val groupId: Int
+    private val drawGroupRepository: DrawGroupRepository,
+    private val firestoreService: FirestoreService
 ) : ViewModel() {
-
+    private val groupId: String = savedStateHandle.get<String>("groupId") ?: ""
     private val _state = MutableStateFlow(WheelState())
     val state = _state.asStateFlow()
 
     val participants: List<Participant> get() = _state.value.remainingParticipants
 
     init {
-        loadParticipants()
+        if (groupId.isNotEmpty()) {
+            loadDrawGroup()
+        }
         loadDrawSettings()
     }
 
-    private fun loadParticipants() {
+    private fun loadDrawGroup() {
         viewModelScope.launch {
             _state.update { it.copy(isLoading = true) }
 
-            when (val result = drawRepository.getParticipants()) {
+            when (val result = drawGroupRepository.getDrawGroupById(groupId)) {
                 is ResultState.Success -> {
-                    _state.update { currentState ->
-                        currentState.copy(
-                            allParticipants = result.data,
-                            remainingParticipants = result.data,
-                            isLoading = false
-                        )
+                    result.data?.let { group ->
+                        _state.update { currentState ->
+                            currentState.copy(
+                                allParticipants = group.participants,
+                                remainingParticipants = group.participants,
+                                drawSettings = group.settings,
+                                isLoading = false
+                            )
+                        }
                     }
                 }
                 is ResultState.Error -> {
@@ -73,7 +81,6 @@ class WheelViewModel @Inject constructor(
             }
         }
     }
-
     private fun loadDrawSettings() {
         viewModelScope.launch {
             when (val result = drawRepository.getDrawSettings()) {
