@@ -9,4 +9,5 @@ data class DrawGroupDetailState(
     val inviteCode: String? = null,
     val isLoading: Boolean = false,
     val message: String? = null,
+    val showDeleteDialog: Boolean = false
 )

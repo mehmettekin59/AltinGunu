@@ -10,6 +10,7 @@ import com.mehmettekin.altingunu.notification.FirestoreService
 import com.mehmettekin.altingunu.utils.ResultState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -173,9 +174,9 @@ class DrawGroupDetailViewModel @Inject constructor(
             }
         }
     }
-
+    private var participantListenerJob: Job? = null
     private fun listenToPendingRequests() {
-        viewModelScope.launch {
+        participantListenerJob= viewModelScope.launch {
             firestoreService.listenToPendingRequests(groupId).collect { pendingRequests ->
                 _state.update {
                     it.copy(pendingRequests = pendingRequests)
@@ -184,6 +185,45 @@ class DrawGroupDetailViewModel @Inject constructor(
         }
     }
 
+    fun showDeleteConfirmation() {
+        _state.update { it.copy(showDeleteDialog = true) }
+    }
+
+    fun dismissDeleteDialog() {
+        _state.update { it.copy(showDeleteDialog = false) }
+    }
+
+    fun deleteGroup() {
+        viewModelScope.launch {
+            _state.update { it.copy(isLoading = true) }
+
+            when (val result = drawGroupRepository.deleteDrawGroup(groupId)) {
+                is ResultState.Success -> {
+                    _state.update {
+                        it.copy(
+                            isLoading = false,
+                            message = "Grup başarıyla silindi"
+                        )
+                    }
+                }
+                is ResultState.Error -> {
+                    _state.update {
+                        it.copy(
+                            isLoading = false,
+                            message = result.message.asString(context),
+                            showDeleteDialog = false
+                        )
+                    }
+                }
+                else -> {}
+            }
+        }
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        participantListenerJob?.cancel()
+    }
     fun clearMessage() {
         _state.value = _state.value.copy(message = null)
     }

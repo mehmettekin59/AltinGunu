@@ -39,6 +39,9 @@ import android.content.Intent
 import androidx.compose.material.icons.filled.Link
 import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.unit.LayoutDirection
+import com.mehmettekin.altingunu.utils.RTLHelper
 import kotlinx.coroutines.launch
 
 
@@ -51,7 +54,7 @@ fun DrawGroupDetailScreen(
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
-
+    val layoutDirection = if (RTLHelper.isRTL()) LayoutDirection.Rtl else LayoutDirection.Ltr
 
     LaunchedEffect(groupId) {
         viewModel.loadDrawGroup(groupId)
@@ -64,6 +67,7 @@ fun DrawGroupDetailScreen(
         }
     }
 
+    CompositionLocalProvider(LocalLayoutDirection provides layoutDirection) {
     Scaffold(
         topBar = {
             CommonTopAppBar(
@@ -73,6 +77,15 @@ fun DrawGroupDetailScreen(
                 actions = {
                     state.drawGroup?.let { group ->
                         if (!group.isCompleted) {
+
+                            IconButton(onClick = { viewModel.showDeleteConfirmation() }) {
+                                Icon(
+                                    Icons.Default.Delete,
+                                    contentDescription = "Grubu Sil",
+                                    tint = White
+                                )
+                            }
+
                             // ✅ Davet kodu varsa göster
                             state.inviteCode?.let { code ->
                                 IconButton(onClick = {
@@ -136,7 +149,7 @@ fun DrawGroupDetailScreen(
                     }
                     // Davet kodu kartı
 
-                    if (state.drawGroup != null && !state.drawGroup.isCompleted) {
+                    if (!drawGroup.isCompleted) {
                         item {
                             InviteCodeSection(
                                 inviteCode = state.inviteCode,
@@ -162,6 +175,7 @@ fun DrawGroupDetailScreen(
                             )
                         }
                     }
+
 
                     // Bekleyen katılım talepleri
                     if (state.pendingRequests.isNotEmpty()) {
@@ -220,8 +234,49 @@ fun DrawGroupDetailScreen(
                 }
             }
         }
+
+
+        if (state.showDeleteDialog) {
+            AlertDialog(
+                onDismissRequest = { viewModel.dismissDeleteDialog() },
+                title = {
+                    Text(
+                        text = "Grubu Sil",
+                        style = MaterialTheme.typography.titleLarge,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.Red
+                    )
+                },
+                text = {
+                    Text(
+                        text = "\"${state.drawGroup?.name}\" grubunu silmek istediğinizden emin misiniz? Bu işlem geri alınamaz.",
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                },
+                confirmButton = {
+                    Button(
+                        onClick = {
+                            viewModel.deleteGroup()
+                            navController.navigateUp()
+                        },
+                        colors = ButtonDefaults.buttonColors(containerColor = Color.Red)
+                    ) {
+                        Text("Sil", color = White)
+                    }
+                },
+                dismissButton = {
+                    TextButton(onClick = { viewModel.dismissDeleteDialog() }) {
+                        Text("İptal")
+                    }
+                }
+            )
+        }
+
+
     }
 }
+}
+
 
 @Composable
 private fun InviteCodeSection(
@@ -356,7 +411,14 @@ private fun InviteCodeSection(
 private fun GroupInfoCard(drawGroup: DrawGroup) {
     Card(
         modifier = Modifier.fillMaxWidth(),
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surface,
+            contentColor = MaterialTheme.colorScheme.onSurface
+        ),
+        elevation = CardDefaults.cardElevation(
+            defaultElevation = 2.dp,
+            pressedElevation = 8.dp
+        )
     ) {
         Column(
             modifier = Modifier
@@ -367,7 +429,7 @@ private fun GroupInfoCard(drawGroup: DrawGroup) {
                 text = "Grup Bilgileri",
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold,
-                color = NavyBlue
+                color = MaterialTheme.colorScheme.primary
             )
 
             Spacer(modifier = Modifier.height(12.dp))
@@ -836,15 +898,20 @@ private fun InfoRow(
     ) {
         Text(
             text = label,
-            style = MaterialTheme.typography.bodyMedium,
+            style = MaterialTheme.typography.bodyMedium.copy(
+                textDirection = RTLHelper.getTextDirection()
+            ),
             color = Color.Gray
         )
 
         Text(
             text = value,
-            style = MaterialTheme.typography.bodyMedium,
+            style = MaterialTheme.typography.bodyMedium.copy(
+                textDirection = RTLHelper.getTextDirection()
+            ),
             fontWeight = FontWeight.Bold,
-            color = valueColor
+            color = valueColor,
+            textAlign = RTLHelper.getEndTextAlign()
         )
     }
 }
