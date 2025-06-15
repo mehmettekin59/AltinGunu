@@ -12,6 +12,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -31,6 +32,15 @@ import com.mehmettekin.altingunu.utils.Constraints
 import com.mehmettekin.altingunu.utils.UiText
 import com.mehmettekin.altingunu.utils.ValueFormatter
 import com.mehmettekin.altingunu.utils.convertNumerals
+import android.content.ClipData
+import android.content.ClipboardManager
+import android.content.Context
+import android.content.Intent
+import androidx.compose.material.icons.filled.Link
+import androidx.compose.material.icons.filled.ContentCopy
+import androidx.compose.ui.platform.LocalContext
+import kotlinx.coroutines.launch
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -63,12 +73,17 @@ fun DrawGroupDetailScreen(
                 actions = {
                     state.drawGroup?.let { group ->
                         if (!group.isCompleted) {
-                            IconButton(onClick = { }) {
-                                Icon(
-                                    Icons.Default.PersonAdd,
-                                    contentDescription = "Davet et",
-                                    tint = White
-                                )
+                            // ✅ Davet kodu varsa göster
+                            state.inviteCode?.let { code ->
+                                IconButton(onClick = {
+                                    viewModel.generateInviteCode()
+                                }) {
+                                    Icon(
+                                        Icons.Default.Share,
+                                        contentDescription = "Davet Et",
+                                        tint = White
+                                    )
+                                }
                             }
                         }
 
@@ -78,6 +93,9 @@ fun DrawGroupDetailScreen(
         },
         snackbarHost = { SnackbarHost(snackbarHostState) }
     ) { paddingValues ->
+
+        val context = LocalContext.current
+        val coroutineScope = rememberCoroutineScope()
         when {
             state.isLoading -> {
                 Box(
@@ -116,6 +134,34 @@ fun DrawGroupDetailScreen(
                             activeTokenCount = drawGroup.getActiveParticipantCount()
                         )
                     }
+                    // Davet kodu kartı
+
+                    if (state.drawGroup != null && !state.drawGroup.isCompleted) {
+                        item {
+                            InviteCodeSection(
+                                inviteCode = state.inviteCode,
+                                isLoading = state.isLoading,
+                                onGenerateCode = { viewModel.generateInviteCode() },
+                                onShareCode = { code ->
+                                    val shareIntent = Intent().apply {
+                                        action = Intent.ACTION_SEND
+                                        type = "text/plain"
+                                        putExtra(Intent.EXTRA_TEXT, "Altın Günü çekilişimize katılın!\nhttps://altingunu.app/invite/$code")
+                                    }
+                                    context.startActivity(Intent.createChooser(shareIntent, "Davet Linkini Paylaş"))
+                                },
+                                onCopyCode = { code ->
+                                    val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+                                    val clip = ClipData.newPlainText("Davet Kodu", code)
+                                    clipboard.setPrimaryClip(clip)
+
+                                    coroutineScope.launch {
+                                        snackbarHostState.showSnackbar("Davet kodu kopyalandı")
+                                    }
+                                }
+                            )
+                        }
+                    }
 
                     // Bekleyen katılım talepleri
                     if (state.pendingRequests.isNotEmpty()) {
@@ -144,6 +190,7 @@ fun DrawGroupDetailScreen(
                         }
                     }
 
+
                     // Aksiyonlar
                     item {
                         ActionsSection(
@@ -170,6 +217,135 @@ fun DrawGroupDetailScreen(
                         text = "Çekiliş bulunamadı",
                         style = MaterialTheme.typography.bodyLarge
                     )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun InviteCodeSection(
+    inviteCode: String?,
+    isLoading: Boolean,
+    onGenerateCode: () -> Unit,
+    onShareCode: (String) -> Unit,
+    onCopyCode: (String) -> Unit
+) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+        colors = CardDefaults.cardColors(containerColor = Gold.copy(alpha = 0.1f))
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp)
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Link,
+                    contentDescription = null,
+                    tint = NavyBlue
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(
+                    text = "Davet Kodu",
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold,
+                    color = NavyBlue
+                )
+            }
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            if (inviteCode != null) {
+                // Kod var, göster
+                Surface(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(8.dp),
+                    color = White
+                ) {
+                    Column(
+                        modifier = Modifier.padding(12.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Text(
+                            text = inviteCode,
+                            style = MaterialTheme.typography.headlineSmall,
+                            fontWeight = FontWeight.Bold,
+                            color = Gold,
+                            textAlign = TextAlign.Center
+                        )
+
+                        Spacer(modifier = Modifier.height(8.dp))
+
+                        Text(
+                            text = "Bu kodu paylaşarak yeni katılımcılar davet edebilirsiniz",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = Color.Gray,
+                            textAlign = TextAlign.Center
+                        )
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceEvenly
+                ) {
+                    TextButton(
+                        onClick = { onShareCode(inviteCode) }
+                    ) {
+                        Icon(
+                            Icons.Default.Share,
+                            contentDescription = null,
+                            modifier = Modifier.size(16.dp)
+                        )
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Text("Paylaş")
+                    }
+
+                    TextButton(
+                        onClick = { onCopyCode(inviteCode) }
+                    ) {
+                        Icon(
+                            Icons.Default.ContentCopy,
+                            contentDescription = null,
+                            modifier = Modifier.size(16.dp)
+                        )
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Text("Kopyala")
+                    }
+                }
+            } else {
+                // Kod yok, oluşturma butonu göster
+                Button(
+                    onClick = onGenerateCode,
+                    modifier = Modifier.fillMaxWidth(),
+                    enabled = !isLoading,
+                    colors = ButtonDefaults.buttonColors(containerColor = Gold)
+                ) {
+                    if (isLoading) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(16.dp),
+                            color = NavyBlue,
+                            strokeWidth = 2.dp
+                        )
+                    } else {
+                        Icon(
+                            Icons.Default.Add,
+                            contentDescription = null
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(
+                            "Davet Kodu Oluştur",
+                            color = NavyBlue,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
                 }
             }
         }
@@ -244,6 +420,8 @@ private fun GroupInfoCard(drawGroup: DrawGroup) {
         }
     }
 }
+
+
 
 @Composable
 private fun ProgressCard(drawGroup: DrawGroup) {

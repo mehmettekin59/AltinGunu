@@ -96,7 +96,8 @@ fun SettingsScreen(
         topBar = {
             CommonTopAppBar(
                 title = UiText.stringResource(R.string.title_settings).asString(),
-                onBackPressed = { navController.navigateUp() },
+                navController = navController,
+                onBackPressed = { navController.navigateUp() }
 
             )
         },

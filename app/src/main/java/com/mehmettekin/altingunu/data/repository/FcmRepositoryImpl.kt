@@ -1,5 +1,6 @@
 package com.mehmettekin.altingunu.data.repository
 
+import android.app.DownloadManager.Query
 import com.google.firebase.functions.FirebaseFunctions
 import com.google.firebase.messaging.FirebaseMessaging
 import com.mehmettekin.altingunu.domain.model.DrawInvitation
@@ -9,6 +10,7 @@ import com.mehmettekin.altingunu.domain.repository.FcmRepository
 import com.mehmettekin.altingunu.utils.ResultState
 import com.mehmettekin.altingunu.utils.UiText
 import kotlinx.coroutines.tasks.await
+import java.util.Date
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -165,6 +167,21 @@ class FcmRepositoryImpl @Inject constructor() : FcmRepository {
             ResultState.Success(Unit)
         } catch (e: Exception) {
             ResultState.Error(UiText.dynamicString(e.message ?: "Bildirim gönderilemedi"))
+        }
+    }
+
+    override suspend fun getExistingInviteCode(groupId: String): ResultState<String?> {
+        return try {
+            val inviteQuery = functions.getHttpsCallable("getExistingInviteCode")
+                .call(hashMapOf("groupId" to groupId))
+                .await()
+
+            val response = inviteQuery.getData() as Map<String, Any>
+            val inviteCode = response["inviteCode"] as? String
+
+            ResultState.Success(inviteCode)
+        } catch (e: Exception) {
+            ResultState.Error(UiText.dynamicString(e.message ?: "Davet kodu alınamadı"))
         }
     }
 

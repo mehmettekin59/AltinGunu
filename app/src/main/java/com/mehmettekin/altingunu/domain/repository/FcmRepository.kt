@@ -38,4 +38,6 @@ interface FcmRepository {
     ): ResultState<Unit>
 
     suspend fun getAcceptedParticipants(groupId: String): ResultState<List<InvitedParticipant>>
+
+    suspend fun getExistingInviteCode(groupId: String): ResultState<String?>
 }

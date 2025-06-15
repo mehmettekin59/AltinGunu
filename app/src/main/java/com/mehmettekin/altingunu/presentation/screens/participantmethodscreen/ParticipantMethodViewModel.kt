@@ -69,15 +69,16 @@ class ParticipantMethodViewModel @Inject constructor(
                     createdDate = System.currentTimeMillis(),
                     lastModifiedDate = System.currentTimeMillis(),
                     settings = ParticipantsScreenWholeInformation(
-                        participantCount = 0,  // Başlangıçta 0
+                        participantCount = 3,
                         participants = emptyList(),
                         itemType = ItemType.TL,
                         specificItem = "",
-                        monthlyAmount = 0.0,
-                        durationMonths = 0,
+                        monthlyAmount = 1.0,
+                        durationMonths = 1,
                         startDay = currentDate.get(Calendar.DAY_OF_MONTH),
                         startMonth = currentDate.get(Calendar.MONTH) + 1,
-                        startYear = currentDate.get(Calendar.YEAR)
+                        startYear = currentDate.get(Calendar.YEAR),
+                        currentFormattedPrice = null
                     ),
                     participants = emptyList(),
                     results = emptyList(),
@@ -122,13 +123,50 @@ class ParticipantMethodViewModel @Inject constructor(
 
 
     fun generateInviteCode() {
-        val groupId = _state.value.groupId ?: return  // Grup yoksa çık
+        val groupId = _state.value.groupId ?: return
 
         viewModelScope.launch {
             _state.update { it.copy(isLoading = true) }
 
+            // ✅ Önce var olan kodu kontrol et
+            when (val existingResult = fcmRepository.getExistingInviteCode(groupId)) {
+                is ResultState.Success -> {
+                    if (existingResult.data != null) {
+                        // Var olan kodu kullan
+                        _state.update {
+                            it.copy(
+                                isLoading = false,
+                                inviteCode = existingResult.data
+                            )
+                        }
+                    } else {
+                        // Yoksa yeni oluştur
+                        createNewInviteCode(groupId)
+                    }
+                }
+                is ResultState.Error -> {
+                    _state.update {
+                        it.copy(
+                            isLoading = false,
+                            error = existingResult.message
+                        )
+                    }
+                }
+                is ResultState.Loading -> {
+                    // Zaten loading state'deyiz, bir şey yapmaya gerek yok
+                }
+                is ResultState.Idle -> {
+                    _state.update { it.copy(isLoading = false) }
+                }
+            }
+        }
+    }
+
+    private fun createNewInviteCode(groupId: String) {
+        // ✅ NOT: viewModelScope.launch gerek yok, zaten bir coroutine içindeyiz
+        viewModelScope.launch {
             when (val result = fcmRepository.createInvitationOnServer(
-                drawGroupId = groupId,  // ✅ Gerçek groupId
+                drawGroupId = groupId,
                 drawGroupName = _state.value.groupName,
                 inviterName = "Grup Yöneticisi"
             )) {
@@ -148,7 +186,10 @@ class ParticipantMethodViewModel @Inject constructor(
                         )
                     }
                 }
-                else -> {
+                is ResultState.Loading -> {
+                    // Loading durumu zaten handle ediliyor
+                }
+                is ResultState.Idle -> {
                     _state.update { it.copy(isLoading = false) }
                 }
             }

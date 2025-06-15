@@ -547,6 +547,44 @@ exports.getAcceptedParticipants = functions.https.onCall(async (data, context) =
     }
 });
 
+
+exports.getExistingInviteCode = functions.https.onCall(async (data, context) => {
+    const { groupId } = data;
+
+    if (!groupId) {
+        throw new functions.https.HttpsError('invalid-argument', 'Grup ID gerekli');
+    }
+
+    try {
+        const inviteQuery = await db.collection('invitations')
+            .where('drawGroupId', '==', groupId)
+            .where('expirationDate', '>', Date.now())
+            .orderBy('expirationDate', 'desc')
+            .limit(1)
+            .get();
+
+        if (inviteQuery.empty) {
+            return {
+                success: true,
+                inviteCode: null
+            };
+        }
+
+        const invitation = inviteQuery.docs[0].data();
+
+        return {
+            success: true,
+            inviteCode: invitation.inviteCode,
+            expirationDate: invitation.expirationDate,
+            remainingDays: Math.floor((invitation.expirationDate - Date.now()) / (1000 * 60 * 60 * 24))
+        };
+
+    } catch (error) {
+        console.error('Davet kodu getirme hatası:', error);
+        throw new functions.https.HttpsError('internal', error.message);
+    }
+});
+
 // Temizlik fonksiyonu - Eski verileri temizle
 exports.cleanupOldData = functions.pubsub
     .schedule('every day 03:00')

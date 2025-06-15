@@ -18,6 +18,7 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 
+
 @HiltViewModel
 class DrawGroupDetailViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
@@ -38,6 +39,7 @@ class DrawGroupDetailViewModel @Inject constructor(
     }
 
     fun loadDrawGroup(id: String) {
+        _state.value = _state.value.copy(isLoading = true)
         viewModelScope.launch {
             _state.value = _state.value.copy(isLoading = true)
 
@@ -66,7 +68,44 @@ class DrawGroupDetailViewModel @Inject constructor(
 
     private fun loadInviteCode(groupId: String) {
         viewModelScope.launch {
+            _state.value = _state.value.copy(isLoading = true)
+            // ✅ Önce var olan kodu kontrol et
+            when (val existingResult = fcmRepository.getExistingInviteCode(groupId)) {
+                is ResultState.Success -> {
+
+                    if (existingResult.data != null) {
+                        // Var olan kodu kullan
+                        _state.value = _state.value.copy(inviteCode = existingResult.data)
+                        _state.value = _state.value.copy(isLoading = false)
+
+                    } else {
+                        // Yoksa yeni oluştur
+                        createNewInviteCode(groupId)
+                    }
+                }
+                is ResultState.Error -> {
+                    _state.update {
+                        it.copy(
+                            message = existingResult.message.asString(context),
+                            isLoading = false
+                        )
+                    }
+                }
+                else -> {}
+            }
+        }
+    }
+
+    fun generateInviteCode() {
+        val currentGroupId = groupId
+        if (currentGroupId.isEmpty()) return
+
+        loadInviteCode(currentGroupId)
+    }
+    private fun createNewInviteCode(groupId: String) {
+        viewModelScope.launch {
             val drawGroup = _state.value.drawGroup ?: return@launch
+            _state.value = _state.value.copy(isLoading = true)
 
             when (val result = fcmRepository.createInvitationOnServer(
                 drawGroupId = groupId,
@@ -74,9 +113,23 @@ class DrawGroupDetailViewModel @Inject constructor(
                 inviterName = "Grup Yöneticisi"
             )) {
                 is ResultState.Success -> {
-                    _state.value = _state.value.copy(inviteCode = result.data)
+                    _state.value = _state.value.copy(
+                        inviteCode = result.data,
+                        isLoading = false
+                    )
+
                 }
-                else -> {}
+                is ResultState.Error -> {
+                    _state.update {
+                        it.copy(
+                            message = result.message.asString(context),
+                            isLoading = false
+                        )
+                    }
+                }
+                else -> {
+                    _state.value = _state.value.copy(isLoading = false)
+                }
             }
         }
     }
