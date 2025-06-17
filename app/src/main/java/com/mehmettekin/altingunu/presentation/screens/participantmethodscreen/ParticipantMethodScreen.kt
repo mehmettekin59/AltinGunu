@@ -15,6 +15,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowForwardIos
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -66,9 +67,9 @@ fun ParticipantMethodScreen(
     Scaffold(
         topBar = {
             CommonTopAppBar(
-                title = UiText.stringResource(R.string.add_participant).asString(),
+                title = UiText.stringResource(R.string.creategroup_and_addparticipant).asString(),
                 navController = navController,
-                onBackPressed = { navController.navigateUp() }
+                onBackPressed = { navController.navigateUp() },
             )
         },
         snackbarHost = { SnackbarHost(snackbarHostState) }
@@ -81,7 +82,7 @@ fun ParticipantMethodScreen(
                 .verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            // Group Info Section - ✅ Grup oluşturulduktan sonra disabled olacak
+
             GroupInfoSection(
                 groupName = state.groupName,
                 groupDescription = state.groupDescription,
@@ -91,7 +92,7 @@ fun ParticipantMethodScreen(
                 onGroupDescriptionChange = {
                     if (!state.isGroupCreated) viewModel.updateGroupDescription(it)
                 },
-                isEnabled = !state.isGroupCreated  // ✅ YENİ: Grup oluşturulduysa disabled
+                isEnabled = !state.isGroupCreated
             )
 
             // ✅ Grup oluşturma butonu (sadece grup oluşturulmadıysa göster)
@@ -128,6 +129,33 @@ fun ParticipantMethodScreen(
                 }
             }
 
+            if (!state.isGroupCreated && state.hasExistingGroups) {
+                Spacer(modifier = Modifier.height(12.dp))
+
+                OutlinedButton(
+                    onClick = { navController.navigate(Screen.DrawGroups.route) },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(56.dp),
+                    shape = RoundedCornerShape(8.dp),
+                    border = BorderStroke(2.dp, Gold),
+                    colors = ButtonDefaults.outlinedButtonColors(
+                        contentColor = Gold
+                    )
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.List,
+                        contentDescription = null,
+                        modifier = Modifier.size(24.dp)
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        text = "Mevcut Çekilişleri Gör",
+                        style = MaterialTheme.typography.titleMedium
+                    )
+                }
+            }
+
             // ✅ Grup oluşturulduysa başarı mesajı göster
             if (state.isGroupCreated) {
                 Card(
@@ -159,15 +187,6 @@ fun ParticipantMethodScreen(
                 }
             }
 
-            // Title
-            Text(
-                text = "Katılımcı Ekleme",
-                style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.Bold,
-                color = NavyBlue,
-                textAlign = TextAlign.Center,
-                modifier = Modifier.fillMaxWidth()
-            )
 
             // ✅ Davet kartı - Sadece grup oluşturulduysa göster
             if (state.isGroupCreated) {
@@ -364,7 +383,7 @@ fun InvitedParticipantsCard(
             Spacer(modifier = Modifier.height(12.dp))
 
             Text(
-                text = "Yanlızca uygulamayı yükleyen katılımcılar bildirim gönderilebilir",
+                text = "Yanlızca uygulamayı yükleyen katılımcılara bildirim gönderilecektir",
                 style = MaterialTheme.typography.bodySmall,
                 color = Color.Green
             )

@@ -618,7 +618,7 @@ fun GoldDayLotteryCard(
                 Spacer(modifier = Modifier.width(8.dp))
 
                 Text(
-                    text = UiText.stringResource(R.string.enter_the_participants).asString(),
+                    text = UiText.stringResource(R.string.start).asString(),
                     style = MaterialTheme.typography.titleMedium
                 )
             }

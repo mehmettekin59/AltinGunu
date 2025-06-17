@@ -2,22 +2,27 @@ package com.mehmettekin.altingunu.data.repository
 
 
 import com.mehmettekin.altingunu.R
+import com.mehmettekin.altingunu.data.local.DrawGroupsDataStore
 import com.mehmettekin.altingunu.data.local.DrawResultsDataStore
+import com.mehmettekin.altingunu.domain.model.DrawGroup
 import com.mehmettekin.altingunu.domain.model.DrawResult
 import com.mehmettekin.altingunu.domain.model.Participant
 import com.mehmettekin.altingunu.domain.model.ParticipantsScreenWholeInformation
 import com.mehmettekin.altingunu.domain.repository.DrawRepository
+import com.mehmettekin.altingunu.notification.FirestoreService
 import com.mehmettekin.altingunu.utils.ResultState
 import com.mehmettekin.altingunu.utils.UiText
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
+import java.util.UUID
 import javax.inject.Inject
 import javax.inject.Singleton
 
 
 @Singleton
 class DrawRepositoryImpl @Inject constructor(
-    private val drawResultsDataStore: DrawResultsDataStore
+    private val drawResultsDataStore: DrawResultsDataStore,
+    private val drawGroupsDataStore: DrawGroupsDataStore,
 ) : DrawRepository {
 
     override suspend fun saveParticipants(participants: List<Participant>): ResultState<Unit> {
@@ -33,6 +38,7 @@ class DrawRepositoryImpl @Inject constructor(
             )
         }
     }
+
 
 
 

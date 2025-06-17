@@ -57,6 +57,7 @@ class FcmRepositoryImpl @Inject constructor() : FcmRepository {
         return try {
             val data = hashMapOf(
                 "drawGroupId" to drawGroupId,
+                "drawGroupName" to drawGroupName,
                 "inviterName" to inviterName
             )
 

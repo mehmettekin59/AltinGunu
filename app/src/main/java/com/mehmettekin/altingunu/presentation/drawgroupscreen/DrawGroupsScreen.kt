@@ -8,6 +8,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowForwardIos
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -65,6 +66,7 @@ fun DrawGroupsScreen(
                             tint = White
                         )
                     }
+
                 }
             )
         },
@@ -114,8 +116,7 @@ fun DrawGroupsScreen(
                                 group = group,
                                 onClick = {
                                     navController.navigate(Screen.DrawGroupDetail.createRoute(group.id))
-                                },
-                                onDelete = { viewModel.onEvent(DrawGroupsEvent.OnDeleteGroup(group)) }
+                                }
                             )
                         }
                     }
@@ -183,7 +184,6 @@ private fun DrawGroupTabSelector(
 private fun DrawGroupCard(
     group: DrawGroup,
     onClick: () -> Unit,
-    onDelete: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Card(
@@ -247,18 +247,6 @@ private fun DrawGroupCard(
                                 else -> Gold
                             },
                             fontWeight = FontWeight.Medium
-                        )
-                    }
-
-                    Spacer(modifier = Modifier.width(8.dp))
-
-                    // Delete Button
-                    IconButton(onClick = onDelete) {
-                        Icon(
-                            Icons.Default.Delete,
-                            contentDescription = UiText.stringResource(R.string.delete).asString(),
-                            tint = Color.Red,
-                            modifier = Modifier.size(20.dp)
                         )
                     }
                 }
@@ -358,45 +346,4 @@ private fun EmptyGroupsView(
             textAlign = TextAlign.Center
         )
     }
-}
-
-@Composable
-private fun DeleteGroupDialog(
-    group: DrawGroup,
-    onConfirm: () -> Unit,
-    onDismiss: () -> Unit
-) {
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = {
-            Text(
-                text = "Çekilişi Sil",
-                style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.Bold,
-                color = Color.Red
-            )
-        },
-        text = {
-            Text(
-                text = "\"${group.name}\" adlı çekilişi silmek istediğinizden emin misiniz? Bu işlem geri alınamaz.",
-                style = MaterialTheme.typography.bodyMedium
-            )
-        },
-        confirmButton = {
-            Button(
-                onClick = onConfirm,
-                colors = ButtonDefaults.buttonColors(containerColor = Color.Red)
-            ) {
-                Text(
-                    text = UiText.stringResource(R.string.delete).asString(),
-                    color = White
-                )
-            }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismiss) {
-                Text(UiText.stringResource(R.string.cancel).asString())
-            }
-        }
-    )
 }

@@ -45,6 +45,28 @@ class ParticipantMethodViewModel @Inject constructor(
         _state.update { it.copy(groupDescription = description) }
     }
 
+
+    init {
+        checkExistingGroups()
+    }
+    private fun checkExistingGroups() {
+        viewModelScope.launch {
+            drawGroupRepository.getAllDrawGroups().collect { result ->
+                when (result) {
+                    is ResultState.Success -> {
+                        val hasGroups = result.data.isNotEmpty()
+                        _state.update { it.copy(hasExistingGroups = hasGroups) }
+                    }
+                    is ResultState.Error -> {
+                        // Hata durumunda false olarak bırak
+                        _state.update { it.copy(hasExistingGroups = false) }
+                    }
+                    else -> {}
+                }
+            }
+        }
+    }
+
     // ✅ YENİ: Grup oluşturma fonksiyonu
     fun createGroup() {
         viewModelScope.launch {

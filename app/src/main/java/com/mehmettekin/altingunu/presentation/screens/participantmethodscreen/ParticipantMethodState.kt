@@ -12,5 +12,6 @@ data class ParticipantMethodState(
     val isGroupCreated: Boolean = false,
     val showInviteDialog: Boolean = false,
     val isLoading: Boolean = false,
-    val error: UiText? = null
+    val error: UiText? = null,
+    val hasExistingGroups: Boolean = false
 )

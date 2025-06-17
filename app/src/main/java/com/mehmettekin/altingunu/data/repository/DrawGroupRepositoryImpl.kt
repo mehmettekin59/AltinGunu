@@ -5,6 +5,7 @@ import com.mehmettekin.altingunu.data.local.DrawGroupsDataStore
 import com.mehmettekin.altingunu.data.local.DrawResultsDataStore
 import com.mehmettekin.altingunu.domain.model.DrawGroup
 import com.mehmettekin.altingunu.domain.repository.DrawGroupRepository
+import com.mehmettekin.altingunu.notification.FirestoreService
 import com.mehmettekin.altingunu.utils.ResultState
 import com.mehmettekin.altingunu.utils.UiText
 import kotlinx.coroutines.flow.Flow
@@ -17,7 +18,8 @@ import javax.inject.Singleton
 @Singleton
 class DrawGroupRepositoryImpl @Inject constructor(
     private val drawGroupsDataStore: DrawGroupsDataStore,
-    private val legacyDrawResultsDataStore: DrawResultsDataStore // Migration için
+    private val legacyDrawResultsDataStore: DrawResultsDataStore ,
+    private val firestoreService: FirestoreService
 ) : DrawGroupRepository {
 
     // ============ ÇOKLU ÇEKİLİŞ YÖNETİMİ ============
@@ -34,6 +36,42 @@ class DrawGroupRepositoryImpl @Inject constructor(
                     )
                 )
             }
+        }
+    }
+
+    override suspend fun updateDrawGroup(drawGroup: DrawGroup): ResultState<Unit> {
+        return try {
+            drawGroupsDataStore.updateDrawGroup(drawGroup)
+
+            // ✅ Firebase'i de güncelle
+            firestoreService.saveDrawGroup(drawGroup)
+
+            ResultState.Success(Unit)
+        } catch (e: Exception) {
+            ResultState.Error(
+                UiText.stringResource(
+                    R.string.error_saving_draw_settings,
+                    e.message ?: ""
+                )
+            )
+        }
+    }
+    override suspend fun deleteDrawGroup(id: String): ResultState<Unit> {
+        return try {
+            // Local'den sil
+            drawGroupsDataStore.deleteDrawGroup(id)
+
+            // ✅ Firebase'den de sil
+            firestoreService.deleteDrawGroup(id)
+
+            ResultState.Success(Unit)
+        } catch (e: Exception) {
+            ResultState.Error(
+                UiText.stringResource(
+                    R.string.error_clearing_draw_results,
+                    e.message ?: ""
+                )
+            )
         }
     }
 
@@ -72,33 +110,6 @@ class DrawGroupRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun updateDrawGroup(drawGroup: DrawGroup): ResultState<Unit> {
-        return try {
-            drawGroupsDataStore.updateDrawGroup(drawGroup)
-            ResultState.Success(Unit)
-        } catch (e: Exception) {
-            ResultState.Error(
-                UiText.stringResource(
-                    R.string.error_saving_draw_settings,
-                    e.message ?: ""
-                )
-            )
-        }
-    }
-
-    override suspend fun deleteDrawGroup(id: String): ResultState<Unit> {
-        return try {
-            drawGroupsDataStore.deleteDrawGroup(id)
-            ResultState.Success(Unit)
-        } catch (e: Exception) {
-            ResultState.Error(
-                UiText.stringResource(
-                    R.string.error_clearing_draw_results,
-                    e.message ?: ""
-                )
-            )
-        }
-    }
 
     override fun getActiveDrawGroups(): Flow<ResultState<List<DrawGroup>>> {
         return flow {
