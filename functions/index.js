@@ -16,67 +16,26 @@ function generateInviteCode() {
     return Array.from({length: 8}, () => chars[Math.floor(Math.random() * chars.length)]).join('');
 }
 
-// Yeni bildirim dökümanı oluşturulduğunda tetiklenir
-exports.sendNotification = onDocumentCreated('notifications/{notificationId}', async (event) => {
-    const snap = event.data;
-    const notification = snap.data();
-    console.log('Yeni bildirim:', notification);
+// Davet oluşturma fonksiyonu - SERVER TARAFINDA - İyileştirilmiş
+exports.createInvitation = onCall({
+    cors: true,
+    region: 'us-central1'
+}, async (request) => {
+    console.log('createInvitation called with data:', request.data);
 
-    // Bildirim mesajını hazırla
-    const message = {
-        token: notification.token,
-        notification: {
-            title: notification.title,
-            body: notification.message,
-            icon: 'ic_notification'
-        },
-        data: notification.data || {},
-        android: {
-            priority: 'high',
-            notification: {
-                sound: 'default',
-                clickAction: 'FLUTTER_NOTIFICATION_CLICK',
-                channelId: 'gold_day_notifications'
-            }
-        }
-    };
-
-    try {
-        // Bildirimi gönder
-        const response = await messaging.send(message);
-        console.log('Bildirim başarıyla gönderildi:', response);
-
-        // Firestore'da durumu güncelle
-        await snap.ref.update({
-            status: 'sent',
-            sentAt: admin.firestore.FieldValue.serverTimestamp(),
-            messageId: response
-        });
-    } catch (error) {
-        console.error('Bildirim gönderilemedi:', error);
-
-        // Hata durumunu kaydet ve retry sayacını artır
-        await snap.ref.update({
-            status: 'failed',
-            error: error.message,
-            errorCode: error.code,
-            failedAt: admin.firestore.FieldValue.serverTimestamp(),
-            retryCount: admin.firestore.FieldValue.increment(1)
-        });
-    }
-});
-
-// Davet oluşturma fonksiyonu - SERVER TARAFINDA
-exports.createInvitation = onCall(async (request) => {
     const { drawGroupId, drawGroupName, inviterName } = request.data;
 
+    // Input validation
     if (!drawGroupId || !drawGroupName) {
+        console.error('Missing required fields:', { drawGroupId, drawGroupName });
         throw new Error('DrawGroupId ve drawGroupName gerekli');
     }
 
     try {
         const inviteCode = generateInviteCode();
         const invitationId = db.collection('invitations').doc().id;
+
+        console.log('Generated invite code:', inviteCode);
 
         const invitation = {
             id: invitationId,
@@ -88,7 +47,11 @@ exports.createInvitation = onCall(async (request) => {
             createdDate: Date.now()
         };
 
+        console.log('Creating invitation document:', invitation);
+
         await db.collection('invitations').doc(invitationId).set(invitation);
+
+        console.log('Invitation created successfully');
 
         return {
             success: true,
@@ -98,9 +61,10 @@ exports.createInvitation = onCall(async (request) => {
 
     } catch (error) {
         console.error('Davet oluşturma hatası:', error);
-        throw new Error(error.message);
+        throw new Error(`Davet oluşturulurken hata: ${error.message}`);
     }
 });
+
 
 // Katılım talebi gönderme - SERVER TARAFINDA
 exports.submitParticipationRequest = onCall(async (request) => {
