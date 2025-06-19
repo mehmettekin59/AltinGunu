@@ -2,6 +2,9 @@ package com.mehmettekin.altingunu
 
 import android.app.Application
 import android.content.Context
+import android.util.Log
+import com.google.firebase.FirebaseApp
+import com.google.firebase.messaging.FirebaseMessaging
 import com.mehmettekin.altingunu.utils.Constraints
 import com.mehmettekin.altingunu.utils.LocaleHelper
 import com.mehmettekin.altingunu.utils.NumeralHelper
@@ -24,9 +27,35 @@ class AltinGunuApplication: Application() {
 
     override fun onCreate() {
         super.onCreate()
+
+        // ✅ FIREBASE INITIALIZATION EKLENDI
+        initializeFirebase()
+
         NumeralHelper.setLanguage(currentLanguage)
         RTLHelper.setLanguage(currentLanguage)
-        Constraints.setLanguage(currentLanguage) // ✅ EKSIK OLAN SATIR
+        Constraints.setLanguage(currentLanguage)
+    }
+
+    // ✅ YENİ: Firebase initialization
+    private fun initializeFirebase() {
+        try {
+            FirebaseApp.initializeApp(this)
+            Log.d("AltinGunu", "Firebase başarıyla başlatıldı")
+
+            // FCM token'ı al (opsiyonel - debug için)
+            FirebaseMessaging.getInstance().token.addOnCompleteListener { task ->
+                if (!task.isSuccessful) {
+                    Log.w("AltinGunu", "FCM token alma başarısız", task.exception)
+                    return@addOnCompleteListener
+                }
+
+                val token = task.result
+                Log.d("AltinGunu", "FCM Registration Token: $token")
+            }
+
+        } catch (e: Exception) {
+            Log.e("AltinGunu", "Firebase başlatma hatası", e)
+        }
     }
 
     private fun loadLanguageSync(context: Context): String {
@@ -53,14 +82,13 @@ class AltinGunuApplication: Application() {
         // RTLHelper'a da dili bildir
         RTLHelper.setLanguage(languageCode)
 
-        // ✅ EKSIK OLAN SATIR
+        // Constraints'e dili bildir
         Constraints.setLanguage(languageCode)
 
         // SharedPreferences'a da kaydet
         val prefs = getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
         prefs.edit().putString("language_code", languageCode).apply()
     }
-
 }
 
 

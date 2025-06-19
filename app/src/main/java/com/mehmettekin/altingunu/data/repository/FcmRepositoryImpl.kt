@@ -1,7 +1,9 @@
 package com.mehmettekin.altingunu.data.repository
 
 import android.app.DownloadManager.Query
+import android.util.Log
 import com.google.firebase.functions.FirebaseFunctions
+import com.google.firebase.functions.FirebaseFunctionsException
 import com.google.firebase.messaging.FirebaseMessaging
 import com.mehmettekin.altingunu.domain.model.DrawInvitation
 import com.mehmettekin.altingunu.domain.model.InviteStatus
@@ -17,9 +19,9 @@ import javax.inject.Singleton
 @Singleton
 class FcmRepositoryImpl @Inject constructor() : FcmRepository {
 
-    private val functions = FirebaseFunctions.getInstance()
+    // ✅ DÜZELTME: Region eklendi
+    private val functions = FirebaseFunctions.getInstance("us-central1")
     private val messaging = FirebaseMessaging.getInstance()
-
 
     override suspend fun updateUserFcmToken(token: String): ResultState<Unit> {
         return try {
@@ -48,7 +50,7 @@ class FcmRepositoryImpl @Inject constructor() : FcmRepository {
         }
     }
 
-    // ✅ SERVER ÇAĞRILARI - Firebase Functions
+   /* // ✅ SERVER ÇAĞRILARI - Firebase Functions
     override suspend fun createInvitationOnServer(
         drawGroupId: String,
         drawGroupName: String,
@@ -73,6 +75,47 @@ class FcmRepositoryImpl @Inject constructor() : FcmRepository {
             ResultState.Error(UiText.dynamicString(e.message ?: "Davet oluşturulamadı"))
         }
     }
+    */
+   override suspend fun createInvitationOnServer(
+       drawGroupId: String,
+       drawGroupName: String,
+       inviterName: String
+   ): ResultState<String> {
+       return try {
+           Log.d("TEST", "=== BAŞLADI ===")
+           Log.d("TEST", "drawGroupId: '$drawGroupId'")
+           Log.d("TEST", "drawGroupName: '$drawGroupName'")
+           Log.d("TEST", "inviterName: '$inviterName'")
+
+           // Basit test data
+           val data = hashMapOf(
+               "drawGroupId" to "test-123",
+               "drawGroupName" to "Test Group",
+               "inviterName" to "Test User"
+           )
+
+           Log.d("TEST", "Test data hazırlandı: $data")
+
+           val result = functions.getHttpsCallable("createInvitation")
+               .call(data)
+               .await()
+
+           Log.d("TEST", "Function çağrısı başarılı!")
+           Log.d("TEST", "Result: ${result.getData()}")
+
+           // Geçici olarak sabit değer dönelim
+           ResultState.Success("TEST-INVITE-CODE")
+
+       } catch (e: Exception) {
+           Log.e("TEST", "HATA: ${e.javaClass.simpleName}")
+           Log.e("TEST", "Message: ${e.message}")
+           if (e is FirebaseFunctionsException) {
+               Log.e("TEST", "Firebase Code: ${e.code}")
+               Log.e("TEST", "Firebase Details: ${e.details}")
+           }
+           ResultState.Error(UiText.dynamicString("TEST HATA: ${e.message}"))
+       }
+   }
 
     override suspend fun validateInviteCodeOnServer(inviteCode: String): ResultState<DrawInvitation?> {
         return try {
