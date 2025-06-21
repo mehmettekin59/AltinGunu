@@ -5,6 +5,7 @@
 
     <!-- Splash screen tema tanımı -->
     <style name="Theme.AltinGunu.SplashScreen" parent="Theme.SplashScreen">
+        <item name="android:windowIsTranslucent">false</item>
         <item name="windowSplashScreenBackground">@color/navy_blue</item>
         <item name="windowSplashScreenAnimatedIcon">@drawable/splash</item>
         <item name="windowSplashScreenAnimationDuration">300</item>
