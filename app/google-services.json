@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "980963249210",
+    "project_id": "altin-gunu-7572d",
+    "storage_bucket": "altin-gunu-7572d.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:980963249210:android:636074c2ec9ac123ca3903",
+        "android_client_info": {
+          "package_name": "com.mehmettekin.altingunu"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD6ECZiUz7wKMnIuFYizBf5kGk4xnRgl-A"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
